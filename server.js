@@ -21,9 +21,24 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(express.static('public'));
 
+// Servir archivos estáticos con MIME types correctos
+app.use('/public', express.static('public'));
+
 // Servir archivos estáticos
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Servir CSS con MIME type correcto
+app.get('/juego.css', (req, res) => {
+    res.setHeader('Content-Type', 'text/css');
+    res.sendFile(path.join(__dirname, 'public', 'juego.css'));
+});
+
+// Servir JS con MIME type correcto
+app.get('/juego-multiplayer.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(__dirname, 'public', 'juego-multiplayer.js'));
 });
 
 // ========================================
