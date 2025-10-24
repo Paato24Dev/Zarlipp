@@ -39,8 +39,8 @@ function showScreen(screenId) {
 function setupEventListeners() {
     // Botones del menú principal
     document.getElementById('playBtn').addEventListener('click', () => {
-        // Redireccionar al juego multijugador automáticamente
-        window.location.href = 'https://zarlipp.vercel.app';
+        // Redireccionar al juego multijugador local
+        window.location.href = 'juego.html';
     });
     
     document.getElementById('settingsBtn').addEventListener('click', () => {
