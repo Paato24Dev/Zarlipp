@@ -153,11 +153,14 @@ io.on('connection', (socket) => {
     socket.on('joinRoom', (data) => {
         const { roomId, playerName } = data;
         
-        let room = rooms.get(roomId);
+        // Si es la sala principal, usar código fijo
+        const actualRoomId = (roomId === 'MAIN') ? 'MAIN' : roomId;
+        
+        let room = rooms.get(actualRoomId);
         if (!room) {
-            room = new Room(roomId);
-            rooms.set(roomId, room);
-            console.log(`🏠 Nueva sala creada: ${roomId}`);
+            room = new Room(actualRoomId);
+            rooms.set(actualRoomId, room);
+            console.log(`🏠 Nueva sala creada: ${actualRoomId}`);
         }
         
         const success = room.addPlayer(socket.id, { name: playerName });
