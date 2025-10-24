@@ -29,9 +29,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'Pantallainicio.html'));
 });
 
-// Servir juego.html
-app.get('/juego.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'juego.html'));
+// Servir Pantallainicio.html
+app.get('/Pantallainicio.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Pantallainicio.html'));
 });
 
 // Servir CSS con MIME type correcto
