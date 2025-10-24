@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mitosis Evolution - Juego de División Celular</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Pantalla Principal -->
+        <div id="mainMenu" class="screen active">
+            <div class="menu-background">
+                <canvas id="backgroundCanvas"></canvas>
+            </div>
+            
+            <div class="menu-content">
+                <div class="game-title">
+                    <h1>MITOSIS</h1>
+                    <h2>EVOLUTION</h2>
+                    <div class="title-subtitle">Divide, Evoluciona, Sobrevive</div>
+                </div>
+                
+                <div class="menu-buttons">
+                    <button class="menu-btn primary" id="playBtn">
+                        <span class="btn-icon">▶</span>
+                        JUGAR
+                    </button>
+                    <button class="menu-btn" id="settingsBtn">
+                        <span class="btn-icon">⚙</span>
+                        CONFIGURACIÓN
+                    </button>
+                    <button class="menu-btn" id="instructionsBtn">
+                        <span class="btn-icon">❓</span>
+                        INSTRUCCIONES
+                    </button>
+                    <button class="menu-btn" id="creditsBtn">
+                        <span class="btn-icon">ℹ</span>
+                        CRÉDITOS
+                    </button>
+                </div>
+                
+                <div class="menu-footer">
+                    <div class="version">v1.0.0</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Juego -->
+        <div id="gameScreen" class="screen">
+            <canvas id="gameCanvas"></canvas>
+            <div id="gameUI">
+                <div class="ui-panel top">
+                    <div class="energy-display">
+                        <span class="ui-label">Energía:</span>
+                        <div class="energy-bar">
+                            <div class="energy-fill" id="energyFill"></div>
+                        </div>
+                        <span class="energy-value" id="energyValue">100</span>
+                    </div>
+                    <div class="cells-count">
+                        <span class="ui-label">Células:</span>
+                        <span class="cells-value" id="cellsValue">1</span>
+                    </div>
+                </div>
+                
+                <div class="ui-panel bottom">
+                    <button class="action-btn" id="divideBtn">DIVIDIR</button>
+                    <button class="action-btn" id="evolveBtn">EVOLUCIONAR</button>
+                    <button class="action-btn" id="pauseBtn">PAUSAR</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Configuración -->
+        <div id="settingsScreen" class="screen">
+            <div class="settings-content">
+                <h2>CONFIGURACIÓN</h2>
+                <div class="settings-group">
+                    <label>Volumen:</label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                </div>
+                <div class="settings-group">
+                    <label>Velocidad del juego:</label>
+                    <select id="gameSpeed">
+                        <option value="slow">Lento</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="fast">Rápido</option>
+                    </select>
+                </div>
+                <div class="settings-group">
+                    <label>Calidad gráfica:</label>
+                    <select id="graphicsQuality">
+                        <option value="low">Baja</option>
+                        <option value="medium" selected>Media</option>
+                        <option value="high">Alta</option>
+                    </select>
+                </div>
+                <button class="menu-btn" id="backToMenuBtn">VOLVER AL MENÚ</button>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Instrucciones -->
+        <div id="instructionsScreen" class="screen">
+            <div class="instructions-content">
+                <h2>INSTRUCCIONES</h2>
+                <div class="instructions-text">
+                    <h3>Objetivo:</h3>
+                    <p>Controla tu célula y hazla crecer dividiéndola en células más pequeñas. Evoluciona para sobrevivir y competir.</p>
+                    
+                    <h3>Controles:</h3>
+                    <ul>
+                        <li><strong>WASD o Flechas:</strong> Mover célula principal</li>
+                        <li><strong>Click izquierdo:</strong> Dividir célula hacia el cursor</li>
+                        <li><strong>Click derecho (mantener):</strong> Atraer células divididas</li>
+                        <li><strong>Soltar click derecho:</strong> Detener atracción</li>
+                        <li><strong>Botón DIVIDIR:</strong> Crear una nueva célula</li>
+                        <li><strong>E:</strong> Evolucionar célula</li>
+                        <li><strong>ESPACIO:</strong> Pausar el juego</li>
+                    </ul>
+                    
+                    <h3>Mecánicas:</h3>
+                    <ul>
+                        <li>Las células consumen energía constantemente</li>
+                        <li>Recolecta nutrientes para mantenerte vivo</li>
+                        <li>Cada división reduce el tamaño pero aumenta el número</li>
+                        <li>Evoluciona para obtener nuevas habilidades</li>
+                    </ul>
+                </div>
+                <button class="menu-btn" id="backToMenuBtn2">VOLVER AL MENÚ</button>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Créditos -->
+        <div id="creditsScreen" class="screen">
+            <div class="credits-content">
+                <h2>CRÉDITOS</h2>
+                <div class="credits-text">
+                    <p><strong>Mitosis Evolution</strong></p>
+                    <p>Un juego inspirado en Mitosis de Steam</p>
+                    <br>
+                    <p>Desarrollado con HTML5, CSS3 y JavaScript</p>
+                    <p>© 2024 - Todos los derechos reservados</p>
+                </div>
+                <button class="menu-btn" id="backToMenuBtn3">VOLVER AL MENÚ</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
