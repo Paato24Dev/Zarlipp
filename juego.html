@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mitosis Evolution - Juego</title>
+    <link rel="stylesheet" href="juego.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Canvas principal del juego -->
+        <canvas id="gameCanvas" class="screen active"></canvas>
+        
+        <!-- Interfaz de usuario del juego -->
+        <div id="gameUI">
+            <!-- Panel superior -->
+            <div class="ui-panel top">
+                <div class="cells-count">
+                    <span class="ui-label">Células:</span>
+                    <span class="cells-value" id="cellsValue">1</span>
+                </div>
+                <div class="generation-info">
+                    <span class="ui-label">Generación:</span>
+                    <span class="generation-value" id="generationValue">1</span>
+                </div>
+                <div class="time-info">
+                    <span class="ui-label">Tiempo:</span>
+                    <span class="time-value" id="timeValue">0s</span>
+                </div>
+            </div>
+            
+            <!-- Panel inferior -->
+            <div class="ui-panel bottom">
+                <button class="action-btn" id="settingsBtn">
+                    <span class="btn-icon">⚙</span>
+                    CONFIGURACIÓN
+                </button>
+                <button class="action-btn shop-highlight" id="shopBtn">
+                    <span class="btn-icon">🛒</span>
+                    TIENDA
+                </button>
+                <button class="action-btn" id="menuBtn">
+                    <span class="btn-icon">🏠</span>
+                    MENÚ
+                </button>
+            </div>
+            
+            <!-- Panel lateral de información -->
+            <div class="ui-panel side">
+                <div class="cell-info">
+                    <h3>Información de Célula</h3>
+                    <div class="info-item">
+                        <span>Tamaño:</span>
+                        <span id="cellSize">30px</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Velocidad:</span>
+                        <span id="cellSpeed">Normal</span>
+                    </div>
+                    <div class="info-item">
+                        <span>Habilidades:</span>
+                        <span id="cellAbilities">Básica</span>
+                    </div>
+                </div>
+                
+                <div class="evolution-tree">
+                    <h3>Árbol de Evolución</h3>
+                    <div class="evolution-options">
+                        <button class="evolution-btn" id="speedEvolve">Velocidad</button>
+                        <button class="evolution-btn" id="sizeEvolve">Tamaño</button>
+                        <button class="evolution-btn" id="energyEvolve">Energía</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pantalla de pausa -->
+        <div id="pauseScreen" class="overlay-screen">
+            <div class="pause-content">
+                <h2>JUEGO PAUSADO</h2>
+                <div class="pause-buttons">
+                    <button class="menu-btn" id="resumeBtn">REANUDAR</button>
+                    <button class="menu-btn" id="restartBtn">REINICIAR</button>
+                    <button class="menu-btn" id="exitBtn">SALIR</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Game Over -->
+        <div id="gameOverScreen" class="overlay-screen">
+            <div class="gameover-content">
+                <h2>GAME OVER</h2>
+                <div class="final-stats">
+                    <p>Células creadas: <span id="finalCells">0</span></p>
+                    <p>Generaciones: <span id="finalGeneration">0</span></p>
+                    <p>Tiempo de supervivencia: <span id="survivalTime">0s</span></p>
+                </div>
+                <div class="gameover-buttons">
+                    <button class="menu-btn" id="playAgainBtn">JUGAR DE NUEVO</button>
+                    <button class="menu-btn" id="exitGameBtn">SALIR</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Configuración -->
+        <div id="settingsScreen" class="screen">
+            <div class="settings-content">
+                <h2>CONFIGURACIÓN</h2>
+                <div class="settings-group">
+                    <label>Volumen:</label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                </div>
+                <div class="settings-group">
+                    <label>Velocidad del juego:</label>
+                    <select id="gameSpeed">
+                        <option value="slow">Lento</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="fast">Rápido</option>
+                    </select>
+                </div>
+                <div class="settings-group">
+                    <label>Calidad gráfica:</label>
+                    <select id="graphicsQuality">
+                        <option value="low">Baja</option>
+                        <option value="medium" selected>Media</option>
+                        <option value="high">Alta</option>
+                    </select>
+                </div>
+                <button class="menu-btn" id="backToGameBtn">VOLVER AL JUEGO</button>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Tienda -->
+        <div id="shopScreen" class="overlay-screen">
+            <div class="shop-content">
+                <div class="shop-header">
+                    <h2>🧬 Tienda de Mejoras</h2>
+                    <div class="shop-balance">
+                        <span class="balance-label">Saldo actual:</span>
+                        <span class="balance-value" id="shopBalance">0</span>
+                        <span class="balance-currency">💰</span>
+                    </div>
+                </div>
+                
+                <div class="shop-upgrades">
+                    <!-- Armadura Celular -->
+                    <div class="upgrade-card" id="armorUpgrade">
+                        <div class="upgrade-icon">🛡️</div>
+                        <div class="upgrade-info">
+                            <h3>Armadura Celular</h3>
+                            <p>Reduce el daño recibido en un 20%</p>
+                            <div class="upgrade-status" id="armorStatus">No activa</div>
+                        </div>
+                        <button class="upgrade-btn" id="armorBtn">
+                            <span class="upgrade-price">200</span>
+                            <span class="upgrade-currency">💰</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Velocidad de Movimiento -->
+                    <div class="upgrade-card" id="speedUpgrade">
+                        <div class="upgrade-icon">⚡</div>
+                        <div class="upgrade-info">
+                            <h3>Velocidad de Movimiento</h3>
+                            <p>Aumenta la velocidad base en un 15%</p>
+                            <div class="upgrade-status" id="speedStatus">No activa</div>
+                        </div>
+                        <button class="upgrade-btn" id="speedBtn">
+                            <span class="upgrade-price">150</span>
+                            <span class="upgrade-currency">💰</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Doble Consumo -->
+                    <div class="upgrade-card" id="doubleConsumeUpgrade">
+                        <div class="upgrade-icon">💥</div>
+                        <div class="upgrade-info">
+                            <h3>Doble Consumo (x2)</h3>
+                            <p>Consumo doble durante 30 segundos</p>
+                            <div class="upgrade-status" id="doubleConsumeStatus">No activa</div>
+                        </div>
+                        <button class="upgrade-btn" id="doubleConsumeBtn">
+                            <span class="upgrade-price">250</span>
+                            <span class="upgrade-currency">💰</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Mega Consumo -->
+                    <div class="upgrade-card" id="megaConsumeUpgrade">
+                        <div class="upgrade-icon">🔥</div>
+                        <div class="upgrade-info">
+                            <h3>Mega Consumo (x5)</h3>
+                            <p>Consumo x5 durante 15 segundos</p>
+                            <div class="upgrade-status" id="megaConsumeStatus">No activa</div>
+                        </div>
+                        <button class="upgrade-btn" id="megaConsumeBtn">
+                            <span class="upgrade-price">500</span>
+                            <span class="upgrade-currency">💰</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Expansión Celular -->
+                    <div class="upgrade-card" id="expansionUpgrade">
+                        <div class="upgrade-icon">🌌</div>
+                        <div class="upgrade-info">
+                            <h3>Expansión Celular</h3>
+                            <p>Permite una división adicional</p>
+                            <div class="upgrade-status" id="expansionStatus">No activa</div>
+                        </div>
+                        <button class="upgrade-btn" id="expansionBtn">
+                            <span class="upgrade-price">300</span>
+                            <span class="upgrade-currency">💰</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="shop-footer">
+                    <button class="menu-btn" id="closeShopBtn">CERRAR TIENDA</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="juego.js"></script>
+    <script>
+        // Conexión automática al servidor multijugador
+        document.addEventListener('DOMContentLoaded', function() {
+            // Esperar un poco para que el juego se inicialice
+            setTimeout(() => {
+                connectToMultiplayerServer();
+            }, 1000);
+        });
+
+        function connectToMultiplayerServer() {
+            // Conectar con Socket.IO del servidor
+            const socket = io('https://zarlipp.vercel.app');
+            
+            // Generar nombre aleatorio
+            const randomNames = ['Célula Alpha', 'Mitosis Master', 'Evolución Pro', 'División Elite', 'Super Célula'];
+            const playerName = randomNames[Math.floor(Math.random() * randomNames.length)];
+            
+            socket.on('connect', () => {
+                console.log('🔌 Conectado al servidor multijugador');
+                
+                // Unirse automáticamente a la sala principal
+                socket.emit('joinRoom', {
+                    roomId: 'MAIN',
+                    playerName: playerName
+                });
+            });
+            
+            socket.on('roomJoined', (data) => {
+                if (data.success) {
+                    console.log('✅ Unido automáticamente a la sala multijugador');
+                    
+                    // Pasar el socket al juego principal
+                    window.gameSocket = socket;
+                    window.isMultiplayer = true;
+                    
+                    // Mostrar mensaje de conexión
+                    showMultiplayerMessage('🌐 Conectado al servidor multijugador');
+                } else {
+                    console.log('❌ Error al unirse:', data.message);
+                }
+            });
+            
+            socket.on('playerJoined', (data) => {
+                console.log('👤 Nuevo jugador:', data.player.name);
+                showMultiplayerMessage(`👤 ${data.player.name} se unió al juego`);
+            });
+            
+            socket.on('playerLeft', (data) => {
+                console.log('👋 Jugador desconectado:', data.playerId);
+            });
+            
+            socket.on('gameStateUpdate', (data) => {
+                // Actualizar estado del juego multijugador
+                if (window.updateMultiplayerState) {
+                    window.updateMultiplayerState(data);
+                }
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('❌ Desconectado del servidor');
+                showMultiplayerMessage('❌ Conexión perdida - Modo offline');
+            });
+        }
+
+        function showMultiplayerMessage(message) {
+            // Crear mensaje temporal
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message;
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 255, 136, 0.9);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 8px;
+                font-weight: bold;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                document.body.removeChild(messageDiv);
+            }, 3000);
+        }
+    </script>
+    <style>
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</body>
+</html>
