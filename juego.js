@@ -79,6 +79,10 @@ let stars = []; // Estrellas de fondo
 let shopOpen = false;
 let lastCurrencyUpdate = Date.now();
 
+// Variables multijugador
+let otherPlayers = new Map();
+let isMultiplayer = false;
+
 // ========================================
 // INICIALIZACIÓN DEL JUEGO
 // ========================================
@@ -828,6 +832,21 @@ function updateGame() {
     // Verificar consumo
     checkConsumption();
     
+    // Verificar colisiones multijugador
+    if (isMultiplayer) {
+        checkMultiplayerCollisions();
+    }
+    
+    // Enviar actualización al servidor multijugador
+    if (isMultiplayer && window.gameSocket && Date.now() % 100 < 16) {
+        window.gameSocket.emit('updatePlayer', {
+            cells: playerCells,
+            currency: gameState.currency,
+            upgrades: gameState.upgrades,
+            temporaryEffects: gameState.temporaryEffects
+        });
+    }
+    
     // Actualizar UI
     updateUI();
 }
@@ -955,6 +974,11 @@ function renderGame() {
     // Dibujar objetos consumibles
     drawConsumables();
     
+    // Dibujar otros jugadores (multijugador)
+    if (isMultiplayer) {
+        drawOtherPlayers();
+    }
+    
     // Dibujar células del jugador
     drawPlayerCells();
     
@@ -1007,6 +1031,46 @@ function drawConsumables() {
             ctx.fill();
             ctx.shadowBlur = 0;
         }
+    });
+}
+
+function drawOtherPlayers() {
+    otherPlayers.forEach((player, playerId) => {
+        if (!player.isAlive) return;
+        
+        player.cells.forEach(cell => {
+            const screenX = cell.x + camera.x;
+            const screenY = cell.y + camera.y;
+            
+            if (screenX > -cell.radius && screenX < canvas.width + cell.radius && 
+                screenY > -cell.radius && screenY < canvas.height + cell.radius) {
+                
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = cell.color;
+                
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, cell.radius, 0, Math.PI * 2);
+                ctx.fillStyle = cell.color;
+                ctx.fill();
+                
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, cell.radius * 0.4, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                
+                ctx.shadowBlur = 0;
+                
+                // Nombre del jugador
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(player.name, screenX, screenY - cell.radius - 10);
+            }
+        });
     });
 }
 
@@ -1216,3 +1280,48 @@ function drawUpgradeEffects(cell, screenX, screenY) {
         ctx.stroke();
     }
 }
+
+// ========================================
+// FUNCIONES MULTIJUGADOR
+// ========================================
+
+function checkMultiplayerCollisions() {
+    const mainCell = playerCells[0];
+    const mainMass = mainCell.mass;
+    
+    otherPlayers.forEach((otherPlayer, playerId) => {
+        if (!otherPlayer.isAlive) return;
+        
+        otherPlayer.cells.forEach(otherCell => {
+            const dist = distance(mainCell.x, mainCell.y, otherCell.x, otherCell.y);
+            
+            if (dist < mainCell.radius + otherCell.radius) {
+                const otherMass = otherCell.mass;
+                
+                if (mainMass > otherMass * 1.2) {
+                    // Consumir al otro jugador
+                    if (window.gameSocket) {
+                        window.gameSocket.emit('playerCollision', { victimId: playerId });
+                    }
+                }
+            }
+        });
+    });
+}
+
+function updateMultiplayerState(data) {
+    // Actualizar otros jugadores
+    data.players.forEach(player => {
+        if (player.id !== window.gameSocket?.id) {
+            otherPlayers.set(player.id, player);
+        }
+    });
+    
+    // Actualizar consumibles del servidor
+    if (data.consumables) {
+        consumables = data.consumables;
+    }
+}
+
+// Función global para el HTML
+window.updateMultiplayerState = updateMultiplayerState;
