@@ -235,163 +235,144 @@
     </div>
     
     <script src="juego.js"></script>
-    <script>
-        // Conexión automática al servidor multijugador
-        document.addEventListener('DOMContentLoaded', function() {
-            // Esperar un poco para que el juego se inicialice
-            setTimeout(() => {
-                connectToMultiplayerServer();
-            }, 1000);
-        });
+<script>
+  function connectToMultiplayerServer() {
+    console.log('🎮 Iniciando conexión multijugador...');
+    const socket = io(window.location.origin, {
+      transports: ['websocket', 'polling'],
+      timeout: 20000,
+      forceNew: false,
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      upgrade: true,
+      rememberUpgrade: true
+    });
 
-        function connectToMultiplayerServer() {
-            console.log('🎮 Iniciando conexión multijugador...');
-            
-            // Conectar con Socket.IO del servidor con configuración robusta
-            const socket = io(window.location.origin, {
-                transports: ['websocket', 'polling'],
-                timeout: 20000,
-                forceNew: false, // ✅ Cambiado a false para reusar conexión
-                reconnection: true,
-                reconnectionAttempts: 10, // ✅ Aumentado de 5 a 10
-                reconnectionDelay: 1000,
-                reconnectionDelayMax: 5000,
-                upgrade: true,
-                rememberUpgrade: true
-            });
-            
-            // Obtener datos de personalización guardados
-            const playerName = localStorage.getItem('playerName') || 'Jugador';
-            const playerColor = localStorage.getItem('playerColor') || '#00ff88';
-            
-            let isConnected = false;
-            let joinedRoom = false;
-            
-            socket.on('connect', () => {
-                console.log('🔌 Conectado al servidor multijugador');
-                isConnected = true;
-                
-                // Unirse automáticamente a la sala principal
-                socket.emit('joinRoom', {
-                    roomId: 'MAIN',
-                    playerName: playerName,
-                    color: playerColor
-                });
-            });
-            
-            socket.on('connect_error', (error) => {
-                console.error('❌ Error de conexión:', error);
-                isConnected = false;
-                
-                // ✅ Modo offline después de varios intentos
-                if (socket.io.engine && socket.io.engine.transport) {
-                    showMultiplayerMessage('🔄 Reconectando... (' + socket.io.engine.transport.name + ')');
-                } else {
-                    showMultiplayerMessage('⚠️ Jugando en modo offline');
-                }
-            });
-            
-            socket.on('reconnect', (attemptNumber) => {
-                console.log('✅ Reconectado después de', attemptNumber, 'intentos');
-                isConnected = true;
-                showMultiplayerMessage('✅ Reconectado al servidor');
-                
-                // Reenviar datos de unión
-                socket.emit('joinRoom', {
-                    roomId: 'MAIN',
-                    playerName: playerName,
-                    color: playerColor
-                });
-            });
-            
-            socket.on('reconnect_attempt', (attemptNumber) => {
-                console.log('🔄 Intento de reconexión', attemptNumber);
-                showMultiplayerMessage(`🔄 Reconectando... (${attemptNumber}/10)`);
-            });
-            
-            socket.on('reconnect_failed', () => {
-                console.log('❌ Falló la reconexión - Modo offline');
-                isConnected = false;
-                showMultiplayerMessage('❌ Modo offline - El juego continúa localmente');
-            });
-            
-            socket.on('roomJoined', (data) => {
-                if (data.success) {
-                    console.log('✅ Unido automáticamente a la sala multijugador');
-                    joinedRoom = true;
-                    
-                    // Pasar el socket al juego principal
-                    window.gameSocket = socket;
-                    window.isMultiplayer = true;
-                    window.multiplayerConnected = true;
+    const playerName = localStorage.getItem('playerName') || 'Jugador';
+    const playerColor = localStorage.getItem('playerColor') || '#00ff88';
 
-                    // Sincronizar estado inicial del servidor
-                    if (window.updateMultiplayerState && data.gameState) {
-                        window.updateMultiplayerState({ 
-                            players: data.players || [], 
-                            consumables: data.gameState.consumables || [] 
-                        });
-                    }
-                    
-                    // Mostrar mensaje de conexión
-                    showMultiplayerMessage('🌐 Conectado - Sala Multijugador');
-                } else {
-                    console.log('❌ Error al unirse:', data.message);
-                    joinedRoom = false;
-                    showMultiplayerMessage('❌ ' + (data.message || 'Error al unirse'));
-                }
-            });
-            
-            socket.on('playerJoined', (data) => {
-                if (data.player && data.player.name) {
-                    console.log('👤 Nuevo jugador:', data.player.name);
-                    showMultiplayerMessage(`👤 ${data.player.name} se unió`);
-                }
-            });
-            
-            socket.on('playerLeft', (data) => {
-                console.log('👋 Jugador desconectado:', data.playerId);
-            });
-            
-            socket.on('gameStateUpdate', (data) => {
-                // Actualizar estado del juego multijugador
-                if (window.updateMultiplayerState) {
-                    window.updateMultiplayerState(data);
-                }
-                
-                // Actualizar tabla de líderes
-                if (data.leaderboard) {
-                    updateLeaderboard(data.leaderboard);
-                }
-            });
-            
-            socket.on('disconnect', (reason) => {
-                console.log('❌ Desconectado del servidor:', reason);
-                isConnected = false;
-                joinedRoom = false;
-                window.multiplayerConnected = false;
-                
-                showMultiplayerMessage('🔌 Desconectado - Modo offline');
-                
-                if (reason === 'io server disconnect') {
-                    // El servidor desconectó al cliente, reconectar manualmente
-                    showMultiplayerMessage('🔄 Intentando reconectar...');
-                    setTimeout(() => {
-                        socket.connect();
-                    }, 1000);
-                }
-            });
-            
-            // ✅ Heartbeat mejorado para mantener conexión viva
-            setInterval(() => {
-                if (socket.connected && isConnected) {
-                    socket.emit('ping');
-                }
-            }, 25000); // Cada 25 segundos (antes de timeout de 30s)
-            
-            // ✅ Guardar referencia global
-            window.multiplayerSocket = socket;
+    let isConnected = false;
+    let joinedRoom = false;
+
+    socket.on('connect', () => {
+      console.log('🔌 Conectado al servidor multijugador');
+      isConnected = true;
+      socket.emit('joinRoom', { roomId: 'MAIN', playerName, color: playerColor });
+    });
+
+    socket.on('roomJoined', (data) => {
+      if (data.success) {
+        console.log('✅ Unido automáticamente a la sala multijugador');
+        joinedRoom = true;
+        window.gameSocket = socket;
+        window.isMultiplayer = true;
+        window.multiplayerConnected = true;
+
+        if (window.updateMultiplayerState && data.gameState) {
+          window.updateMultiplayerState({
+            players: data.players || [],
+            consumables: data.gameState.consumables || []
+          });
         }
+        showMultiplayerMessage('🌐 Conectado - Sala Multijugador');
+      } else {
+        showMultiplayerMessage('❌ ' + (data.message || 'Error al unirse'));
+      }
+    });
+
+    socket.on('gameStateUpdate', (data) => {
+      if (window.updateMultiplayerState) {
+        window.updateMultiplayerState(data);
+      }
+      if (data.leaderboard) {
+        updateLeaderboard(data.leaderboard);
+      }
+    });
+
+    // ⬇️⬇️ AQUI AGREGA EL LISTENER DE CONFIRMACIÓN DE CONSUMO ⬇️⬇️
+    socket.on('objectConsumed', ({ consumableId, playerId }) => {
+      // Normalizamos tipos por si el id viene como número o string
+      const idx = consumables.findIndex(c => String(c.id) === String(consumableId));
+      if (idx !== -1) {
+        consumables.splice(idx, 1);
+        // console.log('🗑️ Consumible confirmado y removido:', consumableId, 'por', playerId);
+      }
+    });
+
+    // Opcional: si en algún momento usas el evento 'foodEaten' en el backend
+    socket.on('foodEaten', ({ foodId, newFood }) => {
+      const idx = consumables.findIndex(c => String(c.id) === String(foodId));
+      if (idx !== -1) consumables.splice(idx, 1);
+      if (newFood) {
+        consumables.push({
+          ...newFood,
+          radius: newFood.radius ?? massToRadius(newFood.mass),
+          type: newFood.type ?? 'consumable'
+        });
+      }
+    });
+    // ⬆️⬆️ FIN DEL BLOQUE NUEVO ⬆️⬆️
+
+    socket.on('playerJoined', (data) => {
+      if (data.player && data.player.name) {
+        console.log('👤 Nuevo jugador:', data.player.name);
+        showMultiplayerMessage(`👤 ${data.player.name} se unió`);
+      }
+    });
+
+    socket.on('playerLeft', (data) => {
+      console.log('👋 Jugador desconectado:', data.playerId);
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('❌ Error de conexión:', error);
+      isConnected = false;
+      if (socket.io.engine && socket.io.engine.transport) {
+        showMultiplayerMessage('🔄 Reconectando... (' + socket.io.engine.transport.name + ')');
+      } else {
+        showMultiplayerMessage('⚠️ Jugando en modo offline');
+      }
+    });
+
+    socket.on('reconnect', (attemptNumber) => {
+      console.log('✅ Reconectado después de', attemptNumber, 'intentos');
+      isConnected = true;
+      showMultiplayerMessage('✅ Reconectado al servidor');
+      socket.emit('joinRoom', { roomId: 'MAIN', playerName, color: playerColor });
+    });
+
+    socket.on('reconnect_attempt', (attemptNumber) => {
+      console.log('🔄 Intento de reconexión', attemptNumber);
+      showMultiplayerMessage(`🔄 Reconectando... (${attemptNumber}/10)`);
+    });
+
+    socket.on('reconnect_failed', () => {
+      console.log('❌ Falló la reconexión - Modo offline');
+      isConnected = false;
+      showMultiplayerMessage('❌ Modo offline - El juego continúa localmente');
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.log('❌ Desconectado del servidor:', reason);
+      isConnected = false;
+      joinedRoom = false;
+      window.multiplayerConnected = false;
+      showMultiplayerMessage('🔌 Desconectado - Modo offline');
+      if (reason === 'io server disconnect') {
+        setTimeout(() => socket.connect(), 1000);
+      }
+    });
+
+    setInterval(() => {
+      if (socket.connected && isConnected) {
+        socket.emit('ping');
+      }
+    }, 25000);
+
+    window.multiplayerSocket = socket;
+  }
 
         function updateLeaderboard(leaderboard) {
             const leaderboardList = document.getElementById('leaderboardList');
