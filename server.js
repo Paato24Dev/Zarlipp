@@ -22,9 +22,8 @@ app.use(cors());
 
 // Servir archivos estáticos desde la raíz del proyecto
 app.use(express.static(__dirname));
-app.use(express.static('public'));
 
-// Rutas principales
+// Rutas principales con MIME types correctos
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'Pantallainicio.html'));
 });
@@ -35,6 +34,28 @@ app.get('/Pantallainicio.html', (req, res) => {
 
 app.get('/juego.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'juego.html'));
+});
+
+// Servir CSS con MIME type correcto
+app.get('/styles.css', (req, res) => {
+    res.setHeader('Content-Type', 'text/css');
+    res.sendFile(path.join(__dirname, 'styles.css'));
+});
+
+app.get('/juego.css', (req, res) => {
+    res.setHeader('Content-Type', 'text/css');
+    res.sendFile(path.join(__dirname, 'juego.css'));
+});
+
+// Servir JS con MIME type correcto
+app.get('/script.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(__dirname, 'script.js'));
+});
+
+app.get('/juego.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(__dirname, 'juego.js'));
 });
 
 // ========================================
