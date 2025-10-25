@@ -103,7 +103,12 @@ function initializeGame() {
     
     // Crear elementos del juego
     createPlayerCell();
-    createConsumables();
+    
+    // ✅ SOLO crear consumibles si NO está en multijugador
+    if (!isMultiplayer) {
+        createConsumables();
+    }
+    
     createStarField();
     
     // Actualizar UI
@@ -694,21 +699,42 @@ function checkConsumption() {
                 massGained *= 5;
             }
             
-            // Consumir objeto
-            mainCell.mass += massGained;
-            mainCell.radius = massToRadius(mainCell.mass);
-            gameState.totalMass = mainCell.mass;
-            
-            // Ganar moneda
-            addCurrency(GAME_CONFIG.shop.currencyGain.perConsumable, 'consumo');
-            
-            // Eliminar objeto consumido
-            consumables.splice(i, 1);
-            
-            console.log(`🍎 Objeto consumido por célula principal! Masa: +${massGained}, Total: ${mainCell.mass.toFixed(1)}`);
+            // ✅ SOLO en modo offline: aplicar directamente
+            if (!isMultiplayer) {
+                mainCell.mass += massGained;
+                mainCell.radius = massToRadius(mainCell.mass);
+                gameState.totalMass = mainCell.mass;
+                
+                // Ganar moneda
+                addCurrency(GAME_CONFIG.shop.currencyGain.perConsumable, 'consumo');
+                
+                // Eliminar objeto consumido
+                consumables.splice(i, 1);
+                
+                console.log(`🍎 Objeto consumido (offline)! Masa: +${massGained}, Total: ${mainCell.mass.toFixed(1)}`);
+            } else {
+                // ✅ MODO ONLINE: Notificar al servidor y él lo manejará
+                if (window.gameSocket) {
+                    window.gameSocket.emit('consumeObject', {
+                        consumableId: consumable.id
+                    });
+                    console.log(`🌐 Consumible enviado al servidor: ${consumable.id}`);
+                }
+                
+                // ✅ Aplicar optimistamente (el servidor confirmará)
+                mainCell.mass += massGained;
+                mainCell.radius = massToRadius(mainCell.mass);
+                gameState.totalMass = mainCell.mass;
+                
+                // Ganar moneda
+                addCurrency(GAME_CONFIG.shop.currencyGain.perConsumable, 'consumo online');
+                
+                // ✅ NO eliminar localmente, esperar actualización del servidor
+            }
         }
     }
     
+    // Consumir objetos del mapa - CÉLULAS DIVIDIDAS
     // Consumir objetos del mapa - CÉLULAS DIVIDIDAS
     for (let j = 1; j < playerCells.length; j++) {
         const dividedCell = playerCells[j];
@@ -718,7 +744,6 @@ function checkConsumption() {
             const dist = distance(dividedCell.x, dividedCell.y, consumable.x, consumable.y);
             
             if (dist < dividedCell.radius) {
-                // Calcular masa ganada (con efectos de mejoras)
                 let massGained = consumable.mass;
                 if (gameState.temporaryEffects.doubleConsume.active) {
                     massGained *= 2;
@@ -727,17 +752,24 @@ function checkConsumption() {
                     massGained *= 5;
                 }
                 
-                // Consumir objeto con célula dividida
-                dividedCell.mass += massGained;
-                dividedCell.radius = massToRadius(dividedCell.mass);
-                
-                // Ganar moneda
-                addCurrency(GAME_CONFIG.shop.currencyGain.perConsumable, 'consumo dividida');
-                
-                // Eliminar objeto consumido
-                consumables.splice(i, 1);
-                
-                console.log(`🍎 Objeto consumido por célula dividida! Masa: +${massGained}, Total célula: ${dividedCell.mass.toFixed(1)}`);
+                // ✅ MODO OFFLINE
+                if (!isMultiplayer) {
+                    dividedCell.mass += massGained;
+                    dividedCell.radius = massToRadius(dividedCell.mass);
+                    addCurrency(GAME_CONFIG.shop.currencyGain.perConsumable, 'consumo dividida');
+                    consumables.splice(i, 1);
+                    console.log(`🍎 Objeto consumido por célula dividida (offline)! Masa: +${massGained}`);
+                } else {
+                    // ✅ MODO ONLINE
+                    if (window.gameSocket) {
+                        window.gameSocket.emit('consumeObject', {
+                            consumableId: consumable.id
+                        });
+                    }
+                    dividedCell.mass += massGained;
+                    dividedCell.radius = massToRadius(dividedCell.mass);
+                    addCurrency(GAME_CONFIG.shop.currencyGain.perConsumable, 'consumo dividida online');
+                }
             }
         }
     }
@@ -1179,16 +1211,33 @@ function restartGame() {
         survivalTime: 0,
         totalMass: 100,
         cells: 1,
-        generation: 1
+        generation: 1,
+        currency: 0,
+        upgrades: {
+            armor: false,
+            speed: false,
+            doubleConsume: false,
+            megaConsume: false,
+            expansion: false
+        },
+        temporaryEffects: {
+            doubleConsume: { active: false, timeLeft: 0 },
+            megaConsume: { active: false, timeLeft: 0 }
+        }
     };
     
     // Limpiar arrays
     playerCells = [];
     consumables = [];
+    otherPlayers.clear(); // ✅ Limpiar otros jugadores
     
     // Recrear elementos
     createPlayerCell();
-    createConsumables();
+    
+    // ✅ SOLO crear consumibles si está offline
+    if (!isMultiplayer) {
+        createConsumables();
+    }
     
     // Limpiar pantallas
     document.getElementById('pauseScreen').classList.remove('active');
@@ -1318,18 +1367,34 @@ function updateMultiplayerState(data) {
     
     // Actualizar otros jugadores
     if (Array.isArray(data.players)) {
+        // Limpiar jugadores que ya no existen
+        otherPlayers.clear();
+        
         data.players.forEach(player => {
+            // ✅ NO incluir al jugador local
             if (player.id !== window.gameSocket?.id) {
                 otherPlayers.set(player.id, player);
             }
         });
     }
     
-    // Actualizar consumibles del servidor (no sobrescribir con vacío)
-    if (Array.isArray(data.consumables)) {
-        if (data.consumables.length > 0 || consumables.length === 0) {
-            consumables = data.consumables;
-        }
+    // ✅ ACTUALIZACIÓN INTELIGENTE de consumibles
+    if (Array.isArray(data.consumables) && data.consumables.length > 0) {
+        // Crear mapa de IDs existentes para comparación rápida
+        const existingIds = new Set(consumables.map(c => c.id));
+        const serverIds = new Set(data.consumables.map(c => c.id));
+        
+        // Agregar nuevos consumibles del servidor
+        data.consumables.forEach(serverConsumable => {
+            if (!existingIds.has(serverConsumable.id)) {
+                consumables.push(serverConsumable);
+            }
+        });
+        
+        // Eliminar consumibles que ya no están en el servidor
+        consumables = consumables.filter(c => serverIds.has(c.id));
+        
+        console.log(`🌐 Consumibles sincronizados: ${consumables.length}`);
     }
 }
 
