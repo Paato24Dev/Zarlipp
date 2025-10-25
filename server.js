@@ -19,6 +19,8 @@ const io = socketIo(server, {
 
 // Middleware
 app.use(cors());
+// Servir también archivos estáticos desde la raíz del proyecto (incluye juego.html y Pantallainicio.html)
+app.use(express.static(path.join(__dirname)));
 app.use(express.static('public'));
 
 // Servir archivos estáticos con MIME types correctos
@@ -32,6 +34,11 @@ app.get('/', (req, res) => {
 // Servir Pantallainicio.html
 app.get('/Pantallainicio.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'Pantallainicio.html'));
+});
+
+// Servir juego.html
+app.get('/juego.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'juego.html'));
 });
 
 // Servir CSS con MIME type correcto
@@ -75,6 +82,11 @@ class Room {
             startTime: Date.now()
         };
         this.maxPlayers = 8;
+        
+        // Sembrar consumibles iniciales para evitar "mapa vacío" al conectar
+        for (let i = 0; i < 10; i++) {
+            this.generateConsumables();
+        }
     }
     
     addPlayer(socketId, playerData) {
@@ -124,8 +136,8 @@ class Room {
     }
     
     generateConsumables() {
-        if (this.gameState.consumables.length < 50) {
-            for (let i = 0; i < 10; i++) {
+        if (this.gameState.consumables.length < 200) {
+            for (let i = 0; i < 20; i++) {
                 this.gameState.consumables.push({
                     id: Date.now() + Math.random(),
                     x: Math.random() * 4000 - 2000,
@@ -183,13 +195,14 @@ io.on('connection', (socket) => {
         const success = room.addPlayer(socket.id, { name: playerName });
         
         if (success) {
-            socket.join(roomId);
-            players.set(socket.id, { roomId, socket });
+            // Asegurar que el socket se una exactamente a la sala usada para emitir actualizaciones
+            socket.join(actualRoomId);
+            players.set(socket.id, { roomId: actualRoomId, socket });
             
             // Enviar estado actual de la sala
             socket.emit('roomJoined', {
                 success: true,
-                roomId: roomId,
+                roomId: actualRoomId,
                 players: Array.from(room.players.values()),
                 gameState: room.gameState
             });
