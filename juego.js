@@ -122,13 +122,16 @@ function resizeCanvas() {
 // ========================================
 
 function createPlayerCell() {
+    // Obtener color personalizado guardado
+    const playerColor = localStorage.getItem('playerColor') || '#00ff88';
+    
     playerCells = [{
         id: 0,
         x: 0,
         y: 0,
         mass: GAME_CONFIG.initialMass,
         radius: massToRadius(GAME_CONFIG.initialMass),
-        color: '#00ff88',
+        color: playerColor,
         velocityX: 0,
         velocityY: 0,
         isMain: true,
