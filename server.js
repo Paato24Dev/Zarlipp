@@ -19,50 +19,22 @@ const io = socketIo(server, {
 
 // Middleware
 app.use(cors());
-// Servir también archivos estáticos desde la raíz del proyecto (incluye juego.html y Pantallainicio.html)
-app.use(express.static(path.join(__dirname)));
+
+// Servir archivos estáticos desde la raíz del proyecto
+app.use(express.static(__dirname));
 app.use(express.static('public'));
 
-// Servir archivos estáticos con MIME types correctos
-app.use('/public', express.static('public'));
-
-// Servir archivos estáticos
+// Rutas principales
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'Pantallainicio.html'));
 });
 
-// Servir Pantallainicio.html
 app.get('/Pantallainicio.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'Pantallainicio.html'));
 });
 
-// Servir juego.html
 app.get('/juego.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'juego.html'));
-});
-
-// Servir CSS con MIME type correcto
-app.get('/juego.css', (req, res) => {
-    res.setHeader('Content-Type', 'text/css');
-    res.sendFile(path.join(__dirname, 'juego.css'));
-});
-
-// Servir styles.css
-app.get('/styles.css', (req, res) => {
-    res.setHeader('Content-Type', 'text/css');
-    res.sendFile(path.join(__dirname, 'styles.css'));
-});
-
-// Servir juego.js
-app.get('/juego.js', (req, res) => {
-    res.setHeader('Content-Type', 'application/javascript');
-    res.sendFile(path.join(__dirname, 'juego.js'));
-});
-
-// Servir script.js
-app.get('/script.js', (req, res) => {
-    res.setHeader('Content-Type', 'application/javascript');
-    res.sendFile(path.join(__dirname, 'script.js'));
 });
 
 // ========================================
