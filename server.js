@@ -181,28 +181,32 @@ class Room {
     }
     
     generateConsumables() {
-        // Asegurar que siempre haya al menos 50 consumibles
-        while (this.gameState.consumables.length < 50) {
-            this.gameState.consumables.push({
-                id: Date.now() + Math.random(),
-                x: Math.random() * 4000 - 2000,
-                y: Math.random() * 4000 - 2000,
-                mass: Math.random() * 20 + 5,
-                color: this.getRandomColor()
-            });
-        }
-    }
-    
-    // Respawn automático de consumibles cuando se comen
-    respawnConsumable() {
-        this.gameState.consumables.push({
-            id: Date.now() + Math.random(),
-            x: Math.random() * 4000 - 2000,
-            y: Math.random() * 4000 - 2000,
-            mass: Math.random() * 20 + 5,
-            color: this.getRandomColor()
-        });
-    }
+  while (this.gameState.consumables.length < 50) {
+    const mass = Math.random() * 20 + 5;
+    this.gameState.consumables.push({
+      id: Date.now() + Math.random(),
+      x: Math.random() * 4000 - 2000,
+      y: Math.random() * 4000 - 2000,
+      mass,
+      radius: Math.sqrt(mass) * 2, // añadir radius en el servidor
+      color: this.getRandomColor(),
+      type: 'consumable'
+    });
+  }
+}
+
+respawnConsumable() {
+  const mass = Math.random() * 20 + 5;
+  this.gameState.consumables.push({
+    id: Date.now() + Math.random(),
+    x: Math.random() * 4000 - 2000,
+    y: Math.random() * 4000 - 2000,
+    mass,
+    radius: Math.sqrt(mass) * 2,
+    color: this.getRandomColor(),
+    type: 'consumable'
+  });
+}
     
     // Actualizar tabla de líderes
     updateLeaderboard() {
