@@ -15,7 +15,10 @@ const io = socketIo(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
-    }
+    },
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    transports: ['websocket', 'polling']
 });
 
 // Conectar a MongoDB (usando la URL de Vercel)
@@ -234,72 +237,87 @@ class Room {
 io.on('connection', (socket) => {
     console.log(`🔌 Jugador conectado: ${socket.id}`);
     
+    // Configurar timeout para evitar conexiones colgadas
+    socket.setTimeout(30000);
+    
     // Unirse a una sala
     socket.on('joinRoom', (data) => {
-        const { roomId, playerName } = data;
-        
-        // Si es la sala principal, usar código fijo
-        const actualRoomId = (roomId === 'MAIN') ? 'MAIN' : roomId;
-        
-        let room = rooms.get(actualRoomId);
-        if (!room) {
-            room = new Room(actualRoomId);
-            rooms.set(actualRoomId, room);
-            console.log(`🏠 Nueva sala creada: ${actualRoomId}`);
-        }
-        
-        const success = room.addPlayer(socket.id, { name: playerName });
-        
-        if (success) {
-            // Asegurar que el socket se una exactamente a la sala usada para emitir actualizaciones
-            socket.join(actualRoomId);
-            players.set(socket.id, { roomId: actualRoomId, socket });
+        try {
+            const { roomId, playerName, color } = data;
             
-            // Enviar estado actual de la sala
-            socket.emit('roomJoined', {
-                success: true,
-                roomId: actualRoomId,
-                players: Array.from(room.players.values()),
-                gameState: room.gameState
-            });
+            // Si es la sala principal, usar código fijo
+            const actualRoomId = (roomId === 'MAIN') ? 'MAIN' : roomId;
             
-            // Notificar a otros jugadores
-            socket.to(roomId).emit('playerJoined', {
-                player: room.players.get(socket.id)
-            });
+            let room = rooms.get(actualRoomId);
+            if (!room) {
+                room = new Room(actualRoomId);
+                rooms.set(actualRoomId, room);
+                console.log(`🏠 Nueva sala creada: ${actualRoomId}`);
+            }
             
-            console.log(`✅ ${playerName} se unió a la sala ${roomId}`);
-        } else {
+            const success = room.addPlayer(socket.id, { name: playerName, color: color });
+            
+            if (success) {
+                // Asegurar que el socket se una exactamente a la sala usada para emitir actualizaciones
+                socket.join(actualRoomId);
+                players.set(socket.id, { roomId: actualRoomId, socket });
+                
+                // Enviar estado actual de la sala
+                socket.emit('roomJoined', {
+                    success: true,
+                    roomId: actualRoomId,
+                    players: Array.from(room.players.values()),
+                    gameState: room.gameState
+                });
+                
+                // Notificar a otros jugadores
+                socket.to(actualRoomId).emit('playerJoined', {
+                    player: room.players.get(socket.id)
+                });
+                
+                console.log(`✅ ${playerName} se unió a la sala ${actualRoomId}`);
+            } else {
+                socket.emit('roomJoined', {
+                    success: false,
+                    message: 'Sala llena (máximo 20 jugadores)'
+                });
+            }
+        } catch (error) {
+            console.error('Error en joinRoom:', error);
             socket.emit('roomJoined', {
                 success: false,
-                message: 'Sala llena'
+                message: 'Error del servidor'
             });
         }
     });
     
     // Actualizar posición del jugador
     socket.on('updatePlayer', (data) => {
-        const playerData = players.get(socket.id);
-        if (!playerData) return;
-        
-        const room = rooms.get(playerData.roomId);
-        if (!room) return;
-        
-        const player = room.players.get(socket.id);
-        if (!player) return;
-        
-        // Actualizar datos del jugador
-        player.cells = data.cells;
-        player.currency = data.currency;
-        player.upgrades = data.upgrades;
-        player.temporaryEffects = data.temporaryEffects;
-        player.lastUpdate = Date.now();
-        
-        // Enviar actualización a otros jugadores
-        socket.to(playerData.roomId).emit('playerUpdated', {
-            playerId: socket.id,
-            player: player
-        });
+        try {
+            const playerData = players.get(socket.id);
+            if (!playerData) return;
+            
+            const room = rooms.get(playerData.roomId);
+            if (!room) return;
+            
+            const player = room.players.get(socket.id);
+            if (!player) return;
+            
+            // Actualizar datos del jugador
+            player.cells = data.cells;
+            player.currency = data.currency;
+            player.upgrades = data.upgrades;
+            player.temporaryEffects = data.temporaryEffects;
+            player.lastUpdate = Date.now();
+            
+            // Enviar actualización a otros jugadores
+            socket.to(playerData.roomId).emit('playerUpdated', {
+                playerId: socket.id,
+                player: player
+            });
+        } catch (error) {
+            console.error('Error en updatePlayer:', error);
+        }
     });
     
     // Manejar consumo de objetos
@@ -406,8 +424,20 @@ io.on('connection', (socket) => {
         }
     });
     
+    // Heartbeat para mantener conexión viva
+    socket.on('ping', () => {
+        socket.emit('pong');
+    });
+    
+    // Manejo de errores
+    socket.on('error', (error) => {
+        console.error(`Error en socket ${socket.id}:`, error);
+    });
+    
     // Desconexión
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (reason) => {
+        console.log(`❌ Jugador desconectado: ${socket.id}, razón: ${reason}`);
+        
         const playerData = players.get(socket.id);
         if (playerData) {
             const room = rooms.get(playerData.roomId);
@@ -428,8 +458,6 @@ io.on('connection', (socket) => {
             
             players.delete(socket.id);
         }
-        
-        console.log(`❌ Jugador desconectado: ${socket.id}`);
     });
 });
 
