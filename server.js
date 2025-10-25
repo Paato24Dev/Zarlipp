@@ -21,13 +21,14 @@ const io = socketIo(server, {
 // Conectar a MongoDB (usando la URL de Vercel)
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mitosis';
 
+// Intentar conectar a MongoDB, pero no bloquear si falla
 mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
     console.log('✅ Conectado a MongoDB');
 }).catch(err => {
-    console.log('❌ Error conectando a MongoDB:', err.message);
+    console.log('⚠️ MongoDB no disponible, continuando sin base de datos:', err.message);
 });
 
 // Esquema de jugador para MongoDB
@@ -104,9 +105,7 @@ class Room {
         this.maxPlayers = 20; // Aumentado a 20 jugadores
         
         // Sembrar consumibles iniciales para evitar "mapa vacío" al conectar
-        for (let i = 0; i < 50; i++) {
-            this.generateConsumables();
-        }
+        this.generateConsumables();
         
         // Actualizar tabla de líderes cada 5 segundos
         this.leaderboardInterval = setInterval(() => {
@@ -166,16 +165,15 @@ class Room {
     }
     
     generateConsumables() {
-        if (this.gameState.consumables.length < 200) {
-            for (let i = 0; i < 20; i++) {
-                this.gameState.consumables.push({
-                    id: Date.now() + Math.random(),
-                    x: Math.random() * 4000 - 2000,
-                    y: Math.random() * 4000 - 2000,
-                    mass: Math.random() * 20 + 5,
-                    color: this.getRandomColor()
-                });
-            }
+        // Asegurar que siempre haya al menos 50 consumibles
+        while (this.gameState.consumables.length < 50) {
+            this.gameState.consumables.push({
+                id: Date.now() + Math.random(),
+                x: Math.random() * 4000 - 2000,
+                y: Math.random() * 4000 - 2000,
+                mass: Math.random() * 20 + 5,
+                color: this.getRandomColor()
+            });
         }
     }
     
