@@ -286,14 +286,78 @@
       }
     });
 
-    socket.on('gameStateUpdate', (data) => {
-      if (window.updateMultiplayerState) {
-        window.updateMultiplayerState(data);
-      }
-      if (data.leaderboard) {
-        updateLeaderboard(data.leaderboard);
-      }
-    });
+socket.on('gameStateUpdate', (data) => {
+  if (window.updateMultiplayerState) {
+    window.updateMultiplayerState(data);
+  }
+
+  // Fallback: si el servidor no trae leaderboard, lo calculamos localmente
+  let list = [];
+  if (Array.isArray(data.leaderboard) && data.leaderboard.length > 0) {
+    list = data.leaderboard;
+  } else {
+    list = buildLocalLeaderboard();
+  }
+  updateLeaderboard(list);
+});
+
+// Construye un leaderboard local con mi jugador + otros
+function buildLocalLeaderboard() {
+  const list = [];
+
+  // Yo
+  try {
+    const myMass = (window.playerCells || []).reduce((sum, c) => sum + (c.mass || 0), 0);
+    const myName = localStorage.getItem('playerName') || 'Yo';
+    const myColor = localStorage.getItem('playerColor') || '#00ff88';
+    if (myMass > 0) {
+      list.push({ name: myName, mass: Math.round(myMass), color: myColor });
+    }
+  } catch (e) {}
+
+  // Otros jugadores (de juego.js)
+  try {
+    if (window.otherPlayers && typeof window.otherPlayers.forEach === 'function') {
+      window.otherPlayers.forEach(p => {
+        const mass = Array.isArray(p.cells) ? p.cells.reduce((s, c) => s + (c.mass || 0), 0) : (p.totalMass || 0);
+        list.push({ name: p.name || 'Jugador', mass: Math.round(mass), color: p.color || '#fff' });
+      });
+    }
+  } catch (e) {}
+
+  // Ordenar y posicionar
+  list.sort((a, b) => b.mass - a.mass);
+  return list.slice(0, 10).map((p, i) => ({ position: i + 1, ...p }));
+}
+
+// Soporta items del servidor y fallback local
+function updateLeaderboard(leaderboard) {
+  const leaderboardList = document.getElementById('leaderboardList');
+  if (!leaderboardList) return;
+
+  leaderboardList.innerHTML = '';
+
+  if (!leaderboard || leaderboard.length === 0) {
+    leaderboardList.innerHTML = '<div class="leaderboard-item"><span class="position">-</span><span class="player-name">Esperando jugadores...</span><span class="player-mass">0</span></div>';
+    return;
+  }
+
+  leaderboard.forEach(item => {
+    const name = item.name || 'Jugador';
+    const mass = item.mass != null ? item.mass : item.totalMass || 0;
+    const color = item.color || '#fff';
+    const position = item.position || '-';
+
+    const div = document.createElement('div');
+    div.className = 'leaderboard-item';
+    div.innerHTML = `
+      <span class="position">${position}</span>
+      <span class="player-name" style="color: ${color}">${name}</span>
+      <span class="player-mass">${mass}</span>
+    `;
+    leaderboardList.appendChild(div);
+  });
+}
 
     // ⬇️⬇️ AQUI AGREGA EL LISTENER DE CONFIRMACIÓN DE CONSUMO ⬇️⬇️
     socket.on('objectConsumed', ({ consumableId, playerId }) => {
