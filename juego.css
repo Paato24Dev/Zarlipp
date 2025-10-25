@@ -125,6 +125,65 @@ body {
     font-size: 1.1em;
 }
 
+/* Tabla de líderes */
+.leaderboard {
+    margin-bottom: 25px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 15px;
+    padding: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.leaderboard h3 {
+    color: #ffd700;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.leaderboard-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+    font-size: 0.9rem;
+}
+
+.leaderboard-item:last-child {
+    border-bottom: none;
+}
+
+.position {
+    color: #ffd700;
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+}
+
+.player-name {
+    color: #ffffff;
+    flex: 1;
+    margin: 0 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.player-mass {
+    color: #00ff88;
+    font-weight: bold;
+    min-width: 40px;
+    text-align: right;
+}
+
 /* Información de célula */
 .cell-info {
     margin-bottom: 25px;
