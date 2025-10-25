@@ -236,7 +236,7 @@ function setupEventListeners() {
         console.error('No se encontró el botón de tienda');
     }
     document.getElementById('menuBtn').addEventListener('click', () => {
-        window.location.href = 'Pantallainicio.html';
+        window.location.href = '/Pantallainicio.html';
     });
     document.getElementById('backToGameBtn').addEventListener('click', () => {
         showScreen('gameScreen');
@@ -1161,11 +1161,11 @@ function togglePause() {
     const pauseBtn = document.getElementById('pauseBtn');
     
     if (gameState.isPaused) {
-        pauseScreen.classList.add('active');
-        pauseBtn.innerHTML = '<span class="btn-icon">▶</span>REANUDAR';
+        if (pauseScreen) pauseScreen.classList.add('active');
+        if (pauseBtn) pauseBtn.innerHTML = '<span class="btn-icon">▶</span>REANUDAR';
     } else {
-        pauseScreen.classList.remove('active');
-        pauseBtn.innerHTML = '<span class="btn-icon">⏸</span>PAUSAR';
+        if (pauseScreen) pauseScreen.classList.remove('active');
+        if (pauseBtn) pauseBtn.innerHTML = '<span class="btn-icon">⏸</span>PAUSAR';
     }
 }
 
@@ -1310,16 +1310,23 @@ function checkMultiplayerCollisions() {
 }
 
 function updateMultiplayerState(data) {
-    // Actualizar otros jugadores
-    data.players.forEach(player => {
-        if (player.id !== window.gameSocket?.id) {
-            otherPlayers.set(player.id, player);
-        }
-    });
+    // Asegurar bandera local de multijugador
+    isMultiplayer = true;
     
-    // Actualizar consumibles del servidor
-    if (data.consumables) {
-        consumables = data.consumables;
+    // Actualizar otros jugadores
+    if (Array.isArray(data.players)) {
+        data.players.forEach(player => {
+            if (player.id !== window.gameSocket?.id) {
+                otherPlayers.set(player.id, player);
+            }
+        });
+    }
+    
+    // Actualizar consumibles del servidor (no sobrescribir con vacío)
+    if (Array.isArray(data.consumables)) {
+        if (data.consumables.length > 0 || consumables.length === 0) {
+            consumables = data.consumables;
+        }
     }
 }
 
