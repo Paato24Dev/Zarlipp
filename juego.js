@@ -689,7 +689,7 @@ function checkConsumption() {
         const consumable = consumables[i];
         const dist = distance(mainCell.x, mainCell.y, consumable.x, consumable.y);
         
-        if (dist < mainCell.radius) {
+        if (dist < mainCell.radius + (consumable.radius || massToRadius(consumable.mass))) {
             // Calcular masa ganada (con efectos de mejoras)
             let massGained = consumable.mass;
             if (gameState.temporaryEffects.doubleConsume.active) {
@@ -743,7 +743,7 @@ function checkConsumption() {
             const consumable = consumables[i];
             const dist = distance(dividedCell.x, dividedCell.y, consumable.x, consumable.y);
             
-            if (dist < dividedCell.radius) {
+            if (dist < dividedCell.radius + (consumable.radius || massToRadius(consumable.mass))) {
                 let massGained = consumable.mass;
                 if (gameState.temporaryEffects.doubleConsume.active) {
                     massGained *= 2;
@@ -1362,41 +1362,50 @@ function checkMultiplayerCollisions() {
 }
 
 function updateMultiplayerState(data) {
-    // Asegurar bandera local de multijugador
+    // Asegurar modo online
     isMultiplayer = true;
-    
-    // Actualizar otros jugadores
+
+    // Actualizar otros jugadores (no incluirme)
     if (Array.isArray(data.players)) {
-        // Limpiar jugadores que ya no existen
         otherPlayers.clear();
-        
         data.players.forEach(player => {
-            // ✅ NO incluir al jugador local
             if (player.id !== window.gameSocket?.id) {
                 otherPlayers.set(player.id, player);
             }
         });
     }
-    
-    // ✅ ACTUALIZACIÓN INTELIGENTE de consumibles
-    if (Array.isArray(data.consumables) && data.consumables.length > 0) {
-        // Crear mapa de IDs existentes para comparación rápida
+
+    // Normalizar consumibles del servidor (añadir radius/type si faltan)
+    const normalizeConsumable = (c) => ({
+        id: c.id,
+        x: c.x,
+        y: c.y,
+        mass: c.mass,
+        radius: (c.radius != null) ? c.radius : massToRadius(c.mass),
+        color: c.color || '#feca57',
+        type: c.type || 'consumable'
+    });
+
+    if (Array.isArray(data.consumables) && data.consumables.length >= 0) {
+        const serverList = data.consumables.map(normalizeConsumable);
+
+        // Merge inteligente: agregar nuevos y remover faltantes
         const existingIds = new Set(consumables.map(c => c.id));
-        const serverIds = new Set(data.consumables.map(c => c.id));
-        
-        // Agregar nuevos consumibles del servidor
-        data.consumables.forEach(serverConsumable => {
-            if (!existingIds.has(serverConsumable.id)) {
-                consumables.push(serverConsumable);
-            }
+        const serverIds = new Set(serverList.map(c => c.id));
+
+        // Agregar nuevos
+        serverList.forEach(sc => {
+            if (!existingIds.has(sc.id)) consumables.push(sc);
         });
-        
-        // Eliminar consumibles que ya no están en el servidor
+
+        // Remover los que ya no están
         consumables = consumables.filter(c => serverIds.has(c.id));
-        
-        console.log(`🌐 Consumibles sincronizados: ${consumables.length}`);
+
+        // Extra: si por alguna razón llegan 0, mantenemos los actuales por un frame
+        // y se corrige en el siguiente tick
+        // console.log('🌐 Consumibles sincronizados:', consumables.length);
     }
 }
 
-// Función global para el HTML
+// Dejar expuesto global
 window.updateMultiplayerState = updateMultiplayerState;
