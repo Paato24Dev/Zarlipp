@@ -379,8 +379,93 @@ body {
     100% { background-position: 0% 50%; }
 }
 
+/* Personalización de jugador */
+.player-customization {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(0, 255, 136, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    backdrop-filter: blur(10px);
+}
+
+.player-customization h3 {
+    color: #00ff88;
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.customization-group {
+    margin-bottom: 15px;
+}
+
+.customization-group label {
+    display: block;
+    color: #ffffff;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.customization-group input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(0, 255, 136, 0.5);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.customization-group input[type="text"]:focus {
+    outline: none;
+    border-color: #00ff88;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.customization-group input[type="text"]::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.color-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.color-picker input[type="color"] {
+    width: 50px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: transparent;
+}
+
+.color-preview {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    background: #00ff88;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
+    .player-customization {
+        margin: 15px 0;
+        padding: 15px;
+    }
+    
+    .customization-group input[type="text"] {
+        font-size: 0.9rem;
+    }
+}
     .game-title h1 {
         font-size: 3rem;
     }
