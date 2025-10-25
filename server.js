@@ -7,6 +7,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const path = require('path');
+const mongoose = require('mongoose');
 
 const app = express();
 const server = http.createServer(app);
@@ -16,6 +17,31 @@ const io = socketIo(server, {
         methods: ["GET", "POST"]
     }
 });
+
+// Conectar a MongoDB (usando la URL de Vercel)
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mitosis';
+
+mongoose.connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('✅ Conectado a MongoDB');
+}).catch(err => {
+    console.log('❌ Error conectando a MongoDB:', err.message);
+});
+
+// Esquema de jugador para MongoDB
+const playerSchema = new mongoose.Schema({
+    socketId: String,
+    name: String,
+    color: String,
+    totalMass: Number,
+    gamesPlayed: Number,
+    bestScore: Number,
+    lastSeen: Date
+});
+
+const Player = mongoose.model('Player', playerSchema);
 
 // Middleware
 app.use(cors());
@@ -72,14 +98,20 @@ class Room {
         this.gameState = {
             consumables: [],
             gameStarted: false,
-            startTime: Date.now()
+            startTime: Date.now(),
+            leaderboard: []
         };
-        this.maxPlayers = 8;
+        this.maxPlayers = 20; // Aumentado a 20 jugadores
         
         // Sembrar consumibles iniciales para evitar "mapa vacío" al conectar
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 50; i++) {
             this.generateConsumables();
         }
+        
+        // Actualizar tabla de líderes cada 5 segundos
+        this.leaderboardInterval = setInterval(() => {
+            this.updateLeaderboard();
+        }, 5000);
     }
     
     addPlayer(socketId, playerData) {
@@ -87,16 +119,20 @@ class Room {
             return false;
         }
         
+        const playerName = playerData.name || `Jugador ${this.players.size + 1}`;
+        const playerColor = playerData.color || this.getRandomColor();
+        
         this.players.set(socketId, {
             id: socketId,
-            name: playerData.name || `Jugador ${this.players.size + 1}`,
+            name: playerName,
+            color: playerColor,
             cells: [{
                 id: 0,
                 x: Math.random() * 2000 - 1000,
                 y: Math.random() * 2000 - 1000,
                 mass: 100,
                 radius: 20,
-                color: this.getRandomColor(),
+                color: playerColor,
                 isMain: true,
                 generation: 1
             }],
@@ -113,7 +149,8 @@ class Room {
                 megaConsume: { active: false, timeLeft: 0 }
             },
             isAlive: true,
-            lastUpdate: Date.now()
+            lastUpdate: Date.now(),
+            totalMass: 100
         });
         
         return true;
@@ -142,11 +179,36 @@ class Room {
         }
     }
     
+    // Respawn automático de consumibles cuando se comen
+    respawnConsumable() {
+        this.gameState.consumables.push({
+            id: Date.now() + Math.random(),
+            x: Math.random() * 4000 - 2000,
+            y: Math.random() * 4000 - 2000,
+            mass: Math.random() * 20 + 5,
+            color: this.getRandomColor()
+        });
+    }
+    
+    // Actualizar tabla de líderes
+    updateLeaderboard() {
+        const playersArray = Array.from(this.players.values());
+        this.gameState.leaderboard = playersArray
+            .sort((a, b) => b.totalMass - a.totalMass)
+            .slice(0, 10)
+            .map((player, index) => ({
+                position: index + 1,
+                name: player.name,
+                mass: Math.round(player.totalMass),
+                color: player.color
+            }));
+    }
+    
     updateGameState() {
         // Generar consumibles si es necesario
         this.generateConsumables();
         
-        // Actualizar efectos temporales
+        // Actualizar efectos temporales y masa total
         this.players.forEach(player => {
             Object.keys(player.temporaryEffects).forEach(effect => {
                 if (player.temporaryEffects[effect].active) {
@@ -157,6 +219,9 @@ class Room {
                     }
                 }
             });
+            
+            // Calcular masa total del jugador
+            player.totalMass = player.cells.reduce((sum, cell) => sum + cell.mass, 0);
             
             // Ganar moneda por tiempo
             player.currency += 0.016; // ~1 por segundo
@@ -254,6 +319,9 @@ io.on('connection', (socket) => {
         room.gameState.consumables = room.gameState.consumables.filter(
             consumable => consumable.id !== data.consumableId
         );
+        
+        // Respawn automático de un nuevo consumible
+        room.respawnConsumable();
         
         // Ganar moneda
         player.currency += 5;
@@ -378,7 +446,8 @@ setInterval(() => {
         // Enviar estado actualizado a todos los jugadores de la sala
         io.to(room.id).emit('gameStateUpdate', {
             consumables: room.gameState.consumables,
-            players: Array.from(room.players.values())
+            players: Array.from(room.players.values()),
+            leaderboard: room.gameState.leaderboard
         });
     });
 }, 1000 / 60); // 60 FPS
