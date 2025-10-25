@@ -250,6 +250,10 @@
       rememberUpgrade: true
     });
 
+    document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(connectToMultiplayerServer, 500);
+    });
+
     const playerName = localStorage.getItem('playerName') || 'Jugador';
     const playerColor = localStorage.getItem('playerColor') || '#00ff88';
 
