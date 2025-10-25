@@ -1,512 +1,524 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mitosis Evolution - Juego</title>
-    <link rel="stylesheet" href="juego.css">
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mitosis Evolution - Juego</title>
+  <link rel="stylesheet" href="juego.css" />
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
-    <div id="gameContainer">
-        <!-- Canvas principal del juego -->
-        <canvas id="gameCanvas" class="screen active"></canvas>
-        
-        <!-- Interfaz de usuario del juego -->
-        <div id="gameUI">
-            <!-- Panel superior -->
-            <div class="ui-panel top">
-                <div class="cells-count">
-                    <span class="ui-label">Células:</span>
-                    <span class="cells-value" id="cellsValue">1</span>
-                </div>
-                <div class="generation-info">
-                    <span class="ui-label">Generación:</span>
-                    <span class="generation-value" id="generationValue">1</span>
-                </div>
-                <div class="time-info">
-                    <span class="ui-label">Tiempo:</span>
-                    <span class="time-value" id="timeValue">0s</span>
-                </div>
-            </div>
-            
-            <!-- Panel inferior -->
-            <div class="ui-panel bottom">
-                <button class="action-btn" id="settingsBtn">
-                    <span class="btn-icon">⚙</span>
-                    CONFIGURACIÓN
-                </button>
-                <button class="action-btn shop-highlight" id="shopBtn">
-                    <span class="btn-icon">🛒</span>
-                    TIENDA
-                </button>
-                <button class="action-btn" id="menuBtn">
-                    <span class="btn-icon">🏠</span>
-                    MENÚ
-                </button>
-            </div>
-            
-            <!-- Panel lateral de información -->
-            <div class="ui-panel side">
-                <!-- Tabla de líderes -->
-                <div class="leaderboard">
-                    <h3>🏆 Top 10</h3>
-                    <div class="leaderboard-list" id="leaderboardList">
-                        <div class="leaderboard-item">
-                            <span class="position">1</span>
-                            <span class="player-name">Cargando...</span>
-                            <span class="player-mass">0</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="cell-info">
-                    <h3>Información de Célula</h3>
-                    <div class="info-item">
-                        <span>Tamaño:</span>
-                        <span id="cellSize">30px</span>
-                    </div>
-                    <div class="info-item">
-                        <span>Velocidad:</span>
-                        <span id="cellSpeed">Normal</span>
-                    </div>
-                    <div class="info-item">
-                        <span>Habilidades:</span>
-                        <span id="cellAbilities">Básica</span>
-                    </div>
-                </div>
-                
-                <div class="evolution-tree">
-                    <h3>Árbol de Evolución</h3>
-                    <div class="evolution-options">
-                        <button class="evolution-btn" id="speedEvolve">Velocidad</button>
-                        <button class="evolution-btn" id="sizeEvolve">Tamaño</button>
-                        <button class="evolution-btn" id="energyEvolve">Energía</button>
-                    </div>
-                </div>
-            </div>
+  <div id="gameContainer">
+    <!-- Canvas principal del juego -->
+    <canvas id="gameCanvas" class="screen active"></canvas>
+
+    <!-- Interfaz de usuario del juego -->
+    <div id="gameUI">
+      <!-- Panel superior -->
+      <div class="ui-panel top">
+        <div class="cells-count">
+          <span class="ui-label">Células:</span>
+          <span class="cells-value" id="cellsValue">1</span>
         </div>
-        
-        <!-- Pantalla de pausa -->
-        <div id="pauseScreen" class="overlay-screen">
-            <div class="pause-content">
-                <h2>JUEGO PAUSADO</h2>
-                <div class="pause-buttons">
-                    <button class="menu-btn" id="resumeBtn">REANUDAR</button>
-                    <button class="menu-btn" id="restartBtn">REINICIAR</button>
-                    <button class="menu-btn" id="exitBtn">SALIR</button>
-                </div>
-            </div>
+        <div class="generation-info">
+          <span class="ui-label">Generación:</span>
+          <span class="generation-value" id="generationValue">1</span>
         </div>
-        
-        <!-- Pantalla de Game Over -->
-        <div id="gameOverScreen" class="overlay-screen">
-            <div class="gameover-content">
-                <h2>GAME OVER</h2>
-                <div class="final-stats">
-                    <p>Células creadas: <span id="finalCells">0</span></p>
-                    <p>Generaciones: <span id="finalGeneration">0</span></p>
-                    <p>Tiempo de supervivencia: <span id="survivalTime">0s</span></p>
-                </div>
-                <div class="gameover-buttons">
-                    <button class="menu-btn" id="playAgainBtn">JUGAR DE NUEVO</button>
-                    <button class="menu-btn" id="exitGameBtn">SALIR</button>
-                </div>
-            </div>
+        <div class="time-info">
+          <span class="ui-label">Tiempo:</span>
+          <span class="time-value" id="timeValue">0s</span>
         </div>
-        
-        <!-- Pantalla de Configuración -->
-        <div id="settingsScreen" class="screen">
-            <div class="settings-content">
-                <h2>CONFIGURACIÓN</h2>
-                <div class="settings-group">
-                    <label>Volumen:</label>
-                    <input type="range" id="volumeSlider" min="0" max="100" value="50">
-                </div>
-                <div class="settings-group">
-                    <label>Velocidad del juego:</label>
-                    <select id="gameSpeed">
-                        <option value="slow">Lento</option>
-                        <option value="normal" selected>Normal</option>
-                        <option value="fast">Rápido</option>
-                    </select>
-                </div>
-                <div class="settings-group">
-                    <label>Calidad gráfica:</label>
-                    <select id="graphicsQuality">
-                        <option value="low">Baja</option>
-                        <option value="medium" selected>Media</option>
-                        <option value="high">Alta</option>
-                    </select>
-                </div>
-                <button class="menu-btn" id="backToGameBtn">VOLVER AL JUEGO</button>
+      </div>
+
+      <!-- Panel inferior -->
+      <div class="ui-panel bottom">
+        <button class="action-btn" id="settingsBtn">
+          <span class="btn-icon">⚙</span>
+          CONFIGURACIÓN
+        </button>
+        <button class="action-btn shop-highlight" id="shopBtn">
+          <span class="btn-icon">🛒</span>
+          TIENDA
+        </button>
+        <button class="action-btn" id="menuBtn">
+          <span class="btn-icon">🏠</span>
+          MENÚ
+        </button>
+      </div>
+
+      <!-- Panel lateral -->
+      <div class="ui-panel side">
+        <!-- Tabla de líderes -->
+        <div class="leaderboard">
+          <h3>🏆 Top 10</h3>
+          <div class="leaderboard-list" id="leaderboardList">
+            <div class="leaderboard-item">
+              <span class="position">1</span>
+              <span class="player-name">Cargando...</span>
+              <span class="player-mass">0</span>
             </div>
+          </div>
         </div>
-        
-        <!-- Pantalla de Tienda -->
-        <div id="shopScreen" class="overlay-screen">
-            <div class="shop-content">
-                <div class="shop-header">
-                    <h2>🧬 Tienda de Mejoras</h2>
-                    <div class="shop-balance">
-                        <span class="balance-label">Saldo actual:</span>
-                        <span class="balance-value" id="shopBalance">0</span>
-                        <span class="balance-currency">💰</span>
-                    </div>
-                </div>
-                
-                <div class="shop-upgrades">
-                    <!-- Armadura Celular -->
-                    <div class="upgrade-card" id="armorUpgrade">
-                        <div class="upgrade-icon">🛡️</div>
-                        <div class="upgrade-info">
-                            <h3>Armadura Celular</h3>
-                            <p>Reduce el daño recibido en un 20%</p>
-                            <div class="upgrade-status" id="armorStatus">No activa</div>
-                        </div>
-                        <button class="upgrade-btn" id="armorBtn">
-                            <span class="upgrade-price">200</span>
-                            <span class="upgrade-currency">💰</span>
-                        </button>
-                    </div>
-                    
-                    <!-- Velocidad de Movimiento -->
-                    <div class="upgrade-card" id="speedUpgrade">
-                        <div class="upgrade-icon">⚡</div>
-                        <div class="upgrade-info">
-                            <h3>Velocidad de Movimiento</h3>
-                            <p>Aumenta la velocidad base en un 15%</p>
-                            <div class="upgrade-status" id="speedStatus">No activa</div>
-                        </div>
-                        <button class="upgrade-btn" id="speedBtn">
-                            <span class="upgrade-price">150</span>
-                            <span class="upgrade-currency">💰</span>
-                        </button>
-                    </div>
-                    
-                    <!-- Doble Consumo -->
-                    <div class="upgrade-card" id="doubleConsumeUpgrade">
-                        <div class="upgrade-icon">💥</div>
-                        <div class="upgrade-info">
-                            <h3>Doble Consumo (x2)</h3>
-                            <p>Consumo doble durante 30 segundos</p>
-                            <div class="upgrade-status" id="doubleConsumeStatus">No activa</div>
-                        </div>
-                        <button class="upgrade-btn" id="doubleConsumeBtn">
-                            <span class="upgrade-price">250</span>
-                            <span class="upgrade-currency">💰</span>
-                        </button>
-                    </div>
-                    
-                    <!-- Mega Consumo -->
-                    <div class="upgrade-card" id="megaConsumeUpgrade">
-                        <div class="upgrade-icon">🔥</div>
-                        <div class="upgrade-info">
-                            <h3>Mega Consumo (x5)</h3>
-                            <p>Consumo x5 durante 15 segundos</p>
-                            <div class="upgrade-status" id="megaConsumeStatus">No activa</div>
-                        </div>
-                        <button class="upgrade-btn" id="megaConsumeBtn">
-                            <span class="upgrade-price">500</span>
-                            <span class="upgrade-currency">💰</span>
-                        </button>
-                    </div>
-                    
-                    <!-- Expansión Celular -->
-                    <div class="upgrade-card" id="expansionUpgrade">
-                        <div class="upgrade-icon">🌌</div>
-                        <div class="upgrade-info">
-                            <h3>Expansión Celular</h3>
-                            <p>Permite una división adicional</p>
-                            <div class="upgrade-status" id="expansionStatus">No activa</div>
-                        </div>
-                        <button class="upgrade-btn" id="expansionBtn">
-                            <span class="upgrade-price">300</span>
-                            <span class="upgrade-currency">💰</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="shop-footer">
-                    <button class="menu-btn" id="closeShopBtn">CERRAR TIENDA</button>
-                </div>
-            </div>
+
+        <div class="cell-info">
+          <h3>Información de Célula</h3>
+          <div class="info-item">
+            <span>Tamaño:</span>
+            <span id="cellSize">30px</span>
+          </div>
+          <div class="info-item">
+            <span>Velocidad:</span>
+            <span id="cellSpeed">Normal</span>
+          </div>
+          <div class="info-item">
+            <span>Habilidades:</span>
+            <span id="cellAbilities">Básica</span>
+          </div>
         </div>
+
+        <div class="evolution-tree">
+          <h3>Árbol de Evolución</h3>
+          <div class="evolution-options">
+            <button class="evolution-btn" id="speedEvolve">Velocidad</button>
+            <button class="evolution-btn" id="sizeEvolve">Tamaño</button>
+            <button class="evolution-btn" id="energyEvolve">Energía</button>
+          </div>
+        </div>
+      </div>
     </div>
-    
-    <script src="juego.js"></script>
-<script>
-  function connectToMultiplayerServer() {
-    console.log('🎮 Iniciando conexión multijugador...');
-    const socket = io(window.location.origin, {
-      transports: ['websocket', 'polling'],
-      timeout: 20000,
-      forceNew: false,
-      reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      upgrade: true,
-      rememberUpgrade: true
-    });
 
+    <!-- Pantalla de pausa -->
+    <div id="pauseScreen" class="overlay-screen">
+      <div class="pause-content">
+        <h2>JUEGO PAUSADO</h2>
+        <div class="pause-buttons">
+          <button class="menu-btn" id="resumeBtn">REANUDAR</button>
+          <button class="menu-btn" id="restartBtn">REINICIAR</button>
+          <button class="menu-btn" id="exitBtn">SALIR</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pantalla de Game Over -->
+    <div id="gameOverScreen" class="overlay-screen">
+      <div class="gameover-content">
+        <h2>GAME OVER</h2>
+        <div class="final-stats">
+          <p>Células creadas: <span id="finalCells">0</span></p>
+          <p>Generaciones: <span id="finalGeneration">0</span></p>
+          <p>Tiempo de supervivencia: <span id="survivalTime">0s</span></p>
+        </div>
+        <div class="gameover-buttons">
+          <button class="menu-btn" id="playAgainBtn">JUGAR DE NUEVO</button>
+          <button class="menu-btn" id="exitGameBtn">SALIR</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pantalla de Configuración -->
+    <div id="settingsScreen" class="screen">
+      <div class="settings-content">
+        <h2>CONFIGURACIÓN</h2>
+        <div class="settings-group">
+          <label>Volumen:</label>
+          <input type="range" id="volumeSlider" min="0" max="100" value="50" />
+        </div>
+        <div class="settings-group">
+          <label>Velocidad del juego:</label>
+          <select id="gameSpeed">
+            <option value="slow">Lento</option>
+            <option value="normal" selected>Normal</option>
+            <option value="fast">Rápido</option>
+          </select>
+        </div>
+        <div class="settings-group">
+          <label>Calidad gráfica:</label>
+          <select id="graphicsQuality">
+            <option value="low">Baja</option>
+            <option value="medium" selected>Media</option>
+            <option value="high">Alta</option>
+          </select>
+        </div>
+        <button class="menu-btn" id="backToGameBtn">VOLVER AL JUEGO</button>
+      </div>
+    </div>
+
+    <!-- Pantalla de Tienda -->
+    <div id="shopScreen" class="overlay-screen">
+      <div class="shop-content">
+        <div class="shop-header">
+          <h2>🧬 Tienda de Mejoras</h2>
+          <div class="shop-balance">
+            <span class="balance-label">Saldo actual:</span>
+            <span class="balance-value" id="shopBalance">0</span>
+            <span class="balance-currency">💰</span>
+          </div>
+        </div>
+
+        <div class="shop-upgrades">
+          <!-- Armadura Celular -->
+          <div class="upgrade-card" id="armorUpgrade">
+            <div class="upgrade-icon">🛡️</div>
+            <div class="upgrade-info">
+              <h3>Armadura Celular</h3>
+              <p>Reduce el daño recibido en un 20%</p>
+              <div class="upgrade-status" id="armorStatus">No activa</div>
+            </div>
+            <button class="upgrade-btn" id="armorBtn">
+              <span class="upgrade-price">200</span>
+              <span class="upgrade-currency">💰</span>
+            </button>
+          </div>
+
+          <!-- Velocidad de Movimiento -->
+          <div class="upgrade-card" id="speedUpgrade">
+            <div class="upgrade-icon">⚡</div>
+            <div class="upgrade-info">
+              <h3>Velocidad de Movimiento</h3>
+              <p>Aumenta la velocidad base en un 15%</p>
+              <div class="upgrade-status" id="speedStatus">No activa</div>
+            </div>
+            <button class="upgrade-btn" id="speedBtn">
+              <span class="upgrade-price">150</span>
+              <span class="upgrade-currency">💰</span>
+            </button>
+          </div>
+
+          <!-- Doble Consumo -->
+          <div class="upgrade-card" id="doubleConsumeUpgrade">
+            <div class="upgrade-icon">💥</div>
+            <div class="upgrade-info">
+              <h3>Doble Consumo (x2)</h3>
+              <p>Consumo doble durante 30 segundos</p>
+              <div class="upgrade-status" id="doubleConsumeStatus">No activa</div>
+            </div>
+            <button class="upgrade-btn" id="doubleConsumeBtn">
+              <span class="upgrade-price">250</span>
+              <span class="upgrade-currency">💰</span>
+            </button>
+          </div>
+
+          <!-- Mega Consumo -->
+          <div class="upgrade-card" id="megaConsumeUpgrade">
+            <div class="upgrade-icon">🔥</div>
+            <div class="upgrade-info">
+              <h3>Mega Consumo (x5)</h3>
+              <p>Consumo x5 durante 15 segundos</p>
+              <div class="upgrade-status" id="megaConsumeStatus">No activa</div>
+            </div>
+            <button class="upgrade-btn" id="megaConsumeBtn">
+              <span class="upgrade-price">500</span>
+              <span class="upgrade-currency">💰</span>
+            </button>
+          </div>
+
+          <!-- Expansión Celular -->
+          <div class="upgrade-card" id="expansionUpgrade">
+            <div class="upgrade-icon">🌌</div>
+            <div class="upgrade-info">
+              <h3>Expansión Celular</h3>
+              <p>Permite una división adicional</p>
+              <div class="upgrade-status" id="expansionStatus">No activa</div>
+            </div>
+            <button class="upgrade-btn" id="expansionBtn">
+              <span class="upgrade-price">300</span>
+              <span class="upgrade-currency">💰</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="shop-footer">
+          <button class="menu-btn" id="closeShopBtn">CERRAR TIENDA</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="juego.js"></script>
+  <script>
+    // Inicia la conexión al cargar el DOM
     document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(connectToMultiplayerServer, 500);
+      setTimeout(connectToMultiplayerServer, 500);
     });
 
-    const playerName = localStorage.getItem('playerName') || 'Jugador';
-    const playerColor = localStorage.getItem('playerColor') || '#00ff88';
+    function connectToMultiplayerServer() {
+      console.log('🎮 Iniciando conexión multijugador...');
+      const socket = io(window.location.origin, {
+        transports: ['websocket', 'polling'],
+        timeout: 20000,
+        forceNew: false,
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        upgrade: true,
+        rememberUpgrade: true
+      });
 
-    let isConnected = false;
-    let joinedRoom = false;
+      const playerName = localStorage.getItem('playerName') || 'Jugador';
+      const playerColor = localStorage.getItem('playerColor') || '#00ff88';
 
-    socket.on('connect', () => {
-      console.log('🔌 Conectado al servidor multijugador');
-      isConnected = true;
-      socket.emit('joinRoom', { roomId: 'MAIN', playerName, color: playerColor });
-    });
+      let isConnected = false;
+      let joinedRoom = false;
 
-    socket.on('roomJoined', (data) => {
-      if (data.success) {
-        console.log('✅ Unido automáticamente a la sala multijugador');
-        joinedRoom = true;
-        window.gameSocket = socket;
-        window.isMultiplayer = true;
-        window.multiplayerConnected = true;
+      socket.on('connect', () => {
+        console.log('🔌 Conectado al servidor multijugador');
+        isConnected = true;
+        socket.emit('joinRoom', { roomId: 'MAIN', playerName, color: playerColor });
+      });
 
-        if (window.updateMultiplayerState && data.gameState) {
-          window.updateMultiplayerState({
-            players: data.players || [],
-            consumables: data.gameState.consumables || []
+      socket.on('roomJoined', (data) => {
+        if (data.success) {
+          console.log('✅ Unido automáticamente a la sala multijugador');
+          joinedRoom = true;
+
+          window.gameSocket = socket;
+          window.isMultiplayer = true;
+          window.multiplayerConnected = true;
+
+          // Sincroniza estado inicial
+          if (window.updateMultiplayerState && data.gameState) {
+            window.updateMultiplayerState({
+              players: data.players || [],
+              consumables: data.gameState.consumables || []
+            });
+          }
+
+          showMultiplayerMessage('🌐 Conectado - Sala Multijugador');
+        } else {
+          showMultiplayerMessage('❌ ' + (data.message || 'Error al unirse'));
+        }
+      });
+
+      socket.on('gameStateUpdate', (data) => {
+        // Sincroniza jugadores y consumibles
+        if (window.updateMultiplayerState) {
+          window.updateMultiplayerState(data);
+        }
+
+        // Leaderboard: servidor -> fallback local
+        const list = buildLeaderboardFromData(data);
+        updateLeaderboard(list);
+      });
+
+      // Confirmación del servidor al consumir
+      socket.on('objectConsumed', ({ consumableId, playerId }) => {
+        const idx = consumables.findIndex(c => String(c.id) === String(consumableId));
+        if (idx !== -1) {
+          consumables.splice(idx, 1);
+        }
+      });
+
+      // Soporte opcional si usas 'foodEaten' en el backend
+      socket.on('foodEaten', ({ foodId, newFood }) => {
+        const idx = consumables.findIndex(c => String(c.id) === String(foodId));
+        if (idx !== -1) consumables.splice(idx, 1);
+        if (newFood) {
+          consumables.push({
+            ...newFood,
+            radius: newFood.radius ?? massToRadius(newFood.mass),
+            type: newFood.type ?? 'consumable'
           });
         }
-        showMultiplayerMessage('🌐 Conectado - Sala Multijugador');
-      } else {
-        showMultiplayerMessage('❌ ' + (data.message || 'Error al unirse'));
-      }
-    });
-
-socket.on('gameStateUpdate', (data) => {
-  if (window.updateMultiplayerState) {
-    window.updateMultiplayerState(data);
-  }
-
-  // Fallback: si el servidor no trae leaderboard, lo calculamos localmente
-  let list = [];
-  if (Array.isArray(data.leaderboard) && data.leaderboard.length > 0) {
-    list = data.leaderboard;
-  } else {
-    list = buildLocalLeaderboard();
-  }
-  updateLeaderboard(list);
-});
-
-// Construye un leaderboard local con mi jugador + otros
-function buildLocalLeaderboard() {
-  const list = [];
-
-  // Yo
-  try {
-    const myMass = (window.playerCells || []).reduce((sum, c) => sum + (c.mass || 0), 0);
-    const myName = localStorage.getItem('playerName') || 'Yo';
-    const myColor = localStorage.getItem('playerColor') || '#00ff88';
-    if (myMass > 0) {
-      list.push({ name: myName, mass: Math.round(myMass), color: myColor });
-    }
-  } catch (e) {}
-
-  // Otros jugadores (de juego.js)
-  try {
-    if (window.otherPlayers && typeof window.otherPlayers.forEach === 'function') {
-      window.otherPlayers.forEach(p => {
-        const mass = Array.isArray(p.cells) ? p.cells.reduce((s, c) => s + (c.mass || 0), 0) : (p.totalMass || 0);
-        list.push({ name: p.name || 'Jugador', mass: Math.round(mass), color: p.color || '#fff' });
       });
+
+      socket.on('playerJoined', (data) => {
+        if (data.player && data.player.name) {
+          console.log('👤 Nuevo jugador:', data.player.name);
+          showMultiplayerMessage(`👤 ${data.player.name} se unió`);
+        }
+      });
+
+      socket.on('playerLeft', (data) => {
+        console.log('👋 Jugador desconectado:', data.playerId);
+      });
+
+      socket.on('connect_error', (error) => {
+        console.error('❌ Error de conexión:', error);
+        isConnected = false;
+        if (socket.io.engine && socket.io.engine.transport) {
+          showMultiplayerMessage('🔄 Reconectando... (' + socket.io.engine.transport.name + ')');
+        } else {
+          showMultiplayerMessage('⚠️ Jugando en modo offline');
+        }
+      });
+
+      socket.on('reconnect', (attemptNumber) => {
+        console.log('✅ Reconectado después de', attemptNumber, 'intentos');
+        isConnected = true;
+        showMultiplayerMessage('✅ Reconectado al servidor');
+        socket.emit('joinRoom', { roomId: 'MAIN', playerName, color: playerColor });
+      });
+
+      socket.on('reconnect_attempt', (attemptNumber) => {
+        console.log('🔄 Intento de reconexión', attemptNumber);
+        showMultiplayerMessage(`🔄 Reconectando... (${attemptNumber}/10)`);
+      });
+
+      socket.on('reconnect_failed', () => {
+        console.log('❌ Falló la reconexión - Modo offline');
+        isConnected = false;
+        showMultiplayerMessage('❌ Modo offline - El juego continúa localmente');
+      });
+
+      socket.on('disconnect', (reason) => {
+        console.log('❌ Desconectado del servidor:', reason);
+        isConnected = false;
+        joinedRoom = false;
+        window.multiplayerConnected = false;
+        showMultiplayerMessage('🔌 Desconectado - Modo offline');
+        if (reason === 'io server disconnect') {
+          setTimeout(() => socket.connect(), 1000);
+        }
+      });
+
+      // Heartbeat
+      setInterval(() => {
+        if (socket.connected && isConnected) {
+          socket.emit('ping');
+        }
+      }, 25000);
+
+      // Exponer socket
+      window.multiplayerSocket = socket;
     }
-  } catch (e) {}
 
-  // Ordenar y posicionar
-  list.sort((a, b) => b.mass - a.mass);
-  return list.slice(0, 10).map((p, i) => ({ position: i + 1, ...p }));
-}
+    // Construye leaderboard desde datos del server o localmente
+    function buildLeaderboardFromData(data) {
+      const myName = localStorage.getItem('playerName') || 'Yo';
+      const myColor = localStorage.getItem('playerColor') || '#00ff88';
 
-// Soporta items del servidor y fallback local
-function updateLeaderboard(leaderboard) {
-  const leaderboardList = document.getElementById('leaderboardList');
-  if (!leaderboardList) return;
+      // 1) Usar leaderboard del servidor si existe
+      if (Array.isArray(data?.leaderboard) && data.leaderboard.length > 0) {
+        const cleaned = data.leaderboard.map((p, i) => ({
+          position: p.position ?? i + 1,
+          name: p.name || 'Jugador',
+          mass: (p.mass != null ? p.mass : (p.totalMass || 0)),
+          color: p.color || '#fff'
+        }));
 
-  leaderboardList.innerHTML = '';
+        const iAmThere = cleaned.some(p => p.name === myName);
+        if (!iAmThere) {
+          const myMass = safeMyMass();
+          if (myMass > 0) {
+            cleaned.push({ name: myName, mass: myMass, color: myColor });
+          }
+        }
 
-  if (!leaderboard || leaderboard.length === 0) {
-    leaderboardList.innerHTML = '<div class="leaderboard-item"><span class="position">-</span><span class="player-name">Esperando jugadores...</span><span class="player-mass">0</span></div>';
-    return;
-  }
-
-  leaderboard.forEach(item => {
-    const name = item.name || 'Jugador';
-    const mass = item.mass != null ? item.mass : item.totalMass || 0;
-    const color = item.color || '#fff';
-    const position = item.position || '-';
-
-    const div = document.createElement('div');
-    div.className = 'leaderboard-item';
-    div.innerHTML = `
-      <span class="position">${position}</span>
-      <span class="player-name" style="color: ${color}">${name}</span>
-      <span class="player-mass">${mass}</span>
-    `;
-    leaderboardList.appendChild(div);
-  });
-}
-
-    // ⬇️⬇️ AQUI AGREGA EL LISTENER DE CONFIRMACIÓN DE CONSUMO ⬇️⬇️
-    socket.on('objectConsumed', ({ consumableId, playerId }) => {
-      // Normalizamos tipos por si el id viene como número o string
-      const idx = consumables.findIndex(c => String(c.id) === String(consumableId));
-      if (idx !== -1) {
-        consumables.splice(idx, 1);
-        // console.log('🗑️ Consumible confirmado y removido:', consumableId, 'por', playerId);
+        return rankTop10(cleaned);
       }
-    });
 
-    // Opcional: si en algún momento usas el evento 'foodEaten' en el backend
-    socket.on('foodEaten', ({ foodId, newFood }) => {
-      const idx = consumables.findIndex(c => String(c.id) === String(foodId));
-      if (idx !== -1) consumables.splice(idx, 1);
-      if (newFood) {
-        consumables.push({
-          ...newFood,
-          radius: newFood.radius ?? massToRadius(newFood.mass),
-          type: newFood.type ?? 'consumable'
+      // 2) Fallback local: yo + players del tick
+      const list = [];
+
+      const myMass = safeMyMass();
+      if (myMass > 0) {
+        list.push({ name: myName, mass: myMass, color: myColor });
+      }
+
+      if (Array.isArray(data?.players)) {
+        data.players.forEach(p => {
+          const mass = (p.totalMass != null)
+            ? p.totalMass
+            : (Array.isArray(p.cells) ? p.cells.reduce((s, c) => s + (c.mass || 0), 0) : 0);
+          list.push({
+            name: p.name || 'Jugador',
+            mass: Math.round(mass),
+            color: p.color || '#fff'
+          });
         });
       }
-    });
-    // ⬆️⬆️ FIN DEL BLOQUE NUEVO ⬆️⬆️
 
-    socket.on('playerJoined', (data) => {
-      if (data.player && data.player.name) {
-        console.log('👤 Nuevo jugador:', data.player.name);
-        showMultiplayerMessage(`👤 ${data.player.name} se unió`);
+      return rankTop10(list);
+    }
+
+    function safeMyMass() {
+      try {
+        if (Array.isArray(playerCells)) {
+          return Math.round(playerCells.reduce((s, c) => s + (c.mass || 0), 0));
+        }
+      } catch (e) {}
+      return 0;
+    }
+
+    function rankTop10(list) {
+      const sorted = (list || [])
+        .filter(x => x && typeof x.mass === 'number')
+        .sort((a, b) => b.mass - a.mass)
+        .slice(0, 10);
+      return sorted.map((p, i) => ({ position: i + 1, ...p }));
+    }
+
+    function updateLeaderboard(leaderboard) {
+      const leaderboardList = document.getElementById('leaderboardList');
+      if (!leaderboardList) return;
+
+      leaderboardList.innerHTML = '';
+
+      if (!leaderboard || leaderboard.length === 0) {
+        leaderboardList.innerHTML =
+          '<div class="leaderboard-item"><span class="position">-</span><span class="player-name">Esperando jugadores...</span><span class="player-mass">0</span></div>';
+        return;
       }
-    });
 
-    socket.on('playerLeft', (data) => {
-      console.log('👋 Jugador desconectado:', data.playerId);
-    });
+      leaderboard.forEach(item => {
+        const name = item.name || 'Jugador';
+        const mass = (typeof item.mass === 'number') ? item.mass : (item.totalMass || 0);
+        const color = item.color || '#fff';
+        const position = item.position || '-';
 
-    socket.on('connect_error', (error) => {
-      console.error('❌ Error de conexión:', error);
-      isConnected = false;
-      if (socket.io.engine && socket.io.engine.transport) {
-        showMultiplayerMessage('🔄 Reconectando... (' + socket.io.engine.transport.name + ')');
-      } else {
-        showMultiplayerMessage('⚠️ Jugando en modo offline');
-      }
-    });
+        const div = document.createElement('div');
+        div.className = 'leaderboard-item';
+        div.innerHTML = `
+          <span class="position">${position}</span>
+          <span class="player-name" style="color: ${color}">${name}</span>
+          <span class="player-mass">${mass}</span>
+        `;
+        leaderboardList.appendChild(div);
+      });
+    }
 
-    socket.on('reconnect', (attemptNumber) => {
-      console.log('✅ Reconectado después de', attemptNumber, 'intentos');
-      isConnected = true;
-      showMultiplayerMessage('✅ Reconectado al servidor');
-      socket.emit('joinRoom', { roomId: 'MAIN', playerName, color: playerColor });
-    });
+    function showMultiplayerMessage(message) {
+      const messageDiv = document.createElement('div');
+      messageDiv.textContent = message;
+      messageDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 255, 136, 0.9);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 14px;
+        z-index: 10000;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease-out;
+      `;
+      document.body.appendChild(messageDiv);
 
-    socket.on('reconnect_attempt', (attemptNumber) => {
-      console.log('🔄 Intento de reconexión', attemptNumber);
-      showMultiplayerMessage(`🔄 Reconectando... (${attemptNumber}/10)`);
-    });
-
-    socket.on('reconnect_failed', () => {
-      console.log('❌ Falló la reconexión - Modo offline');
-      isConnected = false;
-      showMultiplayerMessage('❌ Modo offline - El juego continúa localmente');
-    });
-
-    socket.on('disconnect', (reason) => {
-      console.log('❌ Desconectado del servidor:', reason);
-      isConnected = false;
-      joinedRoom = false;
-      window.multiplayerConnected = false;
-      showMultiplayerMessage('🔌 Desconectado - Modo offline');
-      if (reason === 'io server disconnect') {
-        setTimeout(() => socket.connect(), 1000);
-      }
-    });
-
-    setInterval(() => {
-      if (socket.connected && isConnected) {
-        socket.emit('ping');
-      }
-    }, 25000);
-
-    window.multiplayerSocket = socket;
-  }
-
-        function updateLeaderboard(leaderboard) {
-            const leaderboardList = document.getElementById('leaderboardList');
-            if (!leaderboardList) return;
-            
-            leaderboardList.innerHTML = '';
-            
-            if (!leaderboard || leaderboard.length === 0) {
-                leaderboardList.innerHTML = '<div class="leaderboard-item"><span class="position">-</span><span class="player-name">Esperando jugadores...</span><span class="player-mass">0</span></div>';
-                return;
+      setTimeout(() => {
+        if (messageDiv.parentNode) {
+          messageDiv.style.animation = 'slideOut 0.3s ease-out';
+          setTimeout(() => {
+            if (messageDiv.parentNode) {
+              document.body.removeChild(messageDiv);
             }
-            
-            leaderboard.forEach(player => {
-                const item = document.createElement('div');
-                item.className = 'leaderboard-item';
-                item.innerHTML = `
-                    <span class="position">${player.position}</span>
-                    <span class="player-name" style="color: ${player.color}">${player.name}</span>
-                    <span class="player-mass">${player.mass}</span>
-                `;
-                leaderboardList.appendChild(item);
-            });
+          }, 300);
         }
+      }, 3000);
+    }
+  </script>
 
-        function showMultiplayerMessage(message) {
-            // Crear mensaje temporal
-            const messageDiv = document.createElement('div');
-            messageDiv.textContent = message;
-            messageDiv.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: rgba(0, 255, 136, 0.9);
-                color: white;
-                padding: 12px 20px;
-                border-radius: 8px;
-                font-weight: bold;
-                font-size: 14px;
-                z-index: 10000;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-                animation: slideIn 0.3s ease-out;
-            `;
-            
-            document.body.appendChild(messageDiv);
-            
-            setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.style.animation = 'slideOut 0.3s ease-out';
-                    setTimeout(() => {
-                        if (messageDiv.parentNode) {
-                            document.body.removeChild(messageDiv);
-                        }
-                    }, 300);
-                }
-            }, 3000);
-        }
-    </script>
-    <style>
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-    </style>
+  <style>
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  </style>
 </body>
 </html>
