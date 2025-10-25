@@ -245,23 +245,31 @@
         });
 
         function connectToMultiplayerServer() {
+            console.log('🎮 Iniciando conexión multijugador...');
+            
             // Conectar con Socket.IO del servidor con configuración robusta
             const socket = io(window.location.origin, {
                 transports: ['websocket', 'polling'],
                 timeout: 20000,
-                forceNew: true,
+                forceNew: false, // ✅ Cambiado a false para reusar conexión
                 reconnection: true,
-                reconnectionAttempts: 5,
+                reconnectionAttempts: 10, // ✅ Aumentado de 5 a 10
                 reconnectionDelay: 1000,
-                reconnectionDelayMax: 5000
+                reconnectionDelayMax: 5000,
+                upgrade: true,
+                rememberUpgrade: true
             });
             
             // Obtener datos de personalización guardados
             const playerName = localStorage.getItem('playerName') || 'Jugador';
             const playerColor = localStorage.getItem('playerColor') || '#00ff88';
             
+            let isConnected = false;
+            let joinedRoom = false;
+            
             socket.on('connect', () => {
                 console.log('🔌 Conectado al servidor multijugador');
+                isConnected = true;
                 
                 // Unirse automáticamente a la sala principal
                 socket.emit('joinRoom', {
@@ -272,12 +280,20 @@
             });
             
             socket.on('connect_error', (error) => {
-                console.log('❌ Error de conexión:', error);
-                showMultiplayerMessage('🔄 Reconectando...');
+                console.error('❌ Error de conexión:', error);
+                isConnected = false;
+                
+                // ✅ Modo offline después de varios intentos
+                if (socket.io.engine && socket.io.engine.transport) {
+                    showMultiplayerMessage('🔄 Reconectando... (' + socket.io.engine.transport.name + ')');
+                } else {
+                    showMultiplayerMessage('⚠️ Jugando en modo offline');
+                }
             });
             
             socket.on('reconnect', (attemptNumber) => {
                 console.log('✅ Reconectado después de', attemptNumber, 'intentos');
+                isConnected = true;
                 showMultiplayerMessage('✅ Reconectado al servidor');
                 
                 // Reenviar datos de unión
@@ -290,38 +306,47 @@
             
             socket.on('reconnect_attempt', (attemptNumber) => {
                 console.log('🔄 Intento de reconexión', attemptNumber);
-                showMultiplayerMessage(`🔄 Reconectando... (${attemptNumber}/5)`);
+                showMultiplayerMessage(`🔄 Reconectando... (${attemptNumber}/10)`);
             });
             
             socket.on('reconnect_failed', () => {
-                console.log('❌ Falló la reconexión');
-                showMultiplayerMessage('❌ No se pudo reconectar - Modo offline');
+                console.log('❌ Falló la reconexión - Modo offline');
+                isConnected = false;
+                showMultiplayerMessage('❌ Modo offline - El juego continúa localmente');
             });
             
             socket.on('roomJoined', (data) => {
                 if (data.success) {
                     console.log('✅ Unido automáticamente a la sala multijugador');
+                    joinedRoom = true;
                     
                     // Pasar el socket al juego principal
                     window.gameSocket = socket;
                     window.isMultiplayer = true;
+                    window.multiplayerConnected = true;
 
                     // Sincronizar estado inicial del servidor
                     if (window.updateMultiplayerState && data.gameState) {
-                        window.updateMultiplayerState({ players: data.players || [], consumables: data.gameState.consumables || [] });
+                        window.updateMultiplayerState({ 
+                            players: data.players || [], 
+                            consumables: data.gameState.consumables || [] 
+                        });
                     }
                     
                     // Mostrar mensaje de conexión
-                    showMultiplayerMessage('🌐 Conectado al servidor multijugador');
+                    showMultiplayerMessage('🌐 Conectado - Sala Multijugador');
                 } else {
                     console.log('❌ Error al unirse:', data.message);
-                    showMultiplayerMessage('❌ Sala llena - Intenta más tarde');
+                    joinedRoom = false;
+                    showMultiplayerMessage('❌ ' + (data.message || 'Error al unirse'));
                 }
             });
             
             socket.on('playerJoined', (data) => {
-                console.log('👤 Nuevo jugador:', data.player.name);
-                showMultiplayerMessage(`👤 ${data.player.name} se unió al juego`);
+                if (data.player && data.player.name) {
+                    console.log('👤 Nuevo jugador:', data.player.name);
+                    showMultiplayerMessage(`👤 ${data.player.name} se unió`);
+                }
             });
             
             socket.on('playerLeft', (data) => {
@@ -342,18 +367,30 @@
             
             socket.on('disconnect', (reason) => {
                 console.log('❌ Desconectado del servidor:', reason);
+                isConnected = false;
+                joinedRoom = false;
+                window.multiplayerConnected = false;
+                
+                showMultiplayerMessage('🔌 Desconectado - Modo offline');
+                
                 if (reason === 'io server disconnect') {
                     // El servidor desconectó al cliente, reconectar manualmente
-                    socket.connect();
+                    showMultiplayerMessage('🔄 Intentando reconectar...');
+                    setTimeout(() => {
+                        socket.connect();
+                    }, 1000);
                 }
             });
             
-            // Heartbeat para mantener conexión viva
+            // ✅ Heartbeat mejorado para mantener conexión viva
             setInterval(() => {
-                if (socket.connected) {
+                if (socket.connected && isConnected) {
                     socket.emit('ping');
                 }
-            }, 30000); // Cada 30 segundos
+            }, 25000); // Cada 25 segundos (antes de timeout de 30s)
+            
+            // ✅ Guardar referencia global
+            window.multiplayerSocket = socket;
         }
 
         function updateLeaderboard(leaderboard) {
@@ -362,8 +399,8 @@
             
             leaderboardList.innerHTML = '';
             
-            if (leaderboard.length === 0) {
-                leaderboardList.innerHTML = '<div class="leaderboard-item"><span class="position">-</span><span class="player-name">Sin jugadores</span><span class="player-mass">0</span></div>';
+            if (!leaderboard || leaderboard.length === 0) {
+                leaderboardList.innerHTML = '<div class="leaderboard-item"><span class="position">-</span><span class="player-name">Esperando jugadores...</span><span class="player-mass">0</span></div>';
                 return;
             }
             
@@ -389,17 +426,26 @@
                 right: 20px;
                 background: rgba(0, 255, 136, 0.9);
                 color: white;
-                padding: 10px 15px;
+                padding: 12px 20px;
                 border-radius: 8px;
                 font-weight: bold;
-                z-index: 1000;
+                font-size: 14px;
+                z-index: 10000;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3);
                 animation: slideIn 0.3s ease-out;
             `;
             
             document.body.appendChild(messageDiv);
             
             setTimeout(() => {
-                document.body.removeChild(messageDiv);
+                if (messageDiv.parentNode) {
+                    messageDiv.style.animation = 'slideOut 0.3s ease-out';
+                    setTimeout(() => {
+                        if (messageDiv.parentNode) {
+                            document.body.removeChild(messageDiv);
+                        }
+                    }, 300);
+                }
             }, 3000);
         }
     </script>
@@ -407,6 +453,10 @@
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
         }
     </style>
 </body>
