@@ -167,12 +167,13 @@ class Room {
             lastUpdate: Date.now(),
             totalMass: 100
         });
-        
+        this.updateLeaderboard();
         return true;
     }
     
     removePlayer(socketId) {
         this.players.delete(socketId);
+        this.updateLeaderboard();
     }
     
     getRandomColor() {
