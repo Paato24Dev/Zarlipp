@@ -39,8 +39,8 @@ function showScreen(screenId) {
 function setupEventListeners() {
     // Botones del menú principal
     document.getElementById('playBtn').addEventListener('click', () => {
-        // Redireccionar al juego multijugador local
-        window.location.href = 'juego.html';
+        // Redireccionar al juego multijugador en ruta absoluta para Vercel
+        window.location.href = '/juego.html';
     });
     
     document.getElementById('settingsBtn').addEventListener('click', () => {
