@@ -48,6 +48,18 @@
             
             <!-- Panel lateral de información -->
             <div class="ui-panel side">
+                <!-- Tabla de líderes -->
+                <div class="leaderboard">
+                    <h3>🏆 Top 10</h3>
+                    <div class="leaderboard-list" id="leaderboardList">
+                        <div class="leaderboard-item">
+                            <span class="position">1</span>
+                            <span class="player-name">Cargando...</span>
+                            <span class="player-mass">0</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="cell-info">
                     <h3>Información de Célula</h3>
                     <div class="info-item">
@@ -234,11 +246,11 @@
 
         function connectToMultiplayerServer() {
             // Conectar con Socket.IO del servidor
-            const socket = io('https://zarlipp-g0awci76l-zarlipprns-projects.vercel.app');
+            const socket = io(window.location.origin);
             
-            // Generar nombre aleatorio
-            const randomNames = ['Célula Alpha', 'Mitosis Master', 'Evolución Pro', 'División Elite', 'Super Célula'];
-            const playerName = randomNames[Math.floor(Math.random() * randomNames.length)];
+            // Obtener datos de personalización guardados
+            const playerName = localStorage.getItem('playerName') || 'Jugador';
+            const playerColor = localStorage.getItem('playerColor') || '#00ff88';
             
             socket.on('connect', () => {
                 console.log('🔌 Conectado al servidor multijugador');
@@ -246,7 +258,8 @@
                 // Unirse automáticamente a la sala principal
                 socket.emit('joinRoom', {
                     roomId: 'MAIN',
-                    playerName: playerName
+                    playerName: playerName,
+                    color: playerColor
                 });
             });
             
@@ -257,6 +270,11 @@
                     // Pasar el socket al juego principal
                     window.gameSocket = socket;
                     window.isMultiplayer = true;
+
+                    // Sincronizar estado inicial del servidor
+                    if (window.updateMultiplayerState && data.gameState) {
+                        window.updateMultiplayerState({ players: data.players || [], consumables: data.gameState.consumables || [] });
+                    }
                     
                     // Mostrar mensaje de conexión
                     showMultiplayerMessage('🌐 Conectado al servidor multijugador');
@@ -279,11 +297,39 @@
                 if (window.updateMultiplayerState) {
                     window.updateMultiplayerState(data);
                 }
+                
+                // Actualizar tabla de líderes
+                if (data.leaderboard) {
+                    updateLeaderboard(data.leaderboard);
+                }
             });
             
             socket.on('disconnect', () => {
                 console.log('❌ Desconectado del servidor');
                 showMultiplayerMessage('❌ Conexión perdida - Modo offline');
+            });
+        }
+
+        function updateLeaderboard(leaderboard) {
+            const leaderboardList = document.getElementById('leaderboardList');
+            if (!leaderboardList) return;
+            
+            leaderboardList.innerHTML = '';
+            
+            if (leaderboard.length === 0) {
+                leaderboardList.innerHTML = '<div class="leaderboard-item"><span class="position">-</span><span class="player-name">Sin jugadores</span><span class="player-mass">0</span></div>';
+                return;
+            }
+            
+            leaderboard.forEach(player => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                item.innerHTML = `
+                    <span class="position">${player.position}</span>
+                    <span class="player-name" style="color: ${player.color}">${player.name}</span>
+                    <span class="player-mass">${player.mass}</span>
+                `;
+                leaderboardList.appendChild(item);
             });
         }
 
