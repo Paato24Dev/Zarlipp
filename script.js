@@ -37,8 +37,39 @@ function showScreen(screenId) {
 
 // Configurar event listeners
 function setupEventListeners() {
+    // Personalización de jugador
+    const playerNameInput = document.getElementById('playerName');
+    const playerColorInput = document.getElementById('playerColor');
+    const colorPreview = document.getElementById('colorPreview');
+    
+    // Cargar datos guardados
+    const savedName = localStorage.getItem('playerName') || '';
+    const savedColor = localStorage.getItem('playerColor') || '#00ff88';
+    
+    playerNameInput.value = savedName;
+    playerColorInput.value = savedColor;
+    colorPreview.style.background = savedColor;
+    
+    // Actualizar preview de color
+    playerColorInput.addEventListener('input', () => {
+        colorPreview.style.background = playerColorInput.value;
+        localStorage.setItem('playerColor', playerColorInput.value);
+    });
+    
+    // Guardar nombre
+    playerNameInput.addEventListener('input', () => {
+        localStorage.setItem('playerName', playerNameInput.value);
+    });
+    
     // Botones del menú principal
     document.getElementById('playBtn').addEventListener('click', () => {
+        // Guardar datos de personalización antes de ir al juego
+        const playerName = playerNameInput.value.trim() || 'Jugador';
+        const playerColor = playerColorInput.value;
+        
+        localStorage.setItem('playerName', playerName);
+        localStorage.setItem('playerColor', playerColor);
+        
         // Redireccionar al juego multijugador en ruta absoluta para Vercel
         window.location.href = '/juego.html';
     });
