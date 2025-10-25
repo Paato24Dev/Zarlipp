@@ -245,8 +245,16 @@
         });
 
         function connectToMultiplayerServer() {
-            // Conectar con Socket.IO del servidor
-            const socket = io(window.location.origin);
+            // Conectar con Socket.IO del servidor con configuración robusta
+            const socket = io(window.location.origin, {
+                transports: ['websocket', 'polling'],
+                timeout: 20000,
+                forceNew: true,
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000
+            });
             
             // Obtener datos de personalización guardados
             const playerName = localStorage.getItem('playerName') || 'Jugador';
@@ -261,6 +269,33 @@
                     playerName: playerName,
                     color: playerColor
                 });
+            });
+            
+            socket.on('connect_error', (error) => {
+                console.log('❌ Error de conexión:', error);
+                showMultiplayerMessage('🔄 Reconectando...');
+            });
+            
+            socket.on('reconnect', (attemptNumber) => {
+                console.log('✅ Reconectado después de', attemptNumber, 'intentos');
+                showMultiplayerMessage('✅ Reconectado al servidor');
+                
+                // Reenviar datos de unión
+                socket.emit('joinRoom', {
+                    roomId: 'MAIN',
+                    playerName: playerName,
+                    color: playerColor
+                });
+            });
+            
+            socket.on('reconnect_attempt', (attemptNumber) => {
+                console.log('🔄 Intento de reconexión', attemptNumber);
+                showMultiplayerMessage(`🔄 Reconectando... (${attemptNumber}/5)`);
+            });
+            
+            socket.on('reconnect_failed', () => {
+                console.log('❌ Falló la reconexión');
+                showMultiplayerMessage('❌ No se pudo reconectar - Modo offline');
             });
             
             socket.on('roomJoined', (data) => {
@@ -280,6 +315,7 @@
                     showMultiplayerMessage('🌐 Conectado al servidor multijugador');
                 } else {
                     console.log('❌ Error al unirse:', data.message);
+                    showMultiplayerMessage('❌ Sala llena - Intenta más tarde');
                 }
             });
             
@@ -304,10 +340,20 @@
                 }
             });
             
-            socket.on('disconnect', () => {
-                console.log('❌ Desconectado del servidor');
-                showMultiplayerMessage('❌ Conexión perdida - Modo offline');
+            socket.on('disconnect', (reason) => {
+                console.log('❌ Desconectado del servidor:', reason);
+                if (reason === 'io server disconnect') {
+                    // El servidor desconectó al cliente, reconectar manualmente
+                    socket.connect();
+                }
             });
+            
+            // Heartbeat para mantener conexión viva
+            setInterval(() => {
+                if (socket.connected) {
+                    socket.emit('ping');
+                }
+            }, 30000); // Cada 30 segundos
         }
 
         function updateLeaderboard(leaderboard) {
