@@ -83,6 +83,10 @@ let lastCurrencyUpdate = Date.now();
 let otherPlayers = new Map();
 let isMultiplayer = false;
 
+// Evitar sumar varias veces el mismo consumible en online
+const pendingConsumptions = new Set();
+window.pendingConsumptions = pendingConsumptions; // para usarlo desde el HTML
+
 // ========================================
 // INICIALIZACIÓN DEL JUEGO
 // ========================================
@@ -195,6 +199,21 @@ function distance(x1, y1, x2, y2) {
 
 function angle(x1, y1, x2, y2) {
     return Math.atan2(y2 - y1, x2 - x1);
+}
+
+// Masas permitidas para consumibles (respetar 5, 15, 25)
+const ALLOWED_CONSUMABLE_MASSES = [5, 15, 25];
+
+function getBaseConsumableMass(m) {
+    const v = Math.round(+m || 0);
+    // nos quedamos con el permitido más cercano
+    let best = ALLOWED_CONSUMABLE_MASSES[0];
+    let diff = Infinity;
+    for (const a of ALLOWED_CONSUMABLE_MASSES) {
+        const d = Math.abs(a - v);
+        if (d < diff) { diff = d; best = a; }
+    }
+    return best;
 }
 
 // ========================================
@@ -681,98 +700,126 @@ function forceStopAttraction() {
 // SISTEMA DE CONSUMO
 // ========================================
 
+// ========================================
+// SISTEMA DE CONSUMO
+// ========================================
 function checkConsumption() {
     const mainCell = playerCells[0];
-    
+
     // Consumir objetos del mapa - CÉLULA PRINCIPAL
     for (let i = consumables.length - 1; i >= 0; i--) {
-        const consumable = consumables[i];
-        const dist = distance(mainCell.x, mainCell.y, consumable.x, consumable.y);
-        
-        if (dist < mainCell.radius + (consumable.radius || massToRadius(consumable.mass))) {
-            // Calcular masa ganada (con efectos de mejoras)
-            let massGained = consumable.mass;
-            if (gameState.temporaryEffects.doubleConsume.active) {
-                massGained *= 2;
-            }
-            if (gameState.temporaryEffects.megaConsume.active) {
-                massGained *= 5;
-            }
-            
-            // ✅ SOLO en modo offline: aplicar directamente
+        const c = consumables[i];
+        const dist = distance(mainCell.x, mainCell.y, c.x, c.y);
+
+        if (dist < mainCell.radius + (c.radius || massToRadius(c.mass))) {
+            // Masa base (respeta 5/15/25)
+            const baseMass = getBaseConsumableMass(c.mass);
+
             if (!isMultiplayer) {
-                mainCell.mass += massGained;
+                // OFFLINE: aplicar de inmediato
+                mainCell.mass += baseMass;
                 mainCell.radius = massToRadius(mainCell.mass);
                 gameState.totalMass = mainCell.mass;
-                
-                // Ganar moneda
                 addCurrency(GAME_CONFIG.shop.currencyGain.perConsumable, 'consumo');
-                
-                // Eliminar objeto consumido
                 consumables.splice(i, 1);
-                
-                console.log(`🍎 Objeto consumido (offline)! Masa: +${massGained}, Total: ${mainCell.mass.toFixed(1)}`);
+                console.log(`🍎 Objeto consumido (offline)! Masa: +${baseMass}, Total: ${mainCell.mass.toFixed(1)}`);
             } else {
-                // ✅ MODO ONLINE: Notificar al servidor y él lo manejará
-                if (window.gameSocket) {
-                    window.gameSocket.emit('consumeObject', {
-                        consumableId: consumable.id
-                    });
-                    console.log(`🌐 Consumible enviado al servidor: ${consumable.id}`);
+                // ONLINE: emitir una sola vez y esperar confirmación del servidor
+                if (!pendingConsumptions.has(c.id)) {
+                    pendingConsumptions.add(c.id);
+                    window.gameSocket?.emit('consumeObject', { consumableId: c.id });
+                    // NO sumamos ni borramos aquí para evitar duplicados
                 }
-                
-                // ✅ Aplicar optimistamente (el servidor confirmará)
-                mainCell.mass += massGained;
-                mainCell.radius = massToRadius(mainCell.mass);
-                gameState.totalMass = mainCell.mass;
-                
-                // Ganar moneda
-                addCurrency(GAME_CONFIG.shop.currencyGain.perConsumable, 'consumo online');
-                
-                // ✅ NO eliminar localmente, esperar actualización del servidor
             }
         }
     }
-    
-    // Consumir objetos del mapa - CÉLULAS DIVIDIDAS
+
     // Consumir objetos del mapa - CÉLULAS DIVIDIDAS
     for (let j = 1; j < playerCells.length; j++) {
-        const dividedCell = playerCells[j];
-        
+        const cell = playerCells[j];
+
         for (let i = consumables.length - 1; i >= 0; i--) {
-            const consumable = consumables[i];
-            const dist = distance(dividedCell.x, dividedCell.y, consumable.x, consumable.y);
-            
-            if (dist < dividedCell.radius + (consumable.radius || massToRadius(consumable.mass))) {
-                let massGained = consumable.mass;
-                if (gameState.temporaryEffects.doubleConsume.active) {
-                    massGained *= 2;
-                }
-                if (gameState.temporaryEffects.megaConsume.active) {
-                    massGained *= 5;
-                }
-                
-                // ✅ MODO OFFLINE
+            const c = consumables[i];
+            const dist = distance(cell.x, cell.y, c.x, c.y);
+
+            if (dist < cell.radius + (c.radius || massToRadius(c.mass))) {
+                const baseMass = getBaseConsumableMass(c.mass);
+
                 if (!isMultiplayer) {
-                    dividedCell.mass += massGained;
-                    dividedCell.radius = massToRadius(dividedCell.mass);
+                    // OFFLINE: aplicar de inmediato
+                    cell.mass += baseMass;
+                    cell.radius = massToRadius(cell.mass);
                     addCurrency(GAME_CONFIG.shop.currencyGain.perConsumable, 'consumo dividida');
                     consumables.splice(i, 1);
-                    console.log(`🍎 Objeto consumido por célula dividida (offline)! Masa: +${massGained}`);
+                    console.log(`🍎 Objeto consumido por célula dividida (offline)! Masa: +${baseMass}`);
                 } else {
-                    // ✅ MODO ONLINE
-                    if (window.gameSocket) {
-                        window.gameSocket.emit('consumeObject', {
-                            consumableId: consumable.id
-                        });
+                    // ONLINE: emitir una sola vez y esperar confirmación
+                    if (!pendingConsumptions.has(c.id)) {
+                        pendingConsumptions.add(c.id);
+                        window.gameSocket?.emit('consumeObject', { consumableId: c.id });
                     }
-                    dividedCell.mass += massGained;
-                    dividedCell.radius = massToRadius(dividedCell.mass);
-                    addCurrency(GAME_CONFIG.shop.currencyGain.perConsumable, 'consumo dividida online');
                 }
             }
         }
     }
+
+    // NUEVA FUNCIONALIDAD: Consumo entre células divididas (igual que lo tenías)
+    for (let i = playerCells.length - 1; i >= 1; i--) {
+        for (let j = i - 1; j >= 1; j--) {
+            const cell1 = playerCells[i];
+            const cell2 = playerCells[j];
+            const dist = distance(cell1.x, cell1.y, cell2.x, cell2.y);
+
+            if (dist < cell1.radius + cell2.radius) {
+                let largerCell, smallerCell, largerIndex, smallerIndex;
+
+                if (cell1.mass >= cell2.mass) {
+                    largerCell = cell1;
+                    smallerCell = cell2;
+                    largerIndex = i;
+                    smallerIndex = j;
+                } else {
+                    largerCell = cell2;
+                    smallerCell = cell1;
+                    largerIndex = j;
+                    smallerIndex = i;
+                }
+
+                // Fusionar células divididas
+                largerCell.mass += smallerCell.mass;
+                largerCell.radius = massToRadius(largerCell.mass);
+
+                // Eliminar la célula más pequeña
+                playerCells.splice(smallerIndex, 1);
+                gameState.cells = playerCells.length;
+
+                console.log(`🔄 Células divididas fusionadas! Masa transferida: ${smallerCell.mass.toFixed(1)}, Nueva masa: ${largerCell.mass.toFixed(1)}`);
+
+                if (smallerIndex < largerIndex) {
+                    i--;
+                }
+                break;
+            }
+        }
+    }
+
+    // Consumir células divididas si están cerca de la principal (igual que lo tenías)
+    for (let i = playerCells.length - 1; i >= 1; i--) {
+        const cell = playerCells[i];
+        const dist = distance(mainCell.x, mainCell.y, cell.x, cell.y);
+
+        if (dist < mainCell.radius + cell.radius) {
+            mainCell.mass += cell.mass;
+            mainCell.radius = massToRadius(mainCell.mass);
+            gameState.totalMass = mainCell.mass;
+
+            playerCells.splice(i, 1);
+            gameState.cells = playerCells.length;
+
+            console.log(`🔄 Célula fusionada con principal! Masa transferida: ${cell.mass.toFixed(1)}, Total principal: ${mainCell.mass.toFixed(1)}`);
+        }
+    }
+}
     
     // NUEVA FUNCIONALIDAD: Consumo entre células divididas
     for (let i = playerCells.length - 1; i >= 1; i--) {
@@ -835,7 +882,6 @@ function checkConsumption() {
             console.log(`🔄 Célula fusionada con principal! Masa transferida: ${cell.mass.toFixed(1)}, Total principal: ${mainCell.mass.toFixed(1)}`);
         }
     }
-}
 
 // ========================================
 // ACTUALIZACIÓN DEL JUEGO
@@ -1375,16 +1421,19 @@ function updateMultiplayerState(data) {
         });
     }
 
-    // Normalizar consumibles del servidor (añadir radius/type si faltan)
-    const normalizeConsumable = (c) => ({
+// Normalizar consumibles del servidor (añadir radius/type y MASA BASE 5/15/25)
+const normalizeConsumable = (c) => {
+    const base = getBaseConsumableMass(c.mass);
+    return {
         id: c.id,
         x: c.x,
         y: c.y,
-        mass: c.mass,
-        radius: (c.radius != null) ? c.radius : massToRadius(c.mass),
+        mass: base,
+        radius: (c.radius != null) ? c.radius : massToRadius(base),
         color: c.color || '#feca57',
         type: c.type || 'consumable'
-    });
+    };
+};
 
     if (Array.isArray(data.consumables) && data.consumables.length >= 0) {
         const serverList = data.consumables.map(normalizeConsumable);
