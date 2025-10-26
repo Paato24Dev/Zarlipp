@@ -403,63 +403,73 @@ io.on('connection', (socket) => {
         }
     });
     
-    // Manejar colisiones entre jugadores
-    socket.on('playerCollision', (data) => {
-        try {
-            const playerData = players.get(socket.id);
-            if (!playerData) return;
-            
-            const room = rooms.get(playerData.roomId);
-            if (!room) return;
-            
-            const attacker = room.players.get(socket.id);
-            const victim = room.players.get(data.victimId);
-            
-            if (!attacker || !victim) return;
-            
-            // Calcular si el ataque es exitoso (célula más grande consume la más pequeña)
-            const attackerMass = attacker.cells.reduce((sum, cell) => sum + cell.mass, 0);
-            const victimMass = victim.cells.reduce((sum, cell) => sum + cell.mass, 0);
-            
-            if (attackerMass > victimMass * 1.2) { // 20% más grande para consumir
-                // El atacante consume a la víctima
-                victim.isAlive = false;
-                attacker.currency += victimMass * 0.1; // Ganar moneda por consumir
-                
-                // Notificar a todos
-                io.to(playerData.roomId).emit('playerConsumed', {
-                    attackerId: socket.id,
-                    victimId: data.victimId,
-                    massGained: victimMass * 0.1
-                });
-                
-                // Respawn de la víctima después de 5 segundos
-                setTimeout(() => {
-                    if (room.players.has(data.victimId)) {
-                        const respawnedPlayer = room.players.get(data.victimId);
-                        respawnedPlayer.isAlive = true;
-                        respawnedPlayer.cells = [{
-                            id: 0,
-                            x: Math.random() * 2000 - 1000,
-                            y: Math.random() * 2000 - 1000,
-                            mass: 100,
-                            radius: 20,
-                            color: respawnedPlayer.cells[0].color,
-                            isMain: true,
-                            generation: 1
-                        }];
-                        
-                        io.to(playerData.roomId).emit('playerRespawned', {
-                            playerId: data.victimId,
-                            player: respawnedPlayer
-                        });
-                    }
-                }, 5000);
-            }
-        } catch (error) {
-            console.error('Error en playerCollision:', error);
-        }
+// Manejador de colisión entre jugadores con transferencia real de masa
+socket.on('playerCollision', (data) => {
+  const playerData = players.get(socket.id);
+  if (!playerData) return;
+
+  const room = rooms.get(playerData.roomId);
+  if (!room) return;
+
+  const attacker = room.players.get(socket.id);
+  const victim = room.players.get(data.victimId);
+  if (!attacker || !victim || !victim.isAlive) return;
+
+  // Masa total de cada jugador
+  const attackerMass = attacker.cells.reduce((s, c) => s + c.mass, 0);
+  const victimMass = victim.cells.reduce((s, c) => s + c.mass, 0);
+
+  // Solo si el atacante tiene al menos 20 % más masa
+  if (attackerMass > victimMass * 1.2) {
+    victim.isAlive = false;
+
+    // Ganar masa y monedas
+    const gainedMass = victimMass * 0.8;           // 80 % de la víctima
+    const gainedCurrency = victimMass * 0.05;      // 5 % en monedas
+
+    attacker.currency += gainedCurrency;
+
+    // Repartir la masa ganada entre sus células
+    const perCellGain = gainedMass / attacker.cells.length;
+    attacker.cells.forEach(c => {
+      c.mass += perCellGain;
+      c.radius = Math.sqrt(c.mass) * 2;
     });
+    attacker.totalMass = attacker.cells.reduce((s, c) => s + c.mass, 0);
+
+    // Actualizar ranking en la sala
+    room.updateLeaderboard();
+
+    // Notificar visualmente a todos
+    io.to(playerData.roomId).emit('playerConsumed', {
+      attackerId: socket.id,
+      victimId: data.victimId,
+      massGained: Math.round(gainedMass)
+    });
+
+    // Respawn de la víctima después de 5 s
+    setTimeout(() => {
+      if (room.players.has(data.victimId)) {
+        const respawned = room.players.get(data.victimId);
+        respawned.isAlive = true;
+        respawned.cells = [{
+          id: 0,
+          x: Math.random() * 2000 - 1000,
+          y: Math.random() * 2000 - 1000,
+          mass: 100,
+          radius: 20,
+          color: respawned.cells[0].color,
+          isMain: true,
+          generation: 1
+        }];
+        io.to(playerData.roomId).emit('playerRespawned', {
+          playerId: data.victimId,
+          player: respawned
+        });
+      }
+    }, 5000);
+  }
+});
     
     // Heartbeat para mantener conexión viva
     socket.on('ping', () => {
