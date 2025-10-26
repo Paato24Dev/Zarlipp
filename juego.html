@@ -302,12 +302,37 @@
       });
 
       // Confirmación del servidor al consumir
-      socket.on('objectConsumed', ({ consumableId, playerId }) => {
-        const idx = consumables.findIndex(c => String(c.id) === String(consumableId));
-        if (idx !== -1) {
-          consumables.splice(idx, 1);
-        }
-      });
+socket.on('objectConsumed', ({ consumableId, playerId }) => {
+  const idx = consumables.findIndex(c => String(c.id) === String(consumableId));
+  if (idx !== -1) {
+    const c = consumables[idx];
+
+    // Si soy yo quien lo consumió, sumo la masa base (5/15/25)
+    if (playerId === socket.id) {
+      // Elegimos la célula propia más cercana a ese consumible
+      let nearestIndex = 0;
+      let bestDist = Infinity;
+      for (let k = 0; k < playerCells.length; k++) {
+        const d = distance(playerCells[k].x, playerCells[k].y, c.x, c.y);
+        if (d < bestDist) { bestDist = d; nearestIndex = k; }
+      }
+
+      const gain = getBaseConsumableMass(c.mass);
+      const cell = playerCells[nearestIndex];
+      cell.mass += gain;
+      cell.radius = massToRadius(cell.mass);
+      if (nearestIndex === 0) gameState.totalMass = cell.mass;
+
+      addCurrency(GAME_CONFIG.shop.currencyGain.perConsumable, nearestIndex === 0 ? 'consumo' : 'consumo dividida');
+    }
+
+    // En todos los casos: quitar local y limpiar pendiente
+    consumables.splice(idx, 1);
+  }
+  if (typeof pendingConsumptions !== 'undefined') {
+    pendingConsumptions.delete(consumableId);
+  }
+});
 
       // Soporte opcional si usas 'foodEaten' en el backend
       socket.on('foodEaten', ({ foodId, newFood }) => {
