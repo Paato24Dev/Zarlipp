@@ -1384,27 +1384,30 @@ function drawUpgradeEffects(cell, screenX, screenY) {
 // ========================================
 
 function checkMultiplayerCollisions() {
-    const mainCell = playerCells[0];
-    const mainMass = mainCell.mass;
-    
-    otherPlayers.forEach((otherPlayer, playerId) => {
-        if (!otherPlayer.isAlive) return;
-        
-        otherPlayer.cells.forEach(otherCell => {
-            const dist = distance(mainCell.x, mainCell.y, otherCell.x, otherCell.y);
-            
-            if (dist < mainCell.radius + otherCell.radius) {
-                const otherMass = otherCell.mass;
-                
-                if (mainMass > otherMass * 1.2) {
-                    // Consumir al otro jugador
-                    if (window.gameSocket) {
-                        window.gameSocket.emit('playerCollision', { victimId: playerId });
-                    }
-                }
-            }
-        });
+  if (!window.gameSocket || !isMultiplayer) return;
+  const mainCell = playerCells[0];
+  const mainMass = mainCell.mass;
+
+  // Revisar contra todos los otros jugadores
+  otherPlayers.forEach((otherPlayer, playerId) => {
+    if (!otherPlayer.isAlive) return;
+
+    otherPlayer.cells.forEach(otherCell => {
+      const dist = distance(mainCell.x, mainCell.y, otherCell.x, otherCell.y);
+      const sumRadii = mainCell.radius + otherCell.radius;
+
+      // Si hay solapamiento (choque)
+      if (dist < sumRadii) {
+        const otherMass = otherCell.mass;
+
+        // Si nuestra masa total es al menos 10 % mayor,
+        // avisamos al servidor para que haga la absorción real
+        if (mainMass > otherMass * 1.1) {
+          window.gameSocket.emit('playerCollision', { victimId: playerId });
+        }
+      }
     });
+  });
 }
 
 function updateMultiplayerState(data) {
