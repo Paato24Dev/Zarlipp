@@ -403,7 +403,7 @@ io.on('connection', (socket) => {
         }
     });
     
-// Manejador de colisión entre jugadores con transferencia real de masa
+// --- ABSORCIÓN COMPLETA ENTRE JUGADORES (tipo Agar.io) ---
 socket.on('playerCollision', (data) => {
   const playerData = players.get(socket.id);
   if (!playerData) return;
@@ -419,56 +419,53 @@ socket.on('playerCollision', (data) => {
   const attackerMass = attacker.cells.reduce((s, c) => s + c.mass, 0);
   const victimMass = victim.cells.reduce((s, c) => s + c.mass, 0);
 
-  // Solo si el atacante tiene al menos 20 % más masa
-  if (attackerMass > victimMass * 1.2) {
-    victim.isAlive = false;
+  // Umbral: el atacante debe ser al menos 10 % más grande
+  const canEat = attackerMass > victimMass * 1.1;
 
-    // Ganar masa y monedas
-    const gainedMass = victimMass * 0.8;           // 80 % de la víctima
-    const gainedCurrency = victimMass * 0.05;      // 5 % en monedas
+  if (!canEat) return; // si no, no puede comerlo
 
-    attacker.currency += gainedCurrency;
+  victim.isAlive = false;
 
-    // Repartir la masa ganada entre sus células
-    const perCellGain = gainedMass / attacker.cells.length;
-    attacker.cells.forEach(c => {
-      c.mass += perCellGain;
-      c.radius = Math.sqrt(c.mass) * 2;
-    });
-    attacker.totalMass = attacker.cells.reduce((s, c) => s + c.mass, 0);
+  // 🔹 SUMA TODA LA MASA
+  attacker.cells.forEach(cell => {
+    cell.mass += victimMass / attacker.cells.length;
+    cell.radius = Math.sqrt(cell.mass) * 2;
+  });
+  attacker.totalMass = attacker.cells.reduce((s, c) => s + c.mass, 0);
 
-    // Actualizar ranking en la sala
-    room.updateLeaderboard();
+  // 🔹 ACTUALIZAR TABLERO
+  room.updateLeaderboard();
 
-    // Notificar visualmente a todos
-    io.to(playerData.roomId).emit('playerConsumed', {
-      attackerId: socket.id,
-      victimId: data.victimId,
-      massGained: Math.round(gainedMass)
-    });
+  // 🔹 NOTIFICAR A TODOS
+  io.to(playerData.roomId).emit('playerConsumed', {
+    attackerId: socket.id,
+    victimId: data.victimId,
+    massGained: Math.round(victimMass)
+  });
 
-    // Respawn de la víctima después de 5 s
-    setTimeout(() => {
-      if (room.players.has(data.victimId)) {
-        const respawned = room.players.get(data.victimId);
-        respawned.isAlive = true;
-        respawned.cells = [{
-          id: 0,
-          x: Math.random() * 2000 - 1000,
-          y: Math.random() * 2000 - 1000,
-          mass: 100,
-          radius: 20,
-          color: respawned.cells[0].color,
-          isMain: true,
-          generation: 1
-        }];
-        io.to(playerData.roomId).emit('playerRespawned', {
-          playerId: data.victimId,
-          player: respawned
-        });
-      }
-    }, 5000);
-  }
+  // 🔹 RESPWAN DE LA VÍCTIMA
+  setTimeout(() => {
+    if (room.players.has(data.victimId)) {
+      const respawnedPlayer = room.players.get(data.victimId);
+      respawnedPlayer.isAlive = true;
+      respawnedPlayer.cells = [{
+        id: 0,
+        x: Math.random() * 2000 - 1000,
+        y: Math.random() * 2000 - 1000,
+        mass: 100,                    // masa inicial
+        radius: Math.sqrt(100) * 2,  // radio ajustado
+        color: respawnedPlayer.cells[0].color,
+        isMain: true,
+        generation: 1
+      }];
+
+      respawnedPlayer.totalMass = 100;
+      io.to(playerData.roomId).emit('playerRespawned', {
+        playerId: data.victimId,
+        player: respawnedPlayer
+      });
+    }
+  }, 1500);
 });
     
     // Heartbeat para mantener conexión viva
