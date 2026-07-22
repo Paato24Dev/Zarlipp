@@ -8,6 +8,14 @@
   ],
   "routes": [
     {
+      "src": "/portfolio",
+      "dest": "/portfolio.html"
+    },
+    {
+      "src": "/portfolio/",
+      "dest": "/portfolio.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "server.js"
     }
