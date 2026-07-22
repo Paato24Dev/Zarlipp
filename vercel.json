@@ -1,23 +1,31 @@
 {
   "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "functions": {
+    "api/server.js": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
   "builds": [
+    { "src": "portfolio.html", "use": "@vercel/static" },
+    { "src": "Pantallainicio.html", "use": "@vercel/static" },
+    { "src": "juego.html", "use": "@vercel/static" },
+    { "src": "public/**", "use": "@vercel/static" },
+    { "src": "*.css", "use": "@vercel/static" },
+    { "src": "*.js", "use": "@vercel/static" },
+    { "src": "*.html", "use": "@vercel/static" },
     {
       "src": "server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
-    {
-      "src": "/portfolio",
-      "dest": "/portfolio.html"
-    },
-    {
-      "src": "/portfolio/",
-      "dest": "/portfolio.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "server.js"
-    }
+    { "src": "/portfolio", "dest": "/portfolio.html" },
+    { "src": "/portfolio/", "dest": "/portfolio.html" },
+    { "src": "/(.*\\.(css|js|png|jpg|svg|ico|gif|webp|woff2?))", "dest": "/$1" },
+    { "src": "/(.*\\.html)", "dest": "/$1" },
+    { "src": "/(.*)", "dest": "/server.js" }
   ]
 }
