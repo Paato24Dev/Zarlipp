@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0e14" />
+<meta name="description" content="Página interactiva y animada sobre la industria petrolera: torre de pulling, BOP, varillas, tubing y más. Con objetos 3D y juegos." />
+<title>🛢️ Industria Petrolera · Torre de Pulling Interactiva</title>
+<style>
+/* ============================================================
+   VARIABLES Y RESET
+============================================================ */
+:root{
+  --bg:#0a0e14;
+  --bg2:#0f1620;
+  --panel:#141d2b;
+  --panel2:#1b2738;
+  --steel:#2a3a52;
+  --line:rgba(255,255,255,.08);
+  --amber:#ff8c1a;        /* petróleo */
+  --amber2:#ffb347;
+  --gold:#f5b50a;
+  --oil:#0c1118;
+  --green:#22d39a;
+  --blue:#38bdf8;
+  --red:#ff5a5a;
+  --txt:#e8eef6;
+  --muted:#94a6bf;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+  --glow:0 0 18px rgba(255,140,26,.55);
+  --r:16px;
+  --maxw:1080px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  background:
+     radial-gradient(1200px 600px at 80% -10%, rgba(255,140,26,.12), transparent 60%),
+     radial-gradient(900px 500px at -10% 10%, rgba(56,189,248,.08), transparent 55%),
+     var(--bg);
+  color:var(--txt);
+  line-height:1.55;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--amber2);text-decoration:none}
+img{max-width:100%}
+.wrap{width:min(92%,var(--maxw));margin:0 auto}
+section{padding:64px 0;position:relative}
+h1,h2,h3{margin:0 0 .4em;line-height:1.15;font-weight:800;letter-spacing:.3px}
+h2.title{font-size:clamp(1.6rem,5vw,2.6rem);text-align:center}
+h2.title span{color:var(--amber)}
+.sub{color:var(--muted);text-align:center;max-width:640px;margin:0 auto 36px;font-size:1.02rem}
+.eyebrow{text-align:center;color:var(--amber);font-weight:700;letter-spacing:.18em;font-size:.8rem;text-transform:uppercase;margin-bottom:8px}
+.hidden{display:none !important}
+
+/* ============================================================
+   NAV
+============================================================ */
+nav.top{
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,14,20,.82);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.05rem}
+.brand .drop{font-size:1.4rem;filter:drop-shadow(0 0 6px var(--amber))}
+.nav-links{display:flex;gap:6px;flex-wrap:wrap}
+.nav-links a{
+  color:var(--muted);font-size:.9rem;font-weight:600;padding:8px 12px;border-radius:10px;
+  transition:.2s;
+}
+.nav-links a:hover,.nav-links a.active{color:#fff;background:var(--panel2)}
+.burger{display:none;background:none;border:1px solid var(--line);color:#fff;font-size:1.3rem;padding:6px 12px;border-radius:10px;cursor:pointer}
+@media(max-width:760px){
+  .nav-links{
+    position:absolute;top:60px;right:0;left:0;flex-direction:column;
+    background:var(--panel);padding:10px;border-bottom:1px solid var(--line);
+    display:none;gap:2px;
+  }
+  .nav-links.open{display:flex}
+  .nav-links a{padding:12px 16px}
+  .burger{display:block}
+}
+
+/* ============================================================
+   HERO + BALANCÍN ANIMADO
+============================================================ */
+.hero{padding-top:30px;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center}
+@media(max-width:820px){.hero-grid{grid-template-columns:1fr;text-align:center}}
+.hero h1{font-size:clamp(2rem,7vw,3.6rem)}
+.hero h1 .grad{background:linear-gradient(90deg,var(--amber),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{color:var(--muted);font-size:1.08rem;max-width:540px;margin:0 0 22px}
+@media(max-width:820px){.hero p.lead{margin-inline:auto}}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+@media(max-width:820px){.hero .cta{justify-content:center}}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:none;
+  font-weight:800;font-size:.95rem;padding:13px 20px;border-radius:12px;transition:.2s;
+}
+.btn-primary{background:linear-gradient(135deg,var(--amber),var(--gold));color:#1a1206;box-shadow:var(--glow)}
+.btn-primary:active{transform:translateY(2px)}
+.btn-ghost{background:var(--panel2);color:#fff;border:1px solid var(--line)}
+.btn-ghost:hover{background:var(--steel)}
+
+/* Balancín / Pumping Jack SVG */
+.rig-stage{
+  position:relative;background:linear-gradient(180deg,#10182a,#070b12);
+  border:1px solid var(--line);border-radius:var(--r);padding:18px;
+  box-shadow:var(--shadow);overflow:hidden;min-height:340px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.rig-stage::before{ /* sol/luz */
+  content:"";position:absolute;width:260px;height:260px;border-radius:50%;
+  top:-80px;right:-60px;background:radial-gradient(circle,rgba(255,140,26,.35),transparent 70%);
+}
+#jack{width:100%;height:330px;overflow:visible}
+.jack-beam{transform-box:fill-box;transform-origin:62% 50%;animation:rock 2.6s ease-in-out infinite}
+.jack-crank{transform-box:fill-box;transform-origin:50% 50%;animation:spin 2.6s linear infinite}
+.jack-cw{transform-box:fill-box;transform-origin:50% 50%;animation:spin 2.6s linear infinite}
+.bridle{animation:pull 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:top}
+@keyframes rock{0%,100%{transform:rotate(-11deg)}50%{transform:rotate(11deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pull{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.18)}}
+
+/* gotas de petróleo cayendo */
+.drops{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.drop{
+  position:absolute;width:8px;height:12px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  background:linear-gradient(180deg,var(--amber2),var(--amber));
+  box-shadow:0 0 8px rgba(255,140,26,.7);
+  top:-20px;animation:fall linear infinite;opacity:.9;
+}
+@keyframes fall{to{transform:translateY(420px) scaleY(1.4);opacity:0}}
+
+/* partículas flotantes */
+.particle{position:absolute;border-radius:50%;background:rgba(255,180,71,.5);animation:floatUp linear infinite}
+@keyframes floatUp{0%{transform:translateY(0);opacity:0}10%{opacity:1}100%{transform:translateY(-260px);opacity:0}}
+
+/* ============================================================
+   TARJETAS GENÉRICAS / GRID
+============================================================ */
+.grid{display:grid;gap:18px}
+.g-3{grid-template-columns:repeat(3,1fr)}
+.g-2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:900px){.g-3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.g-3,.g-2{grid-template-columns:1fr}}
+
+/* ============================================================
+   EQUIPOS (tarjetas interactivas)
+============================================================ */
+.eq-card{
+  background:linear-gradient(180deg,var(--panel),var(--bg2));
+  border:1px solid var(--line);border-radius:var(--r);padding:20px;cursor:pointer;
+  transition:.22s;position:relative;overflow:hidden;
+}
+.eq-card::after{
+  content:"";position:absolute;inset:0;border-radius:var(--r);
+  background:linear-gradient(135deg,transparent 60%,rgba(255,140,26,.10));
+  opacity:0;transition:.22s;
+}
+.eq-card:hover{transform:translateY(-4px);border-color:rgba(255,140,26,.45);box-shadow:var(--shadow)}
+.eq-card:hover::after{opacity:1}
+.eq-emoji{font-size:2.4rem;display:block;margin-bottom:8px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4))}
+.eq-card h3{font-size:1.18rem}
+.eq-card .tag{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--amber2);background:rgba(255,140,26,.12);padding:3px 9px;border-radius:20px;margin-bottom:10px}
+.eq-card p{color:var(--muted);font-size:.95rem;margin:0}
+.eq-card .more{color:var(--amber2);font-weight:700;font-size:.85rem;margin-top:12px;display:inline-block}
+
+/* modal */
+.modal{
+  position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;padding:20px;
+  background:rgba(4,7,12,.7);backdrop-filter:blur(4px);
+}
+.modal.open{display:flex;animation:fade .25s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal-card{
+  background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+  border-radius:20px;max-width:560px;width:100%;padding:26px;box-shadow:var(--shadow);
+  animation:pop .3s cubic-bezier(.2,1.2,.4,1);max-height:88vh;overflow:auto;
+}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-card .x{float:right;cursor:pointer;font-size:1.5rem;color:var(--muted);line-height:1;border:none;background:none}
+.modal-card h3{font-size:1.5rem;margin-top:6px}
+.modal-card ul{margin:14px 0 0;padding-left:20px;color:var(--muted)}
+.modal-card ul li{margin:6px 0}
+.fact{background:rgba(56,189,248,.08);border-left:3px solid var(--blue);padding:12px 14px;border-radius:8px;margin-top:16px;font-size:.92rem;color:#cfe6f7}
+
+/* ============================================================
+   3D VIEWER
+============================================================ */
+.threed-wrap{
+  position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--line);
+  background:radial-gradient(circle at 50% 30%,#16223a,#070b12 70%);
+  box-shadow:var(--shadow);height:480px;
+}
+#threed-canvas{display:block;width:100%;height:100%}
+.threed-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);padding:24px}
+.threed-hud{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:10px;pointer-events:none}
+.hud-pill{background:rgba(10,14,20,.7);border:1px solid var(--line);padding:6px 12px;border-radius:20px;font-size:.78rem;color:var(--muted);font-weight:600;backdrop-filter:blur(6px)}
+.hud-pill b{color:var(--amber2)}
+.threed-controls{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:max-content;max-width:92%}
+.ctrl{background:rgba(10,14,20,.75);border:1px solid var(--line);color:#fff;padding:8px 12px;border-radius:12px;font-size:.82rem;font-weight:700;cursor:pointer;backdrop-filter:blur(6px);transition:.2s}
+.ctrl:hover{background:var(--amber);color:#1a1206}
+.ctrl.on{background:var(--amber);color:#1a1206}
+.threed-tip{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);color:var(--muted);font-size:.8rem;background:rgba(0,0,0,.4);padding:4px 10px;border-radius:14px}
+.label3d{
+  position:absolute;transform:translate(-50%,-50%);background:rgba(10,14,20,.82);border:1px solid var(--amber);
+  color:#fff;font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:10px;pointer-events:none;white-space:nowrap;
+  box-shadow:0 0 10px rgba(255,140,26,.4);
+}
+
+/* ============================================================
+   JUEGOS GENERALES
+============================================================ */
+.game-card{
+  background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+  border-radius:20px;padding:22px;box-shadow:var(--shadow);
+}
+.game-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.game-head .gi{font-size:1.6rem}
+.game-head h3{margin:0;font-size:1.3rem}
+.scorebar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 18px}
+.chip{background:var(--panel2);border:1px solid var(--line);padding:6px 12px;border-radius:20px;font-size:.82rem;font-weight:700;display:inline-flex;gap:6px;align-items:center}
+.chip b{color:var(--amber2)}
+.progress{height:8px;background:var(--steel);border-radius:5px;overflow:hidden;margin:6px 0}
+.progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--gold));transition:width .4s}
+
+/* ---- JUEGO 1: ARMÁ LA TORRE (drag & drop) ---- */
+.asm-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:680px){.asm-layout{grid-template-columns:1fr}}
+.tower-stack{display:flex;flex-direction:column-reverse;gap:8px;background:var(--oil);border:1px dashed var(--steel);border-radius:14px;padding:12px;min-height:330px}
+.tower-stack .ground{background:linear-gradient(180deg,#3a2c12,#1a1206);border:none;color:var(--muted);text-align:center;font-weight:700;font-size:.8rem;padding:8px;border-radius:8px}
+.assembly-slot{
+  min-height:54px;border:1.5px dashed var(--steel);border-radius:12px;display:flex;align-items:center;justify-content:center;
+  color:var(--muted);font-size:.82rem;font-weight:700;text-align:center;padding:6px;transition:.18s;position:relative;
+}
+.assembly-slot .pos{position:absolute;left:8px;top:6px;font-size:.65rem;color:var(--steel)}
+.assembly-slot.over{border-color:var(--amber);background:rgba(255,140,26,.08)}
+.assembly-slot.correct{border-style:solid;border-color:var(--green);background:rgba(34,211,154,.10);color:#fff}
+.assembly-slot.wrong{border-color:var(--red);background:rgba(255,90,90,.12);animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.slot-fill{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:700;color:#fff}
+.slot-fill .e{font-size:1.3rem}
+.tray{display:flex;flex-direction:column;gap:8px}
+.part-card{
+  background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:grab;user-select:none;
+  touch-action:none;display:flex;align-items:center;gap:10px;font-weight:700;transition:.15s;
+}
+.part-card:hover{border-color:var(--amber)}
+.part-card.dragging{opacity:.35}
+.part-card.placed{display:none}
+.part-card .e{font-size:1.4rem}
+.part-card .pn{font-size:.9rem}
+.part-card .pd{font-size:.72rem;color:var(--muted);font-weight:600}
+.ghost{opacity:.85;transform:rotate(-3deg) scale(1.04);box-shadow:0 10px 24px rgba(0,0,0,.5);cursor:grabbing}
+.asm-done{margin-top:14px;text-align:center}
+
+/* ---- JUEGO 2: QUIZ ---- */
+.q-box{}
+.q-num{color:var(--amber2);font-weight:800;letter-spacing:.08em;font-size:.8rem;text-transform:uppercase}
+.q-text{font-size:1.2rem;font-weight:700;margin:6px 0 16px}
+.q-opts{display:grid;gap:10px}
+.q-opt{
+  text-align:left;background:var(--panel2);border:1.5px solid var(--line);color:var(--txt);
+  padding:14px 16px;border-radius:12px;font-size:.98rem;font-weight:600;cursor:pointer;transition:.18s;display:flex;gap:10px;align-items:center;
+}
+.q-opt:hover{border-color:var(--amber)}
+.q-opt .k{background:var(--steel);color:#fff;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex:none}
+.q-opt.correct{border-color:var(--green);background:rgba(34,211,154,.14)}
+.q-opt.correct .k{background:var(--green)}
+.q-opt.wrong{border-color:var(--red);background:rgba(255,90,90,.14)}
+.q-opt.wrong .k{background:var(--red)}
+.q-opt:disabled{cursor:default}
+.q-explain{margin-top:12px;font-size:.9rem;color:var(--muted);background:var(--oil);padding:10px 14px;border-radius:10px;border-left:3px solid var(--blue)}
+.q-foot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px}
+
+/* ---- JUEGO 3: CONECTÁ CONCEPTOS ---- */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:560px){.match-grid{gap:14px}}
+.match-col{display:flex;flex-direction:column;gap:10px}
+.match-item{
+  background:var(--panel2);border:1.5px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;font-weight:700;
+  transition:.16s;display:flex;gap:10px;align-items:center;font-size:.92rem;
+}
+.match-item:hover{border-color:var(--amber)}
+.match-item.sel{border-color:var(--blue);background:rgba(56,189,248,.14);box-shadow:0 0 0 2px rgba(56,189,248,.4)}
+.match-item.done{opacity:.45;pointer-events:none;border-color:var(--green);background:rgba(34,211,154,.10)}
+.match-item.wrong{animation:shake .4s;border-color:var(--red)}
+.match-item .e{font-size:1.3rem}
+.match-status{text-align:center;margin-top:14px;font-weight:700;color:var(--muted)}
+
+/* ---- TOQUE INTERACTIVO (valvulas BOP) ---- */
+.bop-tap{display:flex;flex-direction:column;align-items:center;gap:10px}
+#bop-svg{max-width:340px;width:100%}
+.bop-valve{cursor:pointer;transform-box:fill-box;transform-origin:center;transition:.15s}
+.bop-valve:hover{transform:scale(1.08)}
+.tap-msg{min-height:24px;font-weight:700;color:var(--amber2);font-size:.95rem}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:.9rem;text-align:center}
+footer b{color:var(--amber2)}
+
+/* toast */
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);
+  background:var(--panel);border:1px solid var(--amber);color:#fff;padding:12px 20px;border-radius:14px;
+  font-weight:700;box-shadow:var(--shadow);z-index:400;opacity:0;transition:.35s;max-width:90%;text-align:center;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.good{border-color:var(--green)}
+.toast.bad{border-color:var(--red)}
+
+/* divider con cinta de peligro */
+.hazard{height:14px;background:repeating-linear-gradient(45deg,#1a1206 0 18px,#f5b50a 18px 36px);opacity:.55;margin:0}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== NAV ===================== -->
+<nav class="top">
+  <div class="wrap nav-in">
+    <div class="brand"><span class="drop">🛢️</span> PetrolTécnica</div>
+    <div class="nav-links" id="navLinks">
+      <a href="#equipos">Equipos</a>
+      <a href="#3d">Vista 3D</a>
+      <a href="#armar">Armá la Torre</a>
+      <a href="#quiz">Quiz</a>
+      <a href="#conectar">Conectá</a>
+      <a href="#bop">BOP Touch</a>
+    </div>
+    <button class="burger" id="burger" aria-label="Menú">☰</button>
+  </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Industria del Petróleo · Workover</div>
+      <h1>Domina la <span class="grad">Torre de Pulling</span> jugando 🛠️</h1>
+      <p class="lead">Una página animada y responsive para aprender de la intervención de pozos: <b style="color:#fff">BOP, varillas, tubing, malacate, cabezal</b> y más. Explora modelos 3D, jugá y demostrá lo que sabés.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#3d">🧭 Ver Torre en 3D</a>
+        <a class="btn btn-ghost" href="#quiz">🎮 Ir al Quiz</a>
+      </div>
+    </div>
+    <div class="rig-stage" aria-hidden="true">
+      <div class="drops" id="drops"></div>
+      <!-- Balancín / Pumping Unit (caballito) -->
+      <svg id="jack" viewBox="0 0 420 330" role="img" aria-label="Balancín de extracción animado">
+        <!-- suelo -->
+        <rect x="0" y="300" width="420" height="30" fill="#241605"/>
+        <line x1="0" y1="300" x2="420" y2="300" stroke="#3a2c12" stroke-width="3"/>
+        <!-- poste Samson (A) -->
+        <polygon points="160,300 200,150 240,300" fill="#2a3a52" stroke="#44607f" stroke-width="2"/>
+        <polygon points="172,300 200,165 228,300" fill="#1c2939"/>
+        <!-- eje central del balancín -->
+        <circle cx="200" cy="150" r="12" fill="#f5b50a" stroke="#1a1206" stroke-width="2"/>
+        <!-- viga (beam) que bascula -->
+        <g class="jack-beam">
+          <rect x="70" y="140" width="220" height="16" rx="6" fill="#3a4d6a" stroke="#5b7696" stroke-width="2"/>
+          <!-- cabeza de caballo (horse head) -->
+          <path d="M70 120 q-26 28 -10 56 q8 -20 30 -22 z" fill="#44607f" stroke="#6d8bad" stroke-width="2"/>
+          <!-- contrapeso (crank) en el otro extremo -->
+          <g class="jack-crank" transform="translate(300 148)">
+            <rect x="-6" y="-46" width="12" height="92" rx="4" fill="#5b7696"/>
+          </g>
+          <g class="jack-cw" transform="translate(300 196)">
+            <circle r="20" fill="#1c2939" stroke="#5b7696" stroke-width="3"/>
+            <circle r="8" fill="#f5b50a"/>
+          </g>
+        </g>
+        <!-- brida/cable que baja al pozo -->
+        <g class="bridle">
+          <rect x="58" y="158" width="4" height="120" fill="#ffb347"/>
+        </g>
+        <!-- cabezal del pozo (pozo en superficie) -->
+        <rect x="44" y="278" width="36" height="24" rx="4" fill="#2a3a52" stroke="#44607f" stroke-width="2"/>
+        <rect x="40" y="272" width="44" height="8" rx="3" fill="#44607f"/>
+        <circle cx="62" cy="268" r="4" fill="#ff5a5a"/>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<div class="hazard"></div>
+
+<!-- ===================== EQUIPOS ===================== -->
+<section id="equipos">
+  <div class="wrap">
+    <div class="eyebrow">Catálogo interactivo</div>
+    <h2 class="title">Equipos de la <span>Torre de Pulling</span></h2>
+    <p class="sub">Tocá cada tarjeta para conocer su función, partes clave y datos técnicos del trabajo de intervención de pozos (workover).</p>
+    <div class="grid g-3" id="eqGrid"></div>
+  </div>
+</section>
+
+<!-- ===================== 3D VIEWER ===================== -->
+<section id="3d">
+  <div class="wrap">
+    <div class="eyebrow">Modelo 3D · Girá y hacé zoom</div>
+    <h2 class="title">La <span>Torre de Pulling</span> en 3D</h2>
+    <p class="sub">Arrastrá con el dedo para rotar, pellizcá para zoom. Activá las etiquetas para ver cada componente. (Necesita conexión para cargar el motor 3D; si no carga, el resto de la página funciona igual.)</p>
+    <div class="threed-wrap">
+      <canvas id="threed-canvas"></canvas>
+      <div class="threed-fallback" id="threedFallback">
+        <div>
+          <div style="font-size:2.4rem">🏗️</div>
+          <p style="margin-top:8px">Cargando modelo 3D…<br><small>Si permanece así, es posible que el motor 3D no haya cargado (sin conexión). El resto de la página funciona igual.</small></p>
+        </div>
+      </div>
+      <div class="threed-hud">
+        <span class="hud-pill">👷 <b>Torre de Pulling</b></span>
+        <span class="hud-pill" id="camPill">Rotación: automática</span>
+      </div>
+      <div class="threed-controls">
+        <button class="ctrl" id="btnLabels">🏷️ Etiquetas: off</button>
+        <button class="ctrl on" id="btnAuto">🔄 Auto-rotación</button>
+        <button class="ctrl" id="btnReset">🎯 Resetear vista</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hazard"></div>
+
+<!-- ===================== JUEGO 1: ARMÁ LA TORRE ===================== -->
+<section id="armar">
+  <div class="wrap">
+    <div class="eyebrow">Juego 1 · Arrastrar y soltar</div>
+    <h2 class="title">🏗️ <span>Armá la Torre</span></h2>
+    <p class="sub">Arrastrá cada equipo al lugar correcto de la pila del pozo, del piso de la torre hacia arriba. ¡Construila de abajo hacia arriba!</p>
+    <div class="game-card">
+      <div class="scorebar">
+        <span class="chip">✅ Correctas <b id="asmScore">0</b>/<b id="asmTotal">0</b></span>
+        <span class="chip">⏱️ Errores <b id="asmErr">0</b></span>
+        <button class="btn btn-ghost" id="asmReset" style="margin-left:auto;padding:8px 14px;font-size:.85rem">↺ Reiniciar</button>
+      </div>
+      <div class="asm-layout">
+        <div>
+          <div class="tower-stack" id="towerStack">
+            <div class="ground">🏔️ Formación / Fondo del pozo</div>
+            <!-- slots se inyectan con JS -->
+          </div>
+        </div>
+        <div>
+          <div style="font-size:.85rem;color:var(--muted);margin-bottom:8px;font-weight:700">🧰 Piezas (arrastrá al lugar correcto):</div>
+          <div class="tray" id="assemblyTray"></div>
+        </div>
+      </div>
+      <div class="asm-done hidden" id="asmDone">
+        <div style="font-size:1.3rem">🎉 ¡Torre armada! ¡Sos un/a buen/a operador/a!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== JUEGO 2: QUIZ ===================== -->
+<section id="quiz">
+  <div class="wrap">
+    <div class="eyebrow">Juego 2 · Preguntas y respuestas</div>
+    <h2 class="title">❓ <span>Quiz Petrolero</span></h2>
+    <p class="sub">Poné a prueba tus conocimientos sobre la intervención de pozos. ¡10 preguntas, una puntuación final!</p>
+    <div class="game-card">
+      <div class="scorebar">
+        <span class="chip">❓ Pregunta <b id="qIndex">1</b>/<b id="qCount">10</b></span>
+        <span class="chip">⭐ Puntos <b id="qScore">0</b></span>
+        <div class="progress" style="flex:1;min-width:120px"><i id="qProg"></i></div>
+      </div>
+      <div class="q-box" id="qBox"></div>
+    </div>
+  </div>
+</section>
+
+<div class="hazard"></div>
+
+<!-- ===================== JUEGO 3: CONECTÁ CONCEPTOS ===================== -->
+<section id="conectar">
+  <div class="wrap">
+    <div class="eyebrow">Juego 3 · Tocá para conectar</div>
+    <h2 class="title">🔗 <span>Conectá cada equipo</span> con su función</h2>
+    <p class="sub">Tocá un equipo a la izquierda y luego su función correcta a la derecha para conectarlos con un lazo.</p>
+    <div class="game-card">
+      <div class="scorebar">
+        <span class="chip">🔗 Pares <b id="mScore">0</b>/<b id="mTotal">0</b></span>
+        <button class="btn btn-ghost" id="mReset" style="margin-left:auto;padding:8px 14px;font-size:.85rem">↺ Reiniciar</button>
+      </div>
+      <div class="match-grid">
+        <div class="match-col" id="mLeft"></div>
+        <div class="match-col" id="mRight"></div>
+      </div>
+      <div class="match-status" id="mStatus">Empezá tocando un equipo 👈</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BOP TOUCH ===================== -->
+<section id="bop">
+  <div class="wrap">
+    <div class="eyebrow">Interactivo · Toque</div>
+    <h2 class="title">🛡️ <span>BOP</span> · Cerrá los rams</h2>
+    <p class="sub">El BOP (preventor de reventones) protege el pozo. Tocá cada válvula/ram para accionarla y sellar el pozo. ¡Cerralas todas antes del "reventón"!</p>
+    <div class="game-card">
+      <div class="bop-tap">
+        <svg id="bop-svg" viewBox="0 0 320 360" role="img" aria-label="Esquema de BOP interactivo">
+          <!-- pozo/tubería central -->
+          <rect x="150" y="0" width="20" height="360" fill="#1c2939" stroke="#44607f" stroke-width="2"/>
+          <!-- cuerpo del BOP -->
+          <rect x="96" y="120" width="128" height="150" rx="10" fill="#2a3a52" stroke="#5b7696" stroke-width="3"/>
+          <!-- etiquetas de cámaras -->
+          <line x1="96" y1="170" x2="224" y2="170" stroke="#44607f" stroke-width="2" stroke-dasharray="4 4"/>
+          <line x1="96" y1="220" x2="224" y2="220" stroke="#44607f" stroke-width="2" stroke-dasharray="4 4"/>
+          <text x="160" y="150" text-anchor="middle" fill="#94a6bf" font-size="9" font-weight="700">ANULAR</text>
+          <text x="160" y="200" text-anchor="middle" fill="#94a6bf" font-size="9" font-weight="700">RAM TUBERÍA</text>
+          <text x="160" y="250" text-anchor="middle" fill="#94a6bf" font-size="9" font-weight="700">RAM CIEGO</text>
+
+          <!-- válvulas/rams laterales (cilindros) -->
+          <g class="bop-valve" data-name="Ram de tubería (izq)" data-x="40">
+            <rect x="40" y="190" width="56" height="20" rx="4" fill="#5b7696" stroke="#fff" stroke-width="1"/>
+            <circle cx="48" cy="200" r="6" fill="#ff5a5a"/>
+          </g>
+          <g class="bop-valve" data-name="Ram ciego (izq)" data-x="40">
+            <rect x="40" y="240" width="56" height="20" rx="4" fill="#5b7696" stroke="#fff" stroke-width="1"/>
+            <circle cx="48" cy="250" r="6" fill="#ff5a5a"/>
+          </g>
+          <g class="bop-valve" data-name="Anular (der)" data-x="224">
+            <rect x="224" y="140" width="56" height="20" rx="4" fill="#5b7696" stroke="#fff" stroke-width="1"/>
+            <circle cx="272" cy="150" r="6" fill="#ff5a5a"/>
+          </g>
+          <g class="bop-valve" data-name="Ram de tubería (der)" data-x="224">
+            <rect x="224" y="190" width="56" height="20" rx="4" fill="#5b7696" stroke="#fff" stroke-width="1"/>
+            <circle cx="272" cy="200" r="6" fill="#ff5a5a"/>
+          </g>
+          <g class="bop-valve" data-name="Ram ciego (der)" data-x="224">
+            <rect x="224" y="240" width="56" height="20" rx="4" fill="#5b7696" stroke="#fff" stroke-width="1"/>
+            <circle cx="272" cy="250" r="6" fill="#ff5a5a"/>
+          </g>
+          <g class="bop-valve" data-name="Anular (izq)" data-x="40">
+            <rect x="40" y="140" width="56" height="20" rx="4" fill="#5b7696" stroke="#fff" stroke-width="1"/>
+            <circle cx="48" cy="150" r="6" fill="#ff5a5a"/>
+          </g>
+          <!-- base / cabezal -->
+          <rect x="120" y="270" width="80" height="40" rx="6" fill="#1c2939" stroke="#5b7696" stroke-width="3"/>
+          <text x="160" y="335" text-anchor="middle" fill="#94a6bf" font-size="10" font-weight="700">CABEZAL DEL POZO</text>
+        </svg>
+        <div class="tap-msg" id="bopMsg">Tocá las 6 válvulas rojas para cerrar el BOP 🔴→🟢</div>
+        <div class="chip">🔒 Cerradas <b id="bopCount">0</b>/6</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="wrap">
+    <p>🛢️ <b>PetrolTécnica</b> — página educativa interactiva sobre la <b>torre de pulling</b> y equipos de workover.</p>
+    <p style="opacity:.7;font-size:.82rem;margin-top:6px">Hecho para móvil · Animaciones CSS + Three.js (3D) · Juegos con JavaScript. Tip: abrí este archivo en tu navegador de celular.</p>
+  </div>
+</footer>
+
+<!-- ===================== MODAL ===================== -->
+<div class="modal" id="eqModal">
+  <div class="modal-card" id="eqModalCard"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Three.js (motor 3D) -->
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+/* ============================================================
+   DATOS DE EQUIPOS
+============================================================ */
+const EQUIPOS = [
+  { id:"torre", e:"🗼", tag:"Estructura",
+    t:"Torre de Pulling (Service Rig)",
+    d:"Equipo de intervención (workover) que sirve para sacar y meter tubería, varillas y herramientas de fondo sin perforar.",
+    pts:["Mástil/mástil telescópico que se arma en superficie","Puede ser montado sobre camión o remolque","Permite trabajos de mantenimiento, limpieza y cambio de bombas","Más liviana que una torre de perforación"],
+    fact:"A diferencia de un equipo de perforación, la torre de pulling se usa para intervenir pozos que ya están produciendo." },
+  { id:"bop", e:"🛡️", tag:"Seguridad",
+    t:"BOP (Blowout Preventer)",
+    d:"Equipo de seguridad que sella el pozo para evitar un reventón (blowout) y el escape incontrolado de fluidos.",
+    pts:["Preventor anular: sella alrededor de cualquier objeto o ciega el pozo","Rams de tubería: abrazan la tubería","Ram ciego: sella pozo sin tubería","Ram de corte (shear): corta y sella"],
+    fact:"El BOP es lo último que se interpone entre el pozo y una catástrofe. Por eso se prueba periódicamente." },
+  { id:"varillas", e:"🔗", tag:"Transmisión",
+    t:"Varillas de Extracción (Sucker Rods)",
+    d:"Barras de acero que conectan el balancín superficial con la bomba de fondo, transmitiendo el movimiento de bombeo.",
+    pts:["Se enroscan tramo a tramo (joint)","Acero de alta resistencia a la fatiga","Tamaños típicos: 5/8\", 3/4\", 7/8\", 1\"","Llevan cuplones (couplings) entre tramos"],
+    fact:"Las varillas sufren cargas alternadas millones de veces; por eso la fatiga es su principal enemigo." },
+  { id:"tubing", e:"🛢️", tag:"Producción",
+    t:"Tubing (Tubería de Producción)",
+    d:"Tubería por donde realmente sube el petróleo desde el fondo del pozo hasta la superficie.",
+    pts:["Va dentro del revestimiento (casing)","Medidas comunes: 2-3/8\", 2-7/8\", 3-1/2\"","Se rosca tramo a tramo (juntas)","Se ancla al cabezal con el 'hanger'"],
+    fact:"Durante el pulling, lo que se 'saca' y se 'mete' es principalmente el tubing y las varillas." },
+  { id:"malacate", e:"⚙️", tag:"Fuerza",
+    t:"Malacate (Drawworks)",
+    d:"El cabrestante/horsta que enrolla el cable y sube o baja la sarta de tubería mediante los bloques.",
+    pts:["Mueve el bloque viajero por el cable de perforación","Freno para sostener cargas con seguridad","Transmite la fuerza del motor al movimiento vertical","Controla la velocidad de izaje"],
+    fact:"El malacate es el 'músculo' de la torre: sin él no se puede mover ningún peso en el pozo." },
+  { id:"cabezal", e:"🎄", tag:"Superficie",
+    t:"Cabezal y Árbol de Navidad",
+    d:"Conjunto de válvulas en la cabeza del pozo que controla el flujo y contiene la presión.",
+    pts:["Cabezal: soporte estructural y sello casing-tubing","Árbol de Navidad: válvulas de producción","Permite cerrar/abrir y regular el pozo","Da acceso para intervenir el pozo con seguridad"],
+    fact:"Se llama 'árbol de Navidad' por la forma ramificada de sus válvulas, no por la fecha. 🎄" },
+];
+
+/* ============================================================
+   RENDER TARJETAS DE EQUIPOS + MODAL
+============================================================ */
+const eqGrid = document.getElementById("eqGrid");
+EQUIPOS.forEach(eq=>{
+  const c=document.createElement("div");
+  c.className="eq-card";
+  c.innerHTML=`<span class="eq-emoji">${eq.e}</span>
+    <span class="tag">${eq.tag}</span>
+    <h3>${eq.t}</h3>
+    <p>${eq.d}</p>
+    <span class="more">Ver detalles →</span>`;
+  c.addEventListener("click",()=>openEq(eq));
+  eqGrid.appendChild(c);
+});
+const modal=document.getElementById("eqModal");
+const modalCard=document.getElementById("eqModalCard");
+function openEq(eq){
+  modalCard.innerHTML=`<button class="x" onclick="document.getElementById('eqModal').classList.remove('open')">✕</button>
+    <span class="eq-emoji" style="font-size:2.6rem">${eq.e}</span>
+    <span class="tag">${eq.tag}</span>
+    <h3>${eq.t}</h3>
+    <p style="color:var(--muted)">${eq.d}</p>
+    <ul>${eq.pts.map(p=>`<li>${p}</li>`).join("")}</ul>
+    <div class="fact">💡 <b>Dato:</b> ${eq.fact}</div>`;
+  modal.classList.add("open");
+}
+modal.addEventListener("click",e=>{ if(e.target===modal) modal.classList.remove("open"); });
+
+/* ============================================================
+   HERO: GOTAS + PARTÍCULAS
+============================================================ */
+(function(){
+  const drops=document.getElementById("drops");
+  for(let i=0;i<14;i++){
+    const d=document.createElement("div");d.className="drop";
+    d.style.left=Math.random()*100+"%";
+    d.style.animationDuration=(2+Math.random()*2.5)+"s";
+    d.style.animationDelay=(Math.random()*3)+"s";
+    d.style.transform="scale("+(0.6+Math.random())+")";
+    drops.appendChild(d);
+  }
+  // partículas que suben en la hero (sobre el stage)
+  const stage=document.querySelector(".rig-stage");
+  for(let i=0;i<8;i++){
+    const p=document.createElement("div");p.className="particle";
+    const s=3+Math.random()*5;p.style.width=s+"px";p.style.height=s+"px";
+    p.style.left=Math.random()*100+"%";
+    p.style.bottom="0";
+    p.style.animationDuration=(4+Math.random()*4)+"s";
+    p.style.animationDelay=(Math.random()*5)+"s";
+    stage.appendChild(p);
+  }
+})();
+
+/* ============================================================
+   NAV: BURGER + SCROLLSPY
+============================================================ */
+const burger=document.getElementById("burger");
+const navLinks=document.getElementById("navLinks");
+burger.addEventListener("click",()=>navLinks.classList.toggle("open"));
+navLinks.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>navLinks.classList.remove("open")));
+const sections=[...document.querySelectorAll("section[id]")];
+const navAs=[...navLinks.querySelectorAll("a")];
+window.addEventListener("scroll",()=>{
+  let cur="";
+  sections.forEach(s=>{ if(window.scrollY>=s.offsetTop-90) cur=s.id; });
+  navAs.forEach(a=>a.classList.toggle("active", a.getAttribute("href")==="#"+cur));
+});
+
+/* ============================================================
+   TOAST
+============================================================ */
+let toastTimer;
+function toast(msg,kind){
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.className="toast show "+(kind||"");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.className="toast "+(kind||""),2600);
+}
+
+/* ============================================================
+   JUEGO 1 — ARMÁ LA TORRE (drag & drop con pointer events)
+============================================================ */
+// Orden correcto de ABAJO hacia ARRIBA (por eso reverse en CSS column-reverse)
+const ASM_ORDER=[
+  { id:"cabezal", e:"🎄", n:"Cabezal / Árbol de Navidad", d:"Sella y soporta en superficie" },
+  { id:"bop",     e:"🛡️", n:"BOP (Preventor)", d:"Seguridad: evita reventones" },
+  { id:"piso",    e:"🟫", n:"Piso de la torre", d:"Plataforma de trabajo" },
+  { id:"torre",   e:"🗼", n:"Mástil / Torre", d:"Estructura vertical" },
+  { id:"corona",  e:"🛞", n:"Corona (Crown Block)", d:"Poleas en lo alto" },
+];
+let asmCorrect=0, asmErr=0;
+
+function buildAssembly(){
+  const stack=document.getElementById("towerStack");
+  // limpiar slots previos (dejar el ground)
+  stack.querySelectorAll(".assembly-slot").forEach(s=>s.remove());
+  const tray=document.getElementById("assemblyTray");
+  tray.innerHTML="";
+  asmCorrect=0; asmErr=0;
+  document.getElementById("asmDone").classList.add("hidden");
+  document.getElementById("asmTotal").textContent=ASM_ORDER.length;
+
+  //Crear slots (en orden visual de abajo hacia arriba; como la columna es column-reverse, appendamos del 1..N)
+  ASM_ORDER.forEach((item,i)=>{
+    const slot=document.createElement("div");
+    slot.className="assembly-slot";
+    slot.dataset.correct=item.id;
+    slot.innerHTML=`<span class="pos">${i+1}°</span>Colocá una pieza`;
+    stack.appendChild(slot);
+  });
+  // piezas en orden aleatorio
+  const shuffled=[...ASM_ORDER].sort(()=>Math.random()-0.5);
+  shuffled.forEach(item=>{
+    const card=document.createElement("div");
+    card.className="part-card";
+    card.dataset.id=item.id;
+    card.innerHTML=`<span class="e">${item.e}</span>
+      <div><div class="pn">${item.n}</div><div class="pd">${item.d}</div></div>`;
+    enableDrag(card);
+    tray.appendChild(card);
+  });
+  updateAsmScore();
+}
+
+function enableDrag(card){
+  let ghost=null,offX=0,offY=0,activeId=null;
+  function down(e){
+    if(card.classList.contains("placed")) return;
+    e.preventDefault();
+    const r=card.getBoundingClientRect();
+    offX=e.clientX-r.left; offY=e.clientY-r.top;
+    ghost=card.cloneNode(true);
+    ghost.classList.add("ghost");
+    Object.assign(ghost.style,{position:"fixed",width:r.width+"px",left:(e.clientX-offX)+"px",top:(e.clientY-offY)+"px",zIndex:9999,pointerEvents:"none",margin:0});
+    document.body.appendChild(ghost);
+    card.classList.add("dragging");
+    activeId=e.pointerId;
+    try{card.setPointerCapture(e.pointerId);}catch(_){}
+  }
+  function move(e){
+    if(!ghost) return;
+    ghost.style.left=(e.clientX-offX)+"px";
+    ghost.style.top=(e.clientY-offY)+"px";
+    // resaltar slot bajo el cursor
+    ghost.style.display="none";
+    const el=document.elementFromPoint(e.clientX,e.clientY);
+    ghost.style.display="";
+    document.querySelectorAll(".assembly-slot.over").forEach(s=>s.classList.remove("over"));
+    const slot=el&&el.closest?el.closest(".assembly-slot"):null;
+    if(slot && !slot.classList.contains("correct")) slot.classList.add("over");
+  }
+  function up(e){
+    if(!ghost) return;
+    ghost.style.display="none";
+    const el=document.elementFromPoint(e.clientX,e.clientY);
+    const slot=el&&el.closest?el.closest(".assembly-slot"):null;
+    document.querySelectorAll(".assembly-slot.over").forEach(s=>s.classList.remove("over"));
+    ghost.remove(); ghost=null;
+    card.classList.remove("dragging");
+    if(slot && !slot.classList.contains("correct")){
+      if(slot.dataset.correct===card.dataset.id){
+        // correcto
+        const item=ASM_ORDER.find(i=>i.id===card.dataset.id);
+        const posNum=[...document.getElementById("towerStack").children].indexOf(slot);
+        slot.classList.add("correct");
+        slot.innerHTML=`<span class="pos">${posNum}°</span>
+          <span class="slot-fill"><span class="e">${item.e}</span>${item.n} ✓</span>`;
+        card.classList.add("placed");
+        asmCorrect++;
+        toast("✅ ¡Correcto! "+item.n,"good");
+        if(asmCorrect===ASM_ORDER.length){
+          document.getElementById("asmDone").classList.remove("hidden");
+          toast("🎉 ¡Torre armada! Errores: "+asmErr,"good");
+        }
+      }else{
+        slot.classList.add("wrong");setTimeout(()=>slot.classList.remove("wrong"),500);
+        asmErr++;toast("❌ Lugar incorrecto, probá de nuevo","bad");
+      }
+      updateAsmScore();
+    }
+  }
+  card.addEventListener("pointerdown",down);
+  card.addEventListener("pointermove",move);
+  card.addEventListener("pointerup",up);
+  card.addEventListener("pointercancel",up);
+}
+function updateAsmScore(){
+  document.getElementById("asmScore").textContent=asmCorrect;
+  document.getElementById("asmErr").textContent=asmErr;
+}
+document.getElementById("asmReset").addEventListener("click",buildAssembly);
+buildAssembly();
+
+/* ============================================================
+   JUEGO 2 — QUIZ
+============================================================ */
+const QUIZ=[
+  {q:"¿Qué significa BOP?",o:["Blowout Preventer","Bomba de Operación Petrolera","Bloque Operativo de Presión","Barra de Operación Perforada"],a:0,
+   e:"BOP = Blowout Preventer: el preventor de reventones que sella el pozo."},
+  {q:"¿Cuál es la función principal del BOP?",o:["Sellar el pozo y evitar un reventón","Extraer más petróleo","Refrigerar el motor","Medir la temperatura del pozo"],a:0,
+   e:"El BOP contiene la presión del pozo y evita escapes incontrolados."},
+  {q:"¿Para qué sirven las varillas de extracción (sucker rods)?",o:["Conectar la bomba superficial con la de fondo","Conducir el petróleo a la superficie","Sostener la torre","Generar electricidad"],a:0,
+   e:"Las varillas transmiten el movimiento del balancín a la bomba de fondo."},
+  {q:"¿Por qué tubería sube el petróleo a la superficie?",o:["Tubing (tubería de producción)","Casing (revestimiento)","Varillas","Línea eléctrica"],a:0,
+   e:"El tubing va dentro del casing y conduce los fluidos producidos."},
+  {q:"¿Para qué se usa la torre de pulling?",o:["Para intervenir y mantener pozos","Para perforar el pozo inicial","Para refinar el petróleo","Para generar vapor"],a:0,
+   e:"La torre de pulling hace trabajos de workover en pozos ya existentes."},
+  {q:"¿Qué es el malacate (drawworks)?",o:["El cabrestante que sube/baja la sarta","El preventor de reventones","La tubería de producción","Un tipo de válvula"],a:0,
+   e:"El malacate mueve el bloque viajero enrollando el cable."},
+  {q:"¿Qué es el 'árbol de Navidad' en un pozo?",o:["Conjunto de válvulas en la cabeza del pozo","Una decoración","Un tipo de roca","El sistema de bombeo"],a:0,
+   e:"Es el arreglo de válvulas que controla el flujo en superficie."},
+  {q:"¿Qué son los 'rams' de un BOP?",o:["Cilindros que cierran sobre la tubería o ciegan el pozo","Varillas de bombeo","Válvulas manuales pequeñas","Sensores de presión"],a:0,
+   e:"Los rams sellan el pozo: de tubería, ciegos o de corte."},
+  {q:"¿Cuál es una medida común de tubing?",o:["2-7/8 pulgadas","100 metros","1/4 de pulgada","5 milímetros"],a:0,
+   e:"2-3/8\", 2-7/8\" y 3-1/2\" son diámetros típicos de tubing."},
+  {q:"¿Qué evita un reventón (blowout)?",o:["Un BOP bien operado","Pintar la torre de amarillo","Apagar las luces","Usar más varillas"],a:0,
+   e:"Un BOP correctamente mantenido y operado es la clave de la seguridad."},
+];
+let qIdx=0,qScore=0;
+document.getElementById("qCount").textContent=QUIZ.length;
+function renderQ(){
+  const box=document.getElementById("qBox");
+  if(qIdx>=QUIZ.length){
+    const pct=Math.round(qScore/QUIZ.length*100);
+    let msg = pct>=80?"🏆 ¡Experto petrolero!":pct>=50?"👍 ¡Bien! Seguí practicando":"📚 Repasá los equipos y volvé a intentar";
+    box.innerHTML=`<div style="text-align:center;padding:10px 0">
+      <div style="font-size:3rem">⭐</div>
+      <h3 style="font-size:1.6rem">Quiz terminado</h3>
+      <p style="font-size:1.3rem">Sacaste <b style="color:var(--amber2)">${qScore}</b> de ${QUIZ.length} (${pct}%)</p>
+      <p style="color:var(--muted)">${msg}</p>
+      <button class="btn btn-primary" id="qAgain">🔄 Jugar de nuevo</button></div>`;
+    document.getElementById("qAgain").addEventListener("click",()=>{qIdx=0;qScore=0;renderQ();});
+    updateQHud();return;
+  }
+  const item=QUIZ[qIdx];
+  let html=`<div class="q-num">Pregunta ${qIdx+1} de ${QUIZ.length}</div>
+    <div class="q-text">${item.q}</div><div class="q-opts">`;
+  const keys=["A","B","C","D"];
+  item.o.forEach((opt,i)=>{
+    html+=`<button class="q-opt" data-i="${i}"><span class="k">${keys[i]}</span><span>${opt}</span></button>`;
+  });
+  html+=`</div><div class="q-explain hidden" id="qExp"></div>`;
+  html+=`<div class="q-foot"><span class="chip">⭐ Puntos <b>${qScore}</b></span>
+    <button class="btn btn-ghost hidden" id="qNext" style="padding:10px 18px;font-size:.9rem">Siguiente →</button></div>`;
+  box.innerHTML=html;
+  document.querySelectorAll(".q-opt").forEach(b=>{
+    b.addEventListener("click",()=>{
+      const i=+b.dataset.i;
+      const correct=i===item.a;
+      document.querySelectorAll(".q-opt").forEach(x=>{x.disabled=true;
+        if(+x.dataset.i===item.a) x.classList.add("correct");
+      });
+      if(!correct){b.classList.add("wrong");}
+      else{qScore++;}
+      const exp=document.getElementById("qExp");
+      exp.textContent=(correct?"✅ ¡Correcto! ":"❌ Casi. ")+item.e;
+      exp.classList.remove("hidden");
+      document.getElementById("qNext").classList.remove("hidden");
+      updateQHud();
+    });
+  });
+  const nextBtn=document.getElementById("qNext");
+  if(nextBtn) nextBtn.addEventListener("click",()=>{qIdx++;renderQ();});
+  updateQHud();
+}
+function updateQHud(){
+  document.getElementById("qIndex").textContent=Math.min(qIdx+1,QUIZ.length);
+  document.getElementById("qScore").textContent=qScore;
+  document.getElementById("qProg").style.width=((qIdx)/QUIZ.length*100)+"%";
+}
+renderQ();
+
+/* ============================================================
+   JUEGO 3 — CONECTÁ CONCEPTOS (tocar para emparejar)
+============================================================ */
+const PAIRS=[
+  {id:"torre", e:"🗼", n:"Torre de Pulling", to:"Intervención / mantenimiento de pozos"},
+  {id:"bop",   e:"🛡️", n:"BOP",               to:"Previene reventones"},
+  {id:"varillas",e:"🔗", n:"Varillas",          to:"Transmiten el movimiento a la bomba"},
+  {id:"tubing",e:"🛢️", n:"Tubing",            to:"Conduce el petróleo a la superficie"},
+  {id:"malacate",e:"⚙️", n:"Malacate",         to:"Sube y baja la sarta de tubería"},
+  {id:"cabezal",e:"🎄", n:"Árbol de Navidad",  to:"Válvulas de control en la cabeza"},
+];
+let mSelLeft=null, mDone=0;
+document.getElementById("mTotal").textContent=PAIRS.length;
+function buildMatch(){
+  const left=document.getElementById("mLeft"), right=document.getElementById("mRight");
+  left.innerHTML="";right.innerHTML="";mDone=0;mSelLeft=null;
+  document.getElementById("mScore").textContent=0;
+  document.getElementById("mStatus").textContent="Empezá tocando un equipo 👈";
+  PAIRS.forEach(p=>{
+    const a=document.createElement("div");a.className="match-item";a.dataset.id=p.id;a.dataset.side="left";
+    a.innerHTML=`<span class="e">${p.e}</span>${p.n}`;
+    a.addEventListener("click",()=>onPick(a,"left"));
+    left.appendChild(a);
+  });
+  [...PAIRS].sort(()=>Math.random()-0.5).forEach(p=>{
+    const b=document.createElement("div");b.className="match-item";b.dataset.id=p.id;b.dataset.side="right";
+    b.innerHTML=`<span class="e">🎯</span>${p.to}`;
+    b.addEventListener("click",()=>onPick(b,"right"));
+    right.appendChild(b);
+  });
+}
+function onPick(el,side){
+  if(side==="left"){
+    document.querySelectorAll("#mLeft .match-item").forEach(x=>x.classList.remove("sel"));
+    el.classList.add("sel"); mSelLeft=el;
+    document.getElementById("mStatus").textContent="Ahora tocá su función a la derecha 👉";
+  }else{
+    if(!mSelLeft){ toast("Primero tocá un equipo a la izquierda","bad"); return; }
+    if(el.dataset.id===mSelLeft.dataset.id){
+      mSelLeft.classList.add("done");el.classList.add("done");
+      mSelLeft.classList.remove("sel");mSelLeft=null;
+      mDone++;
+      document.getElementById("mScore").textContent=mDone;
+      document.getElementById("mStatus").textContent="✅ ¡Par conectado!";
+      if(mDone===PAIRS.length){
+        toast("🎉 ¡Todos los conceptos conectados!","good");
+        document.getElementById("mStatus").textContent="🏆 ¡Perfecto! Conectaste todo.";
+      }else{
+        document.getElementById("mStatus").textContent="Bien. Elegí otro equipo 👈";
+      }
+    }else{
+      el.classList.add("wrong");setTimeout(()=>el.classList.remove("wrong"),450);
+      mSelLeft.classList.add("wrong");setTimeout(()=>mSelLeft.classList.remove("wrong"),450);
+      document.getElementById("mStatus").textContent="❌ No coinciden. Probá de nuevo.";
+    }
+  }
+}
+document.getElementById("mReset").addEventListener("click",buildMatch);
+buildMatch();
+
+/* ============================================================
+   BOP TOUCH
+============================================================ */
+(function(){
+  const valves=[...document.querySelectorAll(".bop-valve")];
+  let closed=0;
+  const msg=document.getElementById("bopMsg");
+  valves.forEach(v=>{
+    v.addEventListener("click",()=>{
+      if(v.dataset.closed) return;
+      v.dataset.closed="1";
+      const dot=v.querySelector("circle"); if(dot){dot.setAttribute("fill","#22d39a");}
+      v.querySelector("rect").setAttribute("fill","#22d39a");
+      closed++;
+      document.getElementById("bopCount").textContent=closed;
+      msg.textContent="✅ "+v.dataset.name+" cerrada correctamente.";
+      msg.style.color="var(--green)";
+      if(closed===valves.length){
+        msg.textContent="🛡️ ¡BOP totalmente cerrado! El pozo está sellado. ¡Buen trabajo, operador!";
+        toast("🛡️ ¡BOP 100% cerrado!","good");
+      }
+    });
+  });
+})();
+
+/* ============================================================
+   THREE.JS — MODELO 3D DE LA TORRE DE PULLING
+============================================================ */
+(function(){
+  if(typeof THREE==="undefined"){
+    // el motor no cargó: dejamos el fallback visible
+    document.getElementById("threedFallback").innerHTML=
+      '<div><div style="font-size:2.4rem">🔌</div><p style="margin-top:8px">No se pudo cargar el motor 3D (sin conexión).<br>El resto de la página funciona perfectamente. 🛠️</p></div>';
+    return;
+  }
+  const wrap=document.querySelector(".threed-wrap");
+  const canvas=document.getElementById("threed-canvas");
+  const fallback=document.getElementById("threedFallback");
+  let renderer,scene,camera,controls,rig,labels=[];
+  let autoRotate=true,showLabels=false;
+
+  try{
+    const r0=wrap.getBoundingClientRect();
+    renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    renderer.setSize(r0.width,r0.height,false);
+    scene=new THREE.Scene();
+    scene.fog=new THREE.Fog(0x070b12,26,60);
+
+    camera=new THREE.PerspectiveCamera(50,r0.width/r0.height,0.1,200);
+    camera.position.set(16,12,20);
+
+    if(THREE.OrbitControls){
+      controls=new THREE.OrbitControls(camera,renderer.domElement);
+      controls.enableDamping=true;controls.dampingFactor=0.08;
+      controls.minDistance=10;controls.maxDistance=42;
+      controls.maxPolarAngle=Math.PI*0.52;
+      controls.target.set(0,6,0);
+    }
+
+    // luces
+    scene.add(new THREE.AmbientLight(0x6f86a8,0.6));
+    const key=new THREE.DirectionalLight(0xffd9a0,1.1);key.position.set(12,20,10);scene.add(key);
+    const fill=new THREE.DirectionalLight(0x4a78b8,0.6);fill.position.set(-14,8,-6);scene.add(fill);
+    const rim=new THREE.PointLight(0xff8c1a,0.8,40);rim.position.set(0,18,0);scene.add(rim);
+
+    // suelo / plataforma
+    const platform=new THREE.Mesh(
+      new THREE.CylinderGeometry(11,11,0.6,48),
+      new THREE.MeshStandardMaterial({color:0x202a3a,metalness:.4,roughness:.7})
+    );
+    platform.position.y=-0.3;scene.add(platform);
+    // anillo pintado (zona)
+    const ring=new THREE.Mesh(
+      new THREE.RingGeometry(9.5,11,48),
+      new THREE.MeshBasicMaterial({color:0xf5b50a,side:THREE.DoubleSide,transparent:true,opacity:.35})
+    );
+    ring.rotation.x=-Math.PI/2;ring.position.y=0.02;scene.add(ring);
+    // rejilla de líneas
+    const grid=new THREE.GridHelper(60,30,0x2a3a52,0x16202f);
+    grid.position.y=0.01;scene.add(grid);
+
+    rig=new THREE.Group();scene.add(rig);
+
+    // ---- subestructura / base ----
+    const steel=new THREE.MeshStandardMaterial({color:0x3a4d6a,metalness:.5,roughness:.6});
+    const steelDark=new THREE.MeshStandardMaterial({color:0x2a3a52,metalness:.5,roughness:.6});
+    const yellow=new THREE.MeshStandardMaterial({color:0xf5b50a,metalness:.3,roughness:.5});
+    const red=new THREE.MeshStandardMaterial({color:0xc0392b,metalness:.4,roughness:.5});
+    const dark=new THREE.MeshStandardMaterial({color:0x1c2939,metalness:.4,roughness:.7});
+
+    function box(w,h,d,mat,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);rig.add(m);return m;}
+    function cyl(rt,rb,h,mat,x,y,z){const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,20),mat);m.position.set(x,y,z);rig.add(m);return m;}
+
+    // base del piso
+    box(7,1.2,7,steelDark,0,0.6,0);
+    // vigas A de la base
+    for(const sx of [-1,1]){
+      const beam=new THREE.Mesh(new THREE.BoxGeometry(0.5,4,0.5),steel);
+      beam.position.set(sx*2.5,2.6,0);beam.rotation.z=sx*0.12;rig.add(beam);
+    }
+
+    // ---- BOP stack (rojo) sobre el pozo ----
+    const bopGroup=new THREE.Group();bopGroup.position.set(0,1.2,0);
+    cyl(1.1,1.1,1.1,red,0,1.4,0); // preventor anular
+    cyl(1.25,1.25,1.1,new THREE.MeshStandardMaterial({color:0xb03323,metalness:.4,roughness:.5}),0,2.55,0); // ram tubería
+    cyl(1.25,1.25,1.1,new THREE.MeshStandardMaterial({color:0xa52a1c,metalness:.4,roughness:.5}),0,3.65,0); // ram ciego
+    // rams laterales
+    for(const sx of [-1,1]){
+      box(1.2,0.5,0.9,steelDark,sx*1.6,2.55,0);
+      box(1.2,0.5,0.9,steelDark,sx*1.6,3.65,0);
+    }
+    rig.add(bopGroup);
+    // pozo (tubería dentro)
+    cyl(0.35,0.35,2.2,dark,0,1.2,0);
+
+    // ---- MÁSTIL (torre) tipo A-frame, de 2 patas inclinadas + celosía ----
+    const mast=new THREE.Group();
+    mast.position.set(0,4.4,-1.2);
+    const H=14;
+    for(const sx of [-1,1]){
+      const leg=new THREE.Mesh(new THREE.BoxGeometry(0.45,H,0.45),steel);
+      leg.position.set(sx*1.6,H/2,0);
+      leg.rotation.z=sx*0.05;
+      mast.add(leg);
+    }
+    // celosía: travesaños horizontales y diagonales
+    for(let i=0;i<7;i++){
+      const y=1+i*2;
+      const bar=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.18,0.18),steelDark);
+      bar.position.set(0,y,0);mast.add(bar);
+      // diagonales (cruz)
+      const dg=new THREE.Mesh(new THREE.BoxGeometry(0.14,2.85,0.14),steelDark);
+      dg.position.set(0,y+1,0);dg.rotation.z=Math.PI/2*0.0;
+      const diag1=new THREE.Mesh(new THREE.BoxGeometry(0.14,3.0,0.14),steelDark);
+      diag1.position.set(-0.9,y+1,0);diag1.rotation.z=Math.atan2(2,1.6);
+      mast.add(diag1);
+      const diag2=new THREE.Mesh(new THREE.BoxGeometry(0.14,3.0,0.14),steelDark);
+      diag2.position.set(0.9,y+1,0);diag2.rotation.z=-Math.atan2(2,1.6);
+      mast.add(diag2);
+    }
+    rig.add(mast);
+
+    // ---- CORONA (crown block) en lo alto ----
+    const crownY=4.4+H+0.6;
+    const crown=cyl(0.9,0.9,1.2,yellow,0,crownY,-1.2); 
+    box(3.4,0.3,0.6,steelDark,0,crownY+0.9,-1.2); // travesaño superior
+
+    // ---- bloque viajero + cable ----
+    const traveler=cyl(0.5,0.5,0.8,new THREE.MeshStandardMaterial({color:0x6d8bad,metalness:.6,roughness:.4}),0,10,-1.2);
+    box(0.2,0.8,0.2,steelDark,0,9.4,-1.2); // gancho
+    // cable de corona a bloque viajero
+    const cableMat=new THREE.MeshStandardMaterial({color:0x999999,metalness:.8,roughness:.3});
+    const cable=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,3.2,8),cableMat);
+    cable.position.set(0,(crownY+10)/2,-1.2);rig.add(cable);
+
+    // ---- stand de tubing (varias tuberías paradas en el piso) ----
+    for(let i=0;i<5;i++){
+      const pipe=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,9,12),
+        new THREE.MeshStandardMaterial({color:i%2?0x6d8bad:0x9fb4d4,metalness:.6,roughness:.4}));
+      pipe.position.set(-4+i*0.5,4.6,3.4);pipe.rotation.z=0.04;
+      rig.add(pipe);
+    }
+
+    // ---- malacate (drawworks) ----
+    box(3.5,1.8,2.2,new THREE.MeshStandardMaterial({color:0x444e60,metalness:.5,roughness:.6}),3.5,1.5,2.5);
+    cyl(0.8,0.8,1.6,new THREE.MeshStandardMaterial({color:0x222a38,metalness:.7,roughness:.4}),3.5,1.5,2.5).rotation.z=Math.PI/2;
+
+    // etiquetas (proyección 3D -> 2D)
+    const labelDefs=[
+      {p:new THREE.Vector3(0,3.5,0),t:"🛡️ BOP"},
+      {p:new THREE.Vector3(0,7,0),t:"🛢️ Tubing"},
+      {p:new THREE.Vector3(0,H/2+4.4,0),t:"🗼 Mástil"},
+      {p:new THREE.Vector3(0,crownY,-1.2),t:"🛞 Corona"},
+      {p:new THREE.Vector3(3.5,1.5,2.5),t:"⚙️ Malacate"},
+      {p:new THREE.Vector3(0,10,-1.2),t:"🪝 Bloque viajero"},
+    ];
+    labelDefs.forEach(d=>{
+      const el=document.createElement("div");el.className="label3d";el.textContent=d.t;
+      el.style.display="none";wrap.appendChild(el);
+      labels.push({el,p:d.p});
+    });
+
+    fallback.style.display="none";
+
+    function resize(){
+      const r=wrap.getBoundingClientRect();
+      renderer.setSize(r.width,r.height,false);
+      if(camera){camera.aspect=r.width/r.height;camera.updateProjectionMatrix();}
+    }
+    window.addEventListener("resize",resize);
+
+    // controles UI
+    const btnLabels=document.getElementById("btnLabels");
+    const btnAuto=document.getElementById("btnAuto");
+    const btnReset=document.getElementById("btnReset");
+    const camPill=document.getElementById("camPill");
+
+    btnLabels.addEventListener("click",()=>{
+      showLabels=!showLabels;
+      btnLabels.textContent="🏷️ Etiquetas: "+(showLabels?"on":"off");
+      btnLabels.classList.toggle("on",showLabels);
+    });
+    btnAuto.addEventListener("click",()=>{
+      autoRotate=!autoRotate;
+      btnAuto.classList.toggle("on",autoRotate);
+      btnAuto.textContent=autoRotate?"🔄 Auto-rotación":"⏸️ Auto-rotación";
+      camPill.textContent="Rotación: "+(autoRotate?"automática":"manual");
+    });
+    btnReset.addEventListener("click",()=>{
+      camera.position.set(16,12,20);controls&&controls.target.set(0,6,0);
+    });
+
+    const tmp=new THREE.Vector3();
+    function animate(){
+      requestAnimationFrame(animate);
+      if(autoRotate) rig.rotation.y+=0.0035;
+      controls&&controls.update();
+      // actualizar etiquetas
+      labels.forEach(l=>{
+        if(!showLabels){l.el.style.display="none";return;}
+        tmp.copy(l.p).applyMatrix4(rig.matrixWorld);
+        tmp.project(camera);
+        const x=(tmp.x*0.5+0.5)*wrap.clientWidth;
+        const y=(-tmp.y*0.5+0.5)*wrap.clientHeight;
+        const visible=tmp.z<1;
+        l.el.style.display=visible?"block":"none";
+        l.el.style.left=x+"px";l.el.style.top=y+"px";
+      });
+      renderer.render(scene,camera);
+    }
+    animate();
+  }catch(err){
+    console.error("3D error",err);
+    document.getElementById("threedFallback").innerHTML=
+      '<div><div style="font-size:2.4rem">🔌</div><p style="margin-top:8px">El modelo 3D no pudo iniciarse en este dispositivo.<br>El resto de la página funciona. 🛠️</p></div>';
+  }
+})();
+</script>
+</body>
+</html>
