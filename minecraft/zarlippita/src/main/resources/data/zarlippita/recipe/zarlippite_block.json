@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "zarlippite",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": "zarlippita:zarlippite"
+  },
+  "result": {
+    "id": "zarlippita:zarlippite_block",
+    "count": 1
+  }
+}

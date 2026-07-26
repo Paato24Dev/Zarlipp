@@ -78,8 +78,16 @@ que en la era 1.21.
 
 ## 4. Qué se ha creado en este repo
 
-Carpeta [`minecraft/zarmining/`](./zarmining) — un plugin de Paper listo para compilar:
-**ZarMining**, un sistema de minería con niveles.
+Hay dos proyectos, uno de cada tipo, para que compares:
+
+| Carpeta | Tipo | Qué es |
+|---|---|---|
+| [`zarmining/`](./zarmining) | **Plugin** (Paper) | Minería con niveles y XP. El jugador no instala nada. |
+| [`zarlippita/`](./zarlippita) | **Mod** (Fabric) | Mineral nuevo con gema, bloque y pico. Cada jugador lo instala. |
+
+### El plugin: `zarmining/`
+
+Un plugin de Paper listo para compilar: **ZarMining**, un sistema de minería con niveles.
 
 Lo elegí porque es el equivalente en Minecraft de tu recurso
 [`esx_mining/`](../esx_mining) de FiveM: reutiliza la misma idea y **la misma fórmula de
@@ -101,21 +109,40 @@ Instrucciones de compilación e instalación: [`zarmining/README.md`](./zarminin
 
 ---
 
-## 5. Si aun así prefieres un mod
+## 5. El mod: `zarlippita/`
 
-El esqueleto mínimo para Fabric 26.2 sería:
+Carpeta [`minecraft/zarlippita/`](./zarlippita) — un mod de **Fabric para 26.2**
+que añade un mineral nuevo de verdad:
 
-```properties
-# gradle.properties
-minecraft_version=26.2
-yarn_mappings=26.2+build.1
-loader_version=0.19.3
-fabric_version=0.150.1
-```
+- **Mena de zarlippita** que genera sola en las cuevas (Y entre -60 y 20)
+- **Zarlippita**, la gema que suelta, compatible con Fortuna y Toque de seda
+- **Bloque de zarlippita** para almacenar (9 gemas ↔ 1 bloque)
+- **Pico de zarlippita**, mejor que el de netherita
 
-Con Loom 1.17, Gradle 9.5.1 y Java 25. La plantilla oficial está en
-<https://fabricmc.net/develop/template/> y genera el proyecto entero.
+Con texturas propias, recetas, drops y traducción a español e inglés.
 
-Para NeoForge, la plantilla está en <https://github.com/NeoForgeMDKs> (rama 26.2).
+Instrucciones completas: [`zarlippita/README.md`](./zarlippita/README.md).
 
-Dime si quieres que monte también uno de estos y lo hago.
+### Ojo con los tutoriales viejos
+
+Minecraft 26.x rompió el modding respecto a 1.21. Si buscas guías por internet,
+casi todas están desactualizadas. Los cambios importantes:
+
+| Antes (1.21 y anteriores) | Ahora (26.1+) |
+|---|---|
+| Mappings de Yarn | **Yarn está muerto**, se usan los nombres oficiales de Mojang |
+| `Identifier` | `ResourceLocation` |
+| `Item.Settings` | `Item.Properties` |
+| `mappings "net.fabricmc:yarn:..."` | **no se declara nada** |
+| plugin `fabric-loom` | plugin `net.fabricmc.fabric-loom` |
+| `modImplementation` | `implementation` |
+| clase `PickaxeItem` | `Item` normal + `Properties.pickaxe(...)` |
+| `ItemGroupEvents` | `CreativeModeTabEvents` (y cambió de paquete) |
+
+El motivo de fondo: desde 26.1 Mojang publica el servidor **sin ofuscar**, y eso
+hizo innecesaria media infraestructura del modding.
+
+### Si prefieres NeoForge
+
+La plantilla oficial está en <https://github.com/NeoForgeMDKs> (rama 26.2).
+Mismo concepto, otra API. Dímelo y lo monto.

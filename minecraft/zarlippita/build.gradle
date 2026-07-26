@@ -1,0 +1,47 @@
+plugins {
+    // OJO: desde 26.1 el plugin es 'net.fabricmc.fabric-loom' (modo sin ofuscar),
+    // ya NO el antiguo 'fabric-loom'.
+    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+
+    // Desde 26.1 NO se declara ninguna linea de 'mappings':
+    // Mojang publica el juego sin ofuscar y Yarn ya no se soporta.
+
+    // Desde 26.1 se usa 'implementation', no 'modImplementation' (que ya no existe).
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') {
+        expand 'version': project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+    it.options.release = 25
+}
+
+java {
+    // Minecraft 26.x exige Java 25.
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    withSourcesJar()
+}

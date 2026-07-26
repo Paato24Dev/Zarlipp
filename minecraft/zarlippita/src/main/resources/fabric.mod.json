@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "zarlippita",
+  "version": "${version}",
+  "name": "Zarlippita",
+  "description": "Anade la zarlippita: un mineral nuevo con su gema, bloque y pico, que genera en las cuevas del Overworld.",
+  "authors": [
+    "Zarlipp"
+  ],
+  "contact": {
+    "repo": "https://github.com/Paato24Dev/Zarlipp"
+  },
+  "license": "MIT",
+  "icon": "assets/zarlippita/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.zarlipp.zarlippita.Zarlippita"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~26.2",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}

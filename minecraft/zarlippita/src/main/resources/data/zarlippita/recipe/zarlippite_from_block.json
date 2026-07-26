@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "zarlippite",
+  "ingredients": [
+    "zarlippita:zarlippite_block"
+  ],
+  "result": {
+    "id": "zarlippita:zarlippite",
+    "count": 9
+  }
+}
