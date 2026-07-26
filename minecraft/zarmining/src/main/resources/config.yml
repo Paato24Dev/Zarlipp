@@ -1,0 +1,132 @@
+# ============================================================
+#  ZarMining - configuracion
+#  Los mensajes usan MiniMessage: https://docs.advntr.dev/minimessage/format.html
+# ============================================================
+
+leveling:
+  max-level: 100
+  # Formula heredada de esx_mining: base-xp + (nivel - 1) * xp-per-level
+  base-xp: 100
+  xp-per-level: 75
+
+rules:
+  # Si es true, solo se gana XP picando con un pico listado en 'pickaxes'.
+  require-pickaxe: true
+  # Ignora bloques colocados por jugadores (anti-farmeo).
+  ignore-player-placed: true
+  # Muestra XP y nivel en la action bar al picar.
+  action-bar: true
+
+vein-miner:
+  enabled: true
+  required-level: 15
+  max-blocks: 32
+
+# XP por bloque. Puedes anadir cualquier bloque por su nombre de Material.
+# Los bloques de 26.2 (sulfur / cinnabar) estan incluidos: si juegas en una
+# version anterior el plugin simplemente los ignorara con un aviso en consola.
+blocks:
+  COAL_ORE:
+    xp: 8
+  DEEPSLATE_COAL_ORE:
+    xp: 10
+  COPPER_ORE:
+    xp: 10
+  DEEPSLATE_COPPER_ORE:
+    xp: 12
+  IRON_ORE:
+    xp: 14
+  DEEPSLATE_IRON_ORE:
+    xp: 16
+  GOLD_ORE:
+    xp: 22
+  DEEPSLATE_GOLD_ORE:
+    xp: 25
+  REDSTONE_ORE:
+    xp: 18
+  DEEPSLATE_REDSTONE_ORE:
+    xp: 20
+  LAPIS_ORE:
+    xp: 20
+  DEEPSLATE_LAPIS_ORE:
+    xp: 22
+  DIAMOND_ORE:
+    xp: 45
+    double-drop-chance: 0.10
+    extra-drops:
+      - DIAMOND
+  DEEPSLATE_DIAMOND_ORE:
+    xp: 50
+    double-drop-chance: 0.12
+    extra-drops:
+      - DIAMOND
+  EMERALD_ORE:
+    xp: 40
+  DEEPSLATE_EMERALD_ORE:
+    xp: 45
+  NETHER_QUARTZ_ORE:
+    xp: 12
+  NETHER_GOLD_ORE:
+    xp: 15
+  ANCIENT_DEBRIS:
+    xp: 120
+    double-drop-chance: 0.05
+    extra-drops:
+      - NETHERITE_SCRAP
+  # --- Bloques nuevos de 26.2 "Chaos Cubed" (sulfur caves) ---
+  SULFUR:
+    xp: 16
+  CINNABAR:
+    xp: 24
+  STONE:
+    xp: 1
+  DEEPSLATE:
+    xp: 2
+
+# Picos permitidos: nivel minimo para usarlos y multiplicador de XP.
+pickaxes:
+  WOODEN_PICKAXE:
+    label: "Pico de madera"
+    required-level: 1
+    xp-multiplier: 1.0
+  STONE_PICKAXE:
+    label: "Pico de piedra"
+    required-level: 1
+    xp-multiplier: 1.1
+  IRON_PICKAXE:
+    label: "Pico de hierro"
+    required-level: 3
+    xp-multiplier: 1.25
+  GOLDEN_PICKAXE:
+    label: "Pico de oro"
+    required-level: 3
+    xp-multiplier: 1.2
+  DIAMOND_PICKAXE:
+    label: "Pico de diamante"
+    required-level: 7
+    xp-multiplier: 1.5
+  NETHERITE_PICKAXE:
+    label: "Pico de netherita"
+    required-level: 12
+    xp-multiplier: 1.8
+
+# Comandos de consola al alcanzar cierto nivel. %player% y %level% se sustituyen.
+level-rewards:
+  5:
+    - "give %player% minecraft:iron_pickaxe 1"
+  10:
+    - "give %player% minecraft:diamond 3"
+  20:
+    - "give %player% minecraft:diamond_pickaxe 1"
+
+messages:
+  action-bar: "<gold>+<xp_gained> XP <dark_gray>| <yellow>Nv. <level> <dark_gray>| <gray><xp>/<xp_needed>"
+  level-up: "<green>¡Subiste al nivel <bold><level></bold> de mineria!"
+  level-required: "<red>Necesitas nivel <level> para usar el <tool>."
+  vein-miner: "<aqua>Veta extraida: <blocks> bloques."
+  profile: "<gold>Mineria <dark_gray>» <yellow>Nivel <level> <dark_gray>| <gray>XP <xp>/<xp_needed> <dark_gray>| <gray>Bloques: <blocks>"
+  top-header: "<gold><bold>Top 10 mineros"
+  top-entry: "<gray><position>. <white><player> <dark_gray>- <yellow>Nv. <level> <dark_gray>(<gray><blocks> bloques<dark_gray>)"
+  no-permission: "<red>No tienes permiso para hacer eso."
+  reloaded: "<green>Configuracion de ZarMining recargada."
+  reset-ok: "<green>Progreso de <player> reseteado."

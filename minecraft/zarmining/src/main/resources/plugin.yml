@@ -1,0 +1,22 @@
+name: ZarMining
+version: '${version}'
+main: dev.zarlipp.zarmining.ZarMiningPlugin
+api-version: '${apiVersion}'
+description: Sistema de mineria con niveles, XP y recompensas (estilo esx_mining) para Paper.
+author: Zarlipp
+website: https://github.com/Paato24Dev/Zarlipp
+folia-supported: false
+
+commands:
+  mineria:
+    description: Muestra tu progreso de mineria y opciones de administracion.
+    usage: /mineria [top|reload|reset <jugador>]
+    aliases: [zarmining, mining]
+
+permissions:
+  zarmining.use:
+    description: Permite usar /mineria y ganar XP de mineria.
+    default: true
+  zarmining.admin:
+    description: Permite recargar la configuracion y resetear progreso.
+    default: op
