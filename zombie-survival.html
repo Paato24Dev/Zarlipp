@@ -561,8 +561,8 @@
             THIRST_DRAIN: 0.95,
             ATTACK_COOLDOWN: 650,
             ATTACK_RANGE: 190,
-            BULLET_SPEED: 12,
-            BULLET_MAX_DISTANCE: 780,
+            BULLET_SPEED: 13,
+            BULLET_MAX_DISTANCE: 1200,
             ATTACK_DAMAGE: 25,
             MAX_ZOMBIES: 18,
             WORLD_WIDTH: 800,
@@ -1205,50 +1205,86 @@
             }
         }
         
-        // === BULLET SYSTEM (PIERCING BULLETS) ===
+        // === BULLET SYSTEM - TRUE PIERCING (bullets go THROUGH multiple enemies reliably) ===
         function updateBullets() {
             if (!gameRunning || paused) return;
             
             for (let i = bullets.length - 1; i >= 0; i--) {
                 const b = bullets[i];
                 
-                // Move bullet
+                const prevX = b.x;
+                const prevY = b.y;
+                
+                // Move the bullet
                 b.x += b.vx;
                 b.y += b.vy;
-                b.life -= 12;
+                b.life -= 6;   // longer life = more chance to cross groups
                 
-                // Check bounds / max distance
+                // Remove bullet ONLY when out of the map or max range
                 if (b.x < 0 || b.x > CONFIG.WORLD_WIDTH || b.y < 0 || b.y > CONFIG.WORLD_HEIGHT || b.life <= 0) {
                     bullets.splice(i, 1);
                     continue;
                 }
                 
-                // Check collision with zombies — PIERCING: bullet goes through multiple enemies
-                for (let j = zombies.length - 1; j >= 0; j--) {
-                    const z = zombies[j];
-                    if (getDistance(b.x, b.y, z.x, z.y) < z.size + 8) {
-                        // Apply damage (slightly reduced after piercing)
-                        const currentDamage = b.damage * Math.max(0.55, 1 - (b.pierced || 0) * 0.22);
-                        z.health -= currentDamage;
+                // === TRUE PIERCING via line sampling ===
+                // Sample multiple points along the movement segment so bullets never "skip" over zombies
+                // Each zombie is hit AT MOST ONCE per bullet (using hitZombies ref array)
+                const dx = b.x - prevX;
+                const dy = b.y - prevY;
+                const segDist = Math.sqrt(dx*dx + dy*dy) || 1;
+                const numSamples = Math.max(5, Math.ceil(segDist / 6)); // dense samples (~every 6px)
+                
+                if (!b.hitZombies) b.hitZombies = [];
+                
+                for (let s = 0; s <= numSamples; s++) {
+                    const t = s / numSamples;
+                    const cx = prevX + dx * t;
+                    const cy = prevY + dy * t;
+                    
+                    for (let j = zombies.length - 1; j >= 0; j--) {
+                        const z = zombies[j];
                         
-                        createBloodEffect(z.x, z.y);
+                        // Hit radius tuned for reliable line piercing (not too big to hit side zombies accidentally)
+                        const hitRadius = z.size + 29;
                         
-                        // Knockback
-                        const d = Math.max(1, getDistance(b.x, b.y, z.x, z.y));
-                        z.x += (b.vx / d) * 8;
-                        z.y += (b.vy / d) * 8;
-                        
-                        // Count piercing
-                        b.pierced = (b.pierced || 0) + 1;
-                        
-                        // Kill if dead
-                        if (z.health <= 0) {
-                            kills++;
-                            showMessage("¡KILLED!", 450, z.x, z.y - 18);
-                            zombies.splice(j, 1);
+                        if (getDistance(cx, cy, z.x, z.y) < hitRadius) {
+                            // Skip if this bullet already pierced this exact zombie
+                            if (b.hitZombies.includes(z)) continue;
+                            
+                            b.hitZombies.push(z);
+                            
+                            const pierce = b.pierced || 0;
+                            
+                            // Damage falls off gently with each pierce
+                            const dmg = Math.max(8, Math.floor(b.damage * (1 - pierce * 0.10)));
+                            
+                            z.health -= dmg;
+                            
+                            createBloodEffect(z.x, z.y);
+                            
+                            // DEBUG: confirm piercing works (remove later if desired)
+                            if (pierce >= 1) {
+                                console.log('[PIERCE] Bullet hit zombie #' + (pierce+1) + ' (dmg=' + dmg + ') at', Math.round(cx), Math.round(cy));
+                            } else {
+                                console.log('[HIT] Bullet first hit zombie (dmg=' + dmg + ')');
+                            }
+                            
+                            // Knockback in bullet direction
+                            const zdist = Math.max(1, getDistance(cx, cy, z.x, z.y));
+                            z.x += (b.vx / zdist) * 9;
+                            z.y += (b.vy / zdist) * 9;
+                            
+                            b.pierced = pierce + 1;
+                            
+                            if (z.health <= 0) {
+                                kills++;
+                                showMessage("¡KILLED!", 350, z.x, z.y - 12);
+                                zombies.splice(j, 1);
+                            }
+                            
+                            // DO NOT break or splice bullet — continue to next samples / zombies
+                            // Bullet keeps flying until max range / bounds
                         }
-                        
-                        // Bullet continues flying through — no removal
                     }
                 }
             }
@@ -1313,7 +1349,8 @@
                 life: CONFIG.BULLET_MAX_DISTANCE || 780,
                 damage: CONFIG.ATTACK_DAMAGE,
                 angle: angle,
-                pierced: 0   // how many zombies it went through
+                pierced: 0,   // how many zombies it went through
+                hitZombies: []  // track which zombies this bullet has already damaged (for piercing)
             });
             
             // Visual muzzle flash
