@@ -1262,13 +1262,6 @@
                             
                             createBloodEffect(z.x, z.y);
                             
-                            // DEBUG: confirm piercing works (remove later if desired)
-                            if (pierce >= 1) {
-                                console.log('[PIERCE] Bullet hit zombie #' + (pierce+1) + ' (dmg=' + dmg + ') at', Math.round(cx), Math.round(cy));
-                            } else {
-                                console.log('[HIT] Bullet first hit zombie (dmg=' + dmg + ')');
-                            }
-                            
                             // Knockback in bullet direction
                             const zdist = Math.max(1, getDistance(cx, cy, z.x, z.y));
                             z.x += (b.vx / zdist) * 9;
