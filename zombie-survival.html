@@ -515,11 +515,12 @@
                 <strong style="color: #4ade80;">CONTROLES:</strong><br>
                 • <strong>WASD</strong> = Mover<br>
                 • <strong>Shift</strong> = Correr<br>
-                • <strong>ESPACIO</strong> o <strong>TOQUE</strong> = Atacar<br>
+                • <strong>ESPACIO</strong> o <strong>BOTÓN ATACAR</strong> = Dispara con <strong>AUTO-APUNTADO</strong> al zombi más cercano<br>
+                • <strong>CLIC en canvas</strong> = Disparo manual en esa dirección<br>
                 • <strong>E</strong> o botón = Recoger<br><br>
                 
                 <strong style="color: #4ade80;">MÓVIL:</strong><br>
-                Usa el joystick + botón rojo.
+                Joystick + botón rojo (auto-apunta al enemigo más cercano).
             </div>
             
             <button onclick="hideInstructions()" class="retro-btn" style="width: 100%; margin-top: 14px; background: #292524; padding: 9px; font-size: 12px;">
@@ -1326,7 +1327,18 @@
             let angle = player.facing;
             
             if (tx !== null && ty !== null) {
+                // Manual aim (clic del ratón o toque directo en canvas)
                 angle = Math.atan2(ty - player.y, tx - player.x);
+            } else {
+                // === AUTO-APUNTADO ===
+                // Al tocar el botón de ATACAR (o SPACE), apunta automáticamente al zombi más cercano
+                const target = findNearestZombie(520); // rango generoso para auto-aim
+                if (target) {
+                    angle = Math.atan2(target.y - player.y, target.x - player.x);
+                    // Actualizamos facing para que el jugador mire hacia el objetivo
+                    player.facing = angle;
+                }
+                // Si no hay zombis cerca, dispara en la dirección actual
             }
             
             // Fire a visible bullet (piercing)
@@ -1348,8 +1360,6 @@
             
             // Visual muzzle flash
             createAttackEffect(startX, startY, angle, true);
-            
-            // Small message if no bullet hits (will be updated by bullet logic)
         }
         
         function showMessage(text, dur, x = null, y = null, damage = false) {
@@ -1705,6 +1715,22 @@
         
         function getDistance(x1, y1, x2, y2) {
             return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+        }
+
+        // === AUTO-AIM: encuentra el zombi más cercano dentro del rango ===
+        function findNearestZombie(maxRange = 480) {
+            let nearest = null;
+            let minDist = Infinity;
+            
+            for (let i = 0; i < zombies.length; i++) {
+                const z = zombies[i];
+                const d = getDistance(player.x, player.y, z.x, z.y);
+                if (d < minDist && d <= maxRange) {
+                    minDist = d;
+                    nearest = z;
+                }
+            }
+            return nearest;
         }
         
         function pauseGame() {
