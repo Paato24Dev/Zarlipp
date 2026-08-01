@@ -560,9 +560,9 @@
             HUNGER_DRAIN: 0.65,
             THIRST_DRAIN: 0.95,
             ATTACK_COOLDOWN: 650,
-            ATTACK_RANGE: 180,
-            BULLET_SPEED: 11.5,
-            BULLET_MAX_DISTANCE: 650,
+            ATTACK_RANGE: 190,
+            BULLET_SPEED: 12,
+            BULLET_MAX_DISTANCE: 720,
             ATTACK_DAMAGE: 25,
             MAX_ZOMBIES: 18,
             WORLD_WIDTH: 800,
@@ -1057,11 +1057,11 @@
                 type = 'food'; val = 26 + Math.random() * 7;
             } else if (roll < 0.60) {
                 type = 'water'; val = 27 + Math.random() * 8;
-            } else if (roll < 0.78) {
+            } else if (roll < 0.72) {
                 type = 'medkit'; val = 30;
             } else {
-                // STAMINA PROVISION - high chance so player doesn't get stuck
-                type = 'stamina'; val = 50 + Math.random() * 18;
+                // STAMINA PROVISION — very frequent now
+                type = 'stamina'; val = 55 + Math.random() * 20;
             }
             
             items.push({
@@ -1588,39 +1588,47 @@
             });
             ctx.globalAlpha = 1;
             
-            // === VISIBLE BULLETS (bright yellow projectiles with long trail) ===
+            // === VISIBLE BULLETS - VERY OBVIOUS YELLOW PROJECTILES ===
             bullets.forEach(b => {
-                const alpha = Math.min(1, b.life / 140);
+                const alpha = Math.min(1, b.life / 120);
                 ctx.globalAlpha = alpha;
                 
-                // Thick bright yellow body
+                // Very thick bright yellow body
                 ctx.strokeStyle = '#fef08c';
-                ctx.lineWidth = 5;
+                ctx.lineWidth = 7;
                 ctx.beginPath();
-                ctx.moveTo(b.x - b.vx * 1.1, b.y - b.vy * 1.1);
+                ctx.moveTo(b.x - b.vx * 1.6, b.y - b.vy * 1.6);
                 ctx.lineTo(b.x, b.y);
                 ctx.stroke();
                 
-                // White hot core
+                // White hot glowing core
                 ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 2.5;
+                ctx.lineWidth = 3.5;
                 ctx.beginPath();
-                ctx.moveTo(b.x - b.vx * 0.6, b.y - b.vy * 0.6);
+                ctx.moveTo(b.x - b.vx * 0.9, b.y - b.vy * 0.9);
                 ctx.lineTo(b.x, b.y);
                 ctx.stroke();
                 
                 // Big bright head
                 ctx.fillStyle = '#fef08c';
                 ctx.beginPath();
-                ctx.arc(b.x, b.y, 4.5, 0, Math.PI * 2);
+                ctx.arc(b.x, b.y, 6, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Very long glowing trail
+                // Extremely long orange/yellow trail
                 ctx.strokeStyle = '#ca8a04';
-                ctx.lineWidth = 3;
+                ctx.lineWidth = 4;
                 ctx.beginPath();
-                ctx.moveTo(b.x - b.vx * 4.5, b.y - b.vy * 4.5);
-                ctx.lineTo(b.x - b.vx * 1.4, b.y - b.vy * 1.4);
+                ctx.moveTo(b.x - b.vx * 6.5, b.y - b.vy * 6.5);
+                ctx.lineTo(b.x - b.vx * 1.8, b.y - b.vy * 1.8);
+                ctx.stroke();
+                
+                // Extra bright glow trail
+                ctx.strokeStyle = '#fef08c';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(b.x - b.vx * 5, b.y - b.vy * 5);
+                ctx.lineTo(b.x - b.vx * 1.2, b.y - b.vy * 1.2);
                 ctx.stroke();
             });
             ctx.globalAlpha = 1;
