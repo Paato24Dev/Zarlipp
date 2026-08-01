@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>🧟 ZOMBIE APOCALYPSE - Survival</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap');
         
@@ -12,171 +11,65 @@
             --primary: #9f1239;
         }
         
-        body {
-            font-family: 'Press Start 2P', system-ui;
+        * {
+            box-sizing: border-box;
         }
         
-        .retro-text {
-            text-shadow: 3px 3px 0 #000;
-            letter-spacing: 2px;
+        body {
+            font-family: 'Press Start 2P', system-ui, -apple-system, sans-serif;
+            background: #1c1917;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .apocalypse-bg {
+            background: linear-gradient(#1c1917, #292524);
+        }
+        
+        .retro-btn {
+            font-family: 'Press Start 2P', system-ui, sans-serif;
+            text-shadow: 2px 2px 0 #000;
+            transition: all 0.1s ease;
+            border: 4px solid #451a03;
+            background: #451a03;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .retro-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .retro-btn:active {
+            transform: translateY(2px);
+        }
+        
+        .stats-panel {
+            background: #1c1917;
+            border: 4px solid #451a03;
+            box-shadow: 0 0 0 4px #111;
         }
         
         .game-canvas {
             image-rendering: pixelated;
             border: 6px solid #451a03;
-            box-shadow: 0 0 0 8px #1c1917,
-                        0 25px 50px -12px rgb(0 0 0 / 0.5);
+            box-shadow: 0 0 0 8px #1c1917, 0 10px 30px rgba(0,0,0,0.6);
             max-width: 100%;
             height: auto;
             touch-action: none;
-        }
-        
-        /* Mobile Responsive Styles */
-        @media (max-width: 768px) {
-            .game-canvas {
-                border-width: 4px;
-                max-width: 100%;
-                height: auto;
-                box-shadow: 0 0 0 4px #1c1917;
-            }
-            
-            .stat-bar {
-                height: 17px;
-                border-width: 2px;
-            }
-            
-            .hud-label {
-                font-size: 8px;
-            }
-            
-            #gameScreen .px-4 {
-                padding-left: 6px;
-                padding-right: 6px;
-            }
-            
-            .retro-btn {
-                font-size: 12px !important;
-                padding: 9px 13px !important;
-            }
-            
-            .stats-panel {
-                border-width: 3px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .game-canvas {
-                max-height: 55vh;
-                border-width: 3px;
-            }
-            
-            .menu-title {
-                font-size: 2.3rem !important;
-            }
-            
-            .stat-bar {
-                height: 14px;
-            }
-            
-            .hud-label {
-                display: none;
-            }
-            
-            .top-hud {
-                flex-wrap: wrap;
-                gap: 4px;
-            }
-        }
-        
-        /* Mobile Controls */
-        .mobile-controls {
-            display: none;
-        }
-        
-        @media (max-width: 768px) {
-            .mobile-controls {
-                display: flex;
-                position: fixed;
-                bottom: 12px;
-                left: 0;
-                right: 0;
-                padding: 0 12px;
-                z-index: 100;
-                justify-content: space-between;
-                align-items: flex-end;
-                pointer-events: none;
-            }
-            
-            .mobile-controls > * {
-                pointer-events: auto;
-            }
-            
-            .joystick-container {
-                width: 92px;
-                height: 92px;
-                background: rgba(28, 25, 23, 0.85);
-                border: 3px solid #451a03;
-                border-radius: 9999px;
-                position: relative;
-                touch-action: none;
-            }
-            
-            .joystick {
-                width: 42px;
-                height: 42px;
-                background: #57534e;
-                border: 3px solid #78350f;
-                border-radius: 9999px;
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                box-shadow: 0 3px 0 #292524;
-                transition: transform 0.05s;
-            }
-            
-            .action-buttons {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-            
-            .mobile-btn {
-                width: 68px;
-                height: 48px;
-                background: #451a03;
-                border: 3px solid #78350f;
-                color: white;
-                font-family: 'Press Start 2P', system-ui;
-                font-size: 10px;
-                font-weight: bold;
-                border-radius: 6px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 4px 0 #292524;
-                user-select: none;
-            }
-            
-            .mobile-btn:active {
-                transform: translateY(2px);
-                box-shadow: 0 1px 0 #292524;
-            }
-            
-            .attack-btn {
-                width: 78px;
-                height: 78px;
-                background: #9f1239;
-                border-color: #b91c1c;
-                font-size: 13px;
-                border-radius: 9999px;
-                box-shadow: 0 6px 0 #450a0a;
-            }
+            display: block;
+            background: #292524;
         }
         
         .stat-bar {
-            height: 22px;
-            background: #1c1917;
+            height: 18px;
+            background: #111;
             border: 3px solid #451a03;
             position: relative;
             overflow: hidden;
@@ -188,519 +81,450 @@
             position: relative;
         }
         
-        .stat-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(
-                90deg,
-                transparent 25%,
-                rgba(255,255,255,0.25) 50%,
-                transparent 75%
-            );
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-        
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
         .hud-label {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             letter-spacing: 1px;
             text-shadow: 1px 1px 0 #000;
         }
         
-        .pixel-border {
-            border: 4px solid #451a03;
-            box-shadow: 0 0 0 4px #1c1917;
-        }
-        
-        .zombie {
-            animation: zombie-walk 0.6s infinite alternate;
-        }
-        
-        .survivor {
-            transition: transform 0.1s;
-        }
-        
-        .apocalypse-bg {
-            background: linear-gradient(#1c1917, #292524);
-        }
-        
-        .game-container {
-            background: #111;
-        }
-        
-        .stat-icon {
-            filter: drop-shadow(2px 2px 0 #000);
-        }
-        
         .menu-title {
-            font-size: 3.2rem;
+            font-size: 2.8rem;
             line-height: 1;
-            text-shadow: 4px 4px 0 #000,
-                        -2px -2px 0 #000;
+            text-shadow: 4px 4px 0 #000, -2px -2px 0 #000;
         }
         
-        canvas {
-            background: #1c1917;
+        .perk-option {
+            transition: all 0.1s;
         }
         
-        .retro-btn {
-            transition: all 0.1s ease;
-            font-family: 'Press Start 2P', system-ui;
+        .perk-option.selected {
+            border-color: #4ade80 !important;
+            background: #166534 !important;
+        }
+        
+        .floating-text {
+            position: absolute;
+            font-size: 13px;
+            font-weight: bold;
+            pointer-events: none;
             text-shadow: 2px 2px 0 #000;
+            z-index: 999;
         }
         
-        .retro-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+        /* Mobile First Styles */
+        @media (max-width: 768px) {
+            .game-canvas {
+                border-width: 4px;
+                box-shadow: 0 0 0 4px #1c1917;
+            }
+            
+            .stat-bar {
+                height: 14px;
+                border-width: 2px;
+            }
+            
+            .hud-label {
+                font-size: 7px;
+            }
+            
+            .menu-title {
+                font-size: 2.1rem !important;
+            }
+            
+            .retro-btn {
+                font-size: 13px !important;
+                padding: 10px 14px !important;
+            }
         }
         
-        .retro-btn:active {
-            transform: translateY(1px);
+        .mobile-controls {
+            position: fixed;
+            bottom: 8px;
+            left: 0;
+            right: 0;
+            padding: 0 10px;
+            z-index: 200;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: none;
         }
         
-        .zombie-red {
-            color: #b91c1c;
+        .mobile-controls > * {
+            pointer-events: all;
         }
         
-        .survivor-green {
-            color: #166534;
+        .joystick-container {
+            width: 85px;
+            height: 85px;
+            background: rgba(28, 25, 23, 0.9);
+            border: 3px solid #451a03;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 0 3px #111;
         }
         
-        .stats-panel {
-            background: #1c1917;
-            border: 4px solid #451a03;
+        .joystick {
+            width: 36px;
+            height: 36px;
+            background: #57534e;
+            border: 3px solid #78350f;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 3px 0 #292524;
+            transition: transform 0.05s linear;
         }
         
-        .info-text {
-            font-size: 10px;
-            line-height: 1.3;
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
         }
         
-        .game-over {
-            animation: fadeInScale 0.4s ease forwards;
+        .mobile-btn {
+            width: 64px;
+            height: 44px;
+            background: #451a03;
+            border: 3px solid #78350f;
+            color: white;
+            font-family: 'Press Start 2P', system-ui, sans-serif;
+            font-size: 9px;
+            font-weight: bold;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 0 #292524;
+            user-select: none;
+            text-align: center;
+            line-height: 1;
+        }
+        
+        .attack-btn {
+            width: 72px;
+            height: 72px;
+            background: #9f1239;
+            border-color: #b91c1c;
+            font-size: 11px;
+            border-radius: 9999px;
+            box-shadow: 0 6px 0 #450a0a;
+            flex-direction: column;
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: flex;
+        }
+        
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .overlay.active {
+            display: flex;
         }
     </style>
 </head>
-<body class="bg-zinc-950 text-white overflow-hidden">
-    <!-- TITLE / MENU SCREEN -->
-    <div id="menuScreen" class="min-h-screen flex items-center justify-center apocalypse-bg">
-        <div class="max-w-md w-full px-6">
-            <!-- Header -->
-            <div class="text-center mb-8">
-                <div class="flex items-center justify-center gap-x-3 mb-2">
-                    <div class="text-6xl">🧟</div>
-                    <div>
-                        <h1 class="menu-title font-black text-5xl tracking-tighter text-red-600">ZOMBIE</h1>
-                        <h1 class="menu-title font-black text-5xl tracking-tighter text-red-700 -mt-2">APOCALYPSE</h1>
-                    </div>
-                </div>
-                <p class="text-amber-400 text-sm tracking-[3px] font-bold">SURVIVAL • 1987</p>
-                <div class="mt-1 text-xs text-zinc-500">v1.0 — FIRST BUILD</div>
+<body>
+    <!-- MENU SCREEN -->
+    <div id="menuScreen" class="min-h-screen flex items-center justify-center apocalypse-bg" style="min-height: 100vh; padding: 20px;">
+        <div style="max-width: 380px; width: 100%; text-align: center;">
+            <div style="margin-bottom: 30px;">
+                <div style="font-size: 3.5rem; margin-bottom: 4px;">🧟</div>
+                <h1 style="font-size: 2.8rem; line-height: 1; margin: 0; color: #b91c1c; text-shadow: 4px 4px 0 #000;">ZOMBIE</h1>
+                <h1 style="font-size: 2.8rem; line-height: 1; margin: -8px 0 0 0; color: #991b1b; text-shadow: 4px 4px 0 #000;">APOCALYPSE</h1>
+                <p style="color: #f59e0b; font-size: 11px; margin-top: 4px; letter-spacing: 2px;">SURVIVAL • 1987</p>
             </div>
             
-            <div class="space-y-3">
-                <!-- Start Button -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
                 <button onclick="showCharacterSelect()" 
-                        class="retro-btn w-full bg-red-700 hover:bg-red-600 active:bg-red-800 transition-colors text-white font-bold py-4 px-8 text-xl border-4 border-red-900 flex items-center justify-center gap-x-3">
-                    <span>▶️</span>
-                    <span>COMENZAR SUPERVIVENCIA</span>
+                        class="retro-btn" 
+                        style="width: 100%; padding: 16px 20px; font-size: 15px; background: #9f1239; border-color: #450a0a;">
+                    ▶️ COMENZAR SUPERVIVENCIA
                 </button>
                 
-                <div class="grid grid-cols-2 gap-3">
+                <button onclick="quickPlay()" 
+                        class="retro-btn" 
+                        style="width: 100%; padding: 12px 20px; font-size: 13px; background: #854d0e; border-color: #451a03;">
+                    ⚡ JUGAR YA (prueba rápida)
+                </button>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <button onclick="showInstructions()" 
-                            class="retro-btn bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-900 transition-colors text-white font-bold py-3 px-4 text-sm border-4 border-zinc-700 flex items-center justify-center gap-x-2">
-                        <span>📜</span>
-                        <span>INSTRUCCIONES</span>
+                            class="retro-btn" style="padding: 11px 10px; font-size: 11px; background: #292524;">
+                        📜 INSTRUCCIONES
                     </button>
-                    
                     <button onclick="showCredits()" 
-                            class="retro-btn bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-900 transition-colors text-white font-bold py-3 px-4 text-sm border-4 border-zinc-700 flex items-center justify-center gap-x-2">
-                        <span>👤</span>
-                        <span>CRÉDITOS</span>
+                            class="retro-btn" style="padding: 11px 10px; font-size: 11px; background: #292524;">
+                        👤 CRÉDITOS
                     </button>
                 </div>
             </div>
             
-            <div class="mt-8 text-center">
-                <div class="text-[10px] text-zinc-500 flex items-center justify-center gap-x-2">
-                    <div class="h-px flex-1 bg-zinc-800"></div>
-                    <span>HTML5 • CANVAS • SURVIVAL</span>
-                    <div class="h-px flex-1 bg-zinc-800"></div>
-                </div>
+            <div style="margin-top: 30px; font-size: 9px; color: #57534e;">
+                HTML5 • CANVAS • SURVIVAL<br>
+                v1.2 — MOBILE READY
             </div>
         </div>
     </div>
     
     <!-- CHARACTER SELECT -->
-    <div id="characterScreen" class="min-h-screen flex items-center justify-center apocalypse-bg hidden">
-        <div class="max-w-2xl w-full px-5">
-            <div class="text-center mb-6">
-                <h2 class="text-4xl font-black tracking-tighter text-amber-300">ELIGE TU DESTINO</h2>
-                <p class="text-xs mt-1 text-zinc-400">VENTAJAS &amp; DESVENTAJAS</p>
+    <div id="characterScreen" class="min-h-screen flex items-center justify-center apocalypse-bg" style="min-height: 100vh; padding: 15px; display: none;">
+        <div style="width: 100%; max-width: 520px;">
+            <div style="text-align: center; margin-bottom: 15px;">
+                <h2 style="font-size: 1.6rem; color: #fcd34d; margin: 0;">ELIGE TU DESTINO</h2>
+                <p style="font-size: 10px; color: #78716c; margin: 2px 0 0;">VENTAJAS &amp; DESVENTAJAS</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
                 
                 <!-- Advantages -->
-                <div class="stats-panel p-5">
-                    <div class="flex items-center gap-x-2 mb-3">
-                        <span class="text-emerald-400 text-xl">★</span>
-                        <span class="font-bold text-emerald-300">VENTAJAS</span>
+                <div class="stats-panel" style="padding: 12px;">
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                        <span style="color: #4ade80; font-size: 16px;">★</span>
+                        <span style="font-weight: bold; color: #4ade80; font-size: 12px;">VENTAJAS</span>
                     </div>
-                    
-                    <div class="space-y-2" id="advantages">
-                        <!-- Populated by JS -->
-                    </div>
+                    <div id="advantages" style="display: flex; flex-direction: column; gap: 6px;"></div>
                 </div>
                 
                 <!-- Disadvantages -->
-                <div class="stats-panel p-5">
-                    <div class="flex items-center gap-x-2 mb-3">
-                        <span class="text-red-400 text-xl">⚠</span>
-                        <span class="font-bold text-red-300">DESVENTAJAS</span>
+                <div class="stats-panel" style="padding: 12px;">
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                        <span style="color: #f87171; font-size: 16px;">⚠</span>
+                        <span style="font-weight: bold; color: #f87171; font-size: 12px;">DESVENTAJAS</span>
                     </div>
-                    
-                    <div class="space-y-2" id="disadvantages">
-                        <!-- Populated by JS -->
-                    </div>
+                    <div id="disadvantages" style="display: flex; flex-direction: column; gap: 6px;"></div>
                 </div>
             </div>
             
-            <div class="mt-5 flex justify-center gap-x-3">
+            <div style="text-align: center;">
                 <button onclick="startGame()" 
-                        class="retro-btn bg-emerald-600 hover:bg-emerald-500 px-9 py-[13px] text-lg font-bold border-4 border-emerald-900 flex items-center gap-x-2">
-                    <span>🧟</span> 
-                    <span>INICIAR SUPERVIVENCIA</span>
+                        class="retro-btn" 
+                        style="background: #166534; padding: 13px 28px; font-size: 14px; border-color: #14532d; margin-bottom: 8px;">
+                    🧟 INICIAR SUPERVIVENCIA
                 </button>
-                
+                <br>
                 <button onclick="backToMenu()" 
-                        class="retro-btn bg-zinc-700 hover:bg-zinc-600 px-5 py-[13px] text-sm font-bold border-4 border-zinc-800">
+                        class="retro-btn" 
+                        style="background: #292524; padding: 8px 18px; font-size: 11px; border-color: #1f2937;">
                     VOLVER
                 </button>
             </div>
             
-            <div class="mt-3 text-center text-xs text-amber-300/70">Selecciona 1 ventaja y 1 desventaja</div>
+            <div style="text-align: center; font-size: 9px; color: #854d0e; margin-top: 8px;">
+                Selecciona 1 ventaja y 1 desventaja
+            </div>
         </div>
     </div>
     
     <!-- GAME SCREEN -->
-    <div id="gameScreen" class="min-h-screen hidden flex flex-col apocalypse-bg">
-        <!-- Top HUD -->
-        <div class="px-4 pt-3 pb-2 bg-zinc-900 border-b-4 border-zinc-800">
-            <div class="max-w-[820px] mx-auto">
-                <div class="flex items-center justify-between mb-1.5">
-                    <!-- Stats -->
-                    <div class="flex items-center gap-x-3 flex-1">
-                        
-                        <!-- Health -->
-                        <div class="flex items-center gap-x-1.5 flex-1 max-w-[165px]">
-                            <div class="flex items-center gap-x-1.5 w-[54px]">
-                                <span class="text-xl">❤️</span>
-                                <span class="hud-label text-red-400">SALUD</span>
+    <div id="gameScreen" class="screen" style="flex-direction: column; min-height: 100vh; background: #1c1917;">
+        
+        <!-- HUD -->
+        <div style="background: #111; border-bottom: 5px solid #451a03; padding: 6px 8px;">
+            <div style="max-width: 820px; margin: 0 auto;">
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    
+                    <!-- Health -->
+                    <div style="flex: 1; min-width: 120px; display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 15px;">❤️</span>
+                        <div style="flex: 1;">
+                            <div class="stat-bar" style="width: 100%;">
+                                <div id="healthBar" class="stat-fill" style="width: 100%; background: #b91c1c;"></div>
                             </div>
-                            <div class="flex-1">
-                                <div class="stat-bar w-full">
-                                    <div id="healthBar" class="stat-fill bg-red-600" style="width: 100%"></div>
-                                </div>
-                            </div>
-                            <span id="healthValue" class="font-bold text-xs w-[30px] text-right text-red-300">100</span>
                         </div>
-                        
-                        <!-- Hunger -->
-                        <div class="flex items-center gap-x-1.5 flex-1 max-w-[165px]">
-                            <div class="flex items-center gap-x-1.5 w-[54px]">
-                                <span class="text-xl">🍖</span>
-                                <span class="hud-label text-amber-400">HAMBRE</span>
-                            </div>
-                            <div class="flex-1">
-                                <div class="stat-bar w-full">
-                                    <div id="hungerBar" class="stat-fill bg-amber-600" style="width: 100%"></div>
-                                </div>
-                            </div>
-                            <span id="hungerValue" class="font-bold text-xs w-[30px] text-right text-amber-300">100</span>
-                        </div>
-                        
-                        <!-- Thirst -->
-                        <div class="flex items-center gap-x-1.5 flex-1 max-w-[165px]">
-                            <div class="flex items-center gap-x-1.5 w-[54px]">
-                                <span class="text-xl">💧</span>
-                                <span class="hud-label text-sky-400">SED</span>
-                            </div>
-                            <div class="flex-1">
-                                <div class="stat-bar w-full">
-                                    <div id="thirstBar" class="stat-fill bg-sky-600" style="width: 100%"></div>
-                                </div>
-                            </div>
-                            <span id="thirstValue" class="font-bold text-xs w-[30px] text-right text-sky-300">100</span>
-                        </div>
-                        
-                        <!-- Stamina -->
-                        <div class="flex items-center gap-x-1.5 flex-1 max-w-[165px]">
-                            <div class="flex items-center gap-x-1.5 w-[54px]">
-                                <span class="text-xl">⚡</span>
-                                <span class="hud-label text-yellow-400">ESTAMINA</span>
-                            </div>
-                            <div class="flex-1">
-                                <div class="stat-bar w-full">
-                                    <div id="staminaBar" class="stat-fill bg-yellow-500" style="width: 100%"></div>
-                                </div>
-                            </div>
-                            <span id="staminaValue" class="font-bold text-xs w-[30px] text-right text-yellow-300">100</span>
-                        </div>
+                        <span id="healthValue" style="width: 26px; text-align: right; font-size: 11px; font-weight: bold; color: #f87171;">100</span>
                     </div>
                     
-                    <!-- Info -->
-                    <div class="flex items-center gap-x-4 text-xs">
-                        <div class="bg-zinc-800 border border-zinc-700 px-2.5 py-1 flex items-center gap-x-1.5">
-                            <span class="text-emerald-400">⏱</span>
-                            <span id="survivalTime" class="font-bold tabular-nums">00:00</span>
+                    <!-- Hunger -->
+                    <div style="flex: 1; min-width: 120px; display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 15px;">🍖</span>
+                        <div style="flex: 1;">
+                            <div class="stat-bar" style="width: 100%;">
+                                <div id="hungerBar" class="stat-fill" style="width: 100%; background: #c2410c;"></div>
+                            </div>
                         </div>
-                        <div class="bg-zinc-800 border border-zinc-700 px-2.5 py-1 flex items-center gap-x-1.5">
-                            <span class="text-red-400">☠️</span>
-                            <span id="killCount" class="font-bold tabular-nums">0</span>
+                        <span id="hungerValue" style="width: 26px; text-align: right; font-size: 11px; font-weight: bold; color: #fcd34d;">100</span>
+                    </div>
+                    
+                    <!-- Thirst -->
+                    <div style="flex: 1; min-width: 120px; display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 15px;">💧</span>
+                        <div style="flex: 1;">
+                            <div class="stat-bar" style="width: 100%;">
+                                <div id="thirstBar" class="stat-fill" style="width: 100%; background: #1e40af;"></div>
+                            </div>
+                        </div>
+                        <span id="thirstValue" style="width: 26px; text-align: right; font-size: 11px; font-weight: bold; color: #60a5fa;">100</span>
+                    </div>
+                    
+                    <!-- Stamina -->
+                    <div style="flex: 1; min-width: 120px; display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 15px;">⚡</span>
+                        <div style="flex: 1;">
+                            <div class="stat-bar" style="width: 100%;">
+                                <div id="staminaBar" class="stat-fill" style="width: 100%; background: #ca8a04;"></div>
+                            </div>
+                        </div>
+                        <span id="staminaValue" style="width: 26px; text-align: right; font-size: 11px; font-weight: bold; color: #fde047;">100</span>
+                    </div>
+                    
+                    <div style="display: flex; gap: 6px; font-size: 10px; margin-left: auto;">
+                        <div style="background: #292524; padding: 3px 7px; border: 2px solid #451a03; white-space: nowrap;">
+                            ⏱ <span id="survivalTime" style="font-weight: bold;">00:00</span>
+                        </div>
+                        <div style="background: #292524; padding: 3px 7px; border: 2px solid #451a03; white-space: nowrap;">
+                            ☠️ <span id="killCount" style="font-weight: bold;">0</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Game Area -->
-        <div class="flex-1 flex items-center justify-center p-2 sm:p-4 relative">
-            <div class="relative mx-auto" style="max-width: 100%;">
-                <!-- Canvas -->
+        <!-- CANVAS AREA -->
+        <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px; position: relative;">
+            <div style="position: relative; max-width: 100%;">
                 <canvas id="gameCanvas" width="800" height="600" 
-                        class="game-canvas rounded-none cursor-crosshair mx-auto"></canvas>
+                        style="max-width: 100%; height: auto; border: 5px solid #451a03; box-shadow: 0 0 0 5px #111; display: block; background: #292524;"></canvas>
                 
-                <!-- Overlay info on canvas -->
-                <div id="canvasOverlay" class="absolute top-2 left-2 bg-black/70 px-2 py-0.5 text-[10px] font-bold pointer-events-none rounded">
-                    <div class="flex items-center gap-x-1 text-emerald-400">
-                        <span id="playerStatus">SUPERVIVIENTE</span>
-                    </div>
+                <div id="canvasOverlay" style="position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.7); padding: 2px 7px; font-size: 10px; border-radius: 3px;">
+                    <span id="playerStatus" style="color: #4ade80; font-weight: bold;">SUPERVIVIENTE</span>
                 </div>
                 
-                <!-- Minimap / Legend -->
-                <div class="absolute bottom-2 right-2 bg-zinc-900/90 border border-zinc-700 px-1.5 py-1 text-[8px] rounded leading-none">
-                    <div class="flex items-center gap-x-2">
-                        <div class="flex items-center gap-x-1">
-                            <div class="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                            <span class="text-emerald-300">Tú</span>
+                <div style="position: absolute; bottom: 6px; right: 6px; background: rgba(28,25,23,0.9); border: 2px solid #451a03; padding: 3px 6px; font-size: 8px; border-radius: 3px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <div style="display: flex; align-items: center; gap: 3px;">
+                            <div style="width: 7px; height: 7px; background: #4ade80; border-radius: 50%;"></div>
+                            <span style="color: #4ade80;">Tú</span>
                         </div>
-                        <div class="flex items-center gap-x-1">
-                            <div class="w-2 h-2 bg-red-600 rounded-full"></div>
-                            <span class="text-red-300">Zombis</span>
+                        <div style="display: flex; align-items: center; gap: 3px;">
+                            <div style="width: 7px; height: 7px; background: #b91c1c; border-radius: 50%;"></div>
+                            <span style="color: #f87171;">Zombis</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Bottom Controls -->
-        <div class="px-4 pb-4 bg-zinc-900 border-t-4 border-zinc-800">
-            <div class="max-w-[820px] mx-auto">
-                <!-- Desktop Controls -->
-                <div class="hidden md:flex items-center justify-between">
-                    <div class="flex items-center gap-x-2 text-xs">
-                        <div class="flex gap-x-1">
-                            <div class="bg-zinc-800 px-2 py-1 border border-zinc-700 text-center text-[10px]">
-                                <span class="font-bold text-amber-300">WASD</span> <span class="text-zinc-400">MOVER</span>
-                            </div>
-                            <div class="bg-zinc-800 px-2 py-1 border border-zinc-700 text-center text-[10px]">
-                                <span class="font-bold text-yellow-300">SHIFT</span> <span class="text-zinc-400">CORRER</span>
-                            </div>
-                            <div class="bg-zinc-800 px-2 py-1 border border-zinc-700 text-center text-[10px]">
-                                <span class="font-bold text-sky-300">ESPACIO</span> <span class="text-zinc-400">ATACAR</span>
-                            </div>
-                            <div class="bg-zinc-800 px-2 py-1 border border-zinc-700 text-center text-[10px]">
-                                <span class="font-bold text-emerald-300">E</span> <span class="text-zinc-400">RECOGER</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center gap-x-2">
-                        <button onclick="pauseGame()" 
-                                class="retro-btn text-xs px-4 py-1.5 bg-zinc-700 hover:bg-zinc-600 transition-colors border border-zinc-600 font-bold flex items-center gap-x-1">
-                            <span>⏸</span>
-                            <span>PAUSA</span>
-                        </button>
-                        
-                        <button onclick="endGame()" 
-                                class="retro-btn text-xs px-4 py-1.5 bg-red-800 hover:bg-red-700 transition-colors border border-red-900 font-bold flex items-center gap-x-1">
-                            <span>🏠</span>
-                            <span>SALIR</span>
-                        </button>
-                    </div>
+        <!-- Bottom bar -->
+        <div style="background: #111; border-top: 5px solid #451a03; padding: 8px 10px;">
+            <div style="max-width: 820px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; font-size: 9px;">
+                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                    <div style="background: #292524; padding: 2px 5px; border: 1px solid #451a03;">WASD = Mover</div>
+                    <div style="background: #292524; padding: 2px 5px; border: 1px solid #451a03;">ESPACIO = Atacar</div>
                 </div>
-                
-                <!-- Mobile hint -->
-                <div class="md:hidden text-center text-[9px] text-zinc-400 py-1">
-                    Usa el joystick para moverte • Botón rojo para atacar
+                <div>
+                    <button onclick="pauseGame()" style="background: #292524; border: 2px solid #451a03; color: white; font-size: 9px; padding: 4px 8px; font-family: 'Press Start 2P', sans-serif;">PAUSA</button>
                 </div>
             </div>
         </div>
         
         <!-- MOBILE CONTROLS -->
-        <div class="mobile-controls md:hidden">
-            <!-- Virtual Joystick -->
+        <div class="mobile-controls" style="display: none;">
             <div id="joystickContainer" class="joystick-container">
                 <div id="joystick" class="joystick"></div>
             </div>
             
             <div class="action-buttons">
-                <!-- Pickup Button -->
-                <button id="pickupBtn" 
-                        class="mobile-btn flex items-center justify-center text-xs"
-                        style="width:58px; height:42px; font-size:9px;">
-                    <span style="font-size:13px;">📦</span><br>
-                    <span style="font-size:7px; line-height:1;">RECOGER</span>
+                <button id="pickupBtn" class="mobile-btn" style="width: 54px; height: 38px; font-size: 8px;">
+                    📦<br>RECOGER
                 </button>
                 
-                <!-- Attack Button -->
-                <button id="attackBtn" 
-                        class="mobile-btn attack-btn text-white flex flex-col items-center justify-center"
-                        style="font-size:10px; line-height:1;">
-                    <span style="font-size:19px;">⚔️</span>
-                    <span style="font-size:8px; font-weight:700; margin-top:-2px;">ATACAR</span>
+                <button id="attackBtn" class="mobile-btn attack-btn">
+                    ⚔️<br>ATACAR
                 </button>
             </div>
         </div>
     </div>
     
-    <!-- PAUSE SCREEN -->
-    <div id="pauseScreen" onclick="if (event.target.id === 'pauseScreen') resumeGame()" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50">
-        <div onclick="event.stopImmediatePropagation()" class="stats-panel max-w-sm w-full mx-4 p-7">
-            <div class="text-center">
-                <h2 class="text-4xl font-black tracking-tighter text-amber-300">PAUSA</h2>
-                <p class="text-xs text-zinc-400 mt-1">El apocalipsis espera...</p>
+    <!-- PAUSE -->
+    <div id="pauseScreen" class="overlay" onclick="if (event.target.id === 'pauseScreen') resumeGame()">
+        <div class="stats-panel" onclick="event.stopImmediatePropagation()" style="width: 100%; max-width: 300px; padding: 20px; margin: 20px;">
+            <div style="text-align: center;">
+                <h2 style="font-size: 2rem; color: #fcd34d; margin: 0 0 10px;">PAUSA</h2>
                 
-                <div class="my-6 space-y-2">
-                    <button onclick="resumeGame()" 
-                            class="retro-btn w-full bg-emerald-600 hover:bg-emerald-500 py-3 px-6 font-bold border-4 border-emerald-800">
-                        REANUDAR
-                    </button>
-                    
-                    <button onclick="restartGame()" 
-                            class="retro-btn w-full bg-zinc-700 hover:bg-zinc-600 py-3 px-6 font-bold border-4 border-zinc-800">
-                        REINICIAR PARTIDA
-                    </button>
-                    
-                    <button onclick="endGame()" 
-                            class="retro-btn w-full bg-red-800 hover:bg-red-700 py-3 px-6 font-bold border-4 border-red-900 text-sm">
-                        VOLVER AL MENÚ
-                    </button>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button onclick="resumeGame()" class="retro-btn" style="background: #166534; padding: 11px;">REANUDAR</button>
+                    <button onclick="restartGame()" class="retro-btn" style="background: #292524; padding: 11px;">REINICIAR</button>
+                    <button onclick="endGame()" class="retro-btn" style="background: #7f1d1d; padding: 11px; font-size: 12px;">VOLVER AL MENÚ</button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- GAME OVER SCREEN -->
-    <div id="gameOverScreen" class="fixed inset-0 bg-black/90 flex items-center justify-center hidden z-50">
-        <div class="game-over max-w-md w-full mx-4 stats-panel p-8">
-            <div class="text-center">
-                <div class="text-6xl mb-1">☠️</div>
-                <h2 class="text-4xl font-black text-red-600 tracking-tighter">HAS MUERTO</h2>
-                <p class="text-red-400 text-xs">El apocalipsis te reclamó</p>
+    <!-- GAME OVER -->
+    <div id="gameOverScreen" class="overlay">
+        <div class="stats-panel" style="width: 100%; max-width: 320px; padding: 20px; margin: 20px;">
+            <div style="text-align: center;">
+                <div style="font-size: 42px; margin-bottom: 4px;">☠️</div>
+                <h2 style="font-size: 1.8rem; color: #b91c1c; margin: 0;">HAS MUERTO</h2>
+                <p style="color: #f87171; font-size: 10px;">El apocalipsis te reclamó</p>
                 
-                <div class="my-6 grid grid-cols-2 gap-3">
-                    <div class="bg-zinc-800 p-3 border border-zinc-700">
-                        <div class="text-xs text-zinc-400">TIEMPO</div>
-                        <div id="finalTime" class="text-3xl font-black text-amber-300 tabular-nums">00:00</div>
+                <div style="margin: 16px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div style="background: #292524; padding: 8px; border: 2px solid #451a03;">
+                        <div style="font-size: 8px; color: #78716c;">TIEMPO</div>
+                        <div id="finalTime" style="font-size: 22px; font-weight: bold; color: #fcd34d;">00:00</div>
                     </div>
-                    <div class="bg-zinc-800 p-3 border border-zinc-700">
-                        <div class="text-xs text-zinc-400">ZOMBIS ELIMINADOS</div>
-                        <div id="finalKills" class="text-3xl font-black text-red-400 tabular-nums">0</div>
+                    <div style="background: #292524; padding: 8px; border: 2px solid #451a03;">
+                        <div style="font-size: 8px; color: #78716c;">ZOMBIS</div>
+                        <div id="finalKills" style="font-size: 22px; font-weight: bold; color: #f87171;">0</div>
                     </div>
                 </div>
                 
-                <div class="mb-5">
-                    <div class="text-xs text-zinc-400">PUNTUACIÓN FINAL</div>
-                    <div id="finalScore" class="text-5xl font-black text-emerald-400">0</div>
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 9px; color: #78716c;">PUNTUACIÓN</div>
+                    <div id="finalScore" style="font-size: 32px; font-weight: bold; color: #4ade80;">0</div>
                 </div>
                 
-                <div class="flex gap-3">
-                    <button onclick="restartGame()" 
-                            class="flex-1 retro-btn bg-emerald-600 hover:bg-emerald-500 py-3 px-4 font-bold border-4 border-emerald-900">
-                        REINTENTAR
-                    </button>
-                    
-                    <button onclick="backToMenuFromGameOver()" 
-                            class="flex-1 retro-btn bg-zinc-700 hover:bg-zinc-600 py-3 px-4 font-bold border-4 border-zinc-800">
-                        MENÚ
-                    </button>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="restartGame()" class="retro-btn" style="flex: 1; background: #166534; padding: 10px; font-size: 12px;">REINTENTAR</button>
+                    <button onclick="backToMenuFromGameOver()" class="retro-btn" style="flex: 1; background: #292524; padding: 10px; font-size: 12px;">MENÚ</button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Instructions Modal -->
-    <div id="instructionsModal" onclick="if (event.target.id === 'instructionsModal') hideInstructions()" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[60]">
-        <div onclick="event.stopImmediatePropagation()" class="stats-panel max-w-lg w-full mx-4 p-6">
-            <h3 class="text-center text-2xl font-bold mb-4 text-amber-300">INSTRUCCIONES</h3>
+    <!-- Instructions -->
+    <div id="instructionsModal" class="overlay" onclick="hideInstructions()">
+        <div class="stats-panel" onclick="event.stopImmediatePropagation()" style="width: 100%; max-width: 340px; padding: 16px; margin: 15px;">
+            <h3 style="text-align: center; color: #fcd34d; margin: 0 0 10px;">INSTRUCCIONES</h3>
             
-            <div class="space-y-4 text-sm">
-                <div>
-                    <div class="font-bold text-emerald-400 mb-1">OBJETIVO</div>
-                    <div class="text-xs text-zinc-300">Sobrevive el mayor tiempo posible en un mundo infestado de zombis. Gestiona tu hambre, sed, estamina y salud.</div>
-                </div>
+            <div style="font-size: 11px; line-height: 1.4;">
+                <strong style="color: #4ade80;">OBJETIVO:</strong><br>
+                Sobrevive el mayor tiempo posible.<br><br>
                 
-                <div>
-                    <div class="font-bold text-emerald-400 mb-1">CONTROLES</div>
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                        <div><span class="font-bold">W A S D</span> — Mover</div>
-                        <div><span class="font-bold">SHIFT</span> — Correr (gasta estamina)</div>
-                        <div><span class="font-bold">ESPACIO / CLICK</span> — Atacar melee</div>
-                        <div><span class="font-bold">E</span> — Recoger objetos cercanos</div>
-                    </div>
-                </div>
+                <strong style="color: #4ade80;">CONTROLES:</strong><br>
+                • <strong>WASD</strong> = Mover<br>
+                • <strong>Shift</strong> = Correr<br>
+                • <strong>ESPACIO</strong> o <strong>TOQUE</strong> = Atacar<br>
+                • <strong>E</strong> o botón = Recoger<br><br>
                 
-                <div>
-                    <div class="font-bold text-emerald-400 mb-1">MECÁNICAS</div>
-                    <ul class="text-xs space-y-[1px] text-zinc-300 list-disc pl-4">
-                        <li>La hambre y la sed bajan constantemente</li>
-                        <li>Si hambre o sed llegan a 0, pierdes salud</li>
-                        <li>Los zombis te persiguen y atacan al contacto</li>
-                        <li>Busca comida y agua para sobrevivir</li>
-                        <li>Usa la estamina para correr y atacar</li>
-                        <li>Las ventajas y desventajas afectan tus stats</li>
-                    </ul>
-                </div>
+                <strong style="color: #4ade80;">MÓVIL:</strong><br>
+                Usa el joystick + botón rojo.
             </div>
             
-            <div class="mt-6 text-center">
-                <button onclick="hideInstructions()" class="retro-btn bg-zinc-700 px-6 py-2 text-sm font-bold border-4 border-zinc-800">
-                    ENTENDIDO
-                </button>
-            </div>
+            <button onclick="hideInstructions()" class="retro-btn" style="width: 100%; margin-top: 14px; background: #292524; padding: 9px; font-size: 12px;">
+                ENTENDIDO
+            </button>
         </div>
     </div>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
+
     <script>
-        // Tailwind script
-        function initTailwind() {
-            document.documentElement.style.setProperty('--accent', '#9f1239');
-            
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            'retro': ['Press Start 2P', 'system-ui', 'sans-serif']
-                        }
-                    }
-                }
-            };
-        }
-        
-        // Game variables
+        // ============== SELF-CONTAINED GAME ==============
         let canvas, ctx;
         let gameRunning = false;
         let paused = false;
@@ -710,32 +534,19 @@
         let frame = 0;
         
         let player = {
-            x: 400,
-            y: 300,
-            size: 16,
-            speed: 2.8,
-            health: 100,
-            hunger: 100,
-            thirst: 100,
-            stamina: 100,
-            maxHealth: 100,
-            maxStamina: 100,
-            facing: 0 // radians
+            x: 400, y: 300, size: 16, speed: 2.8,
+            health: 100, hunger: 100, thirst: 100, stamina: 100,
+            maxHealth: 100, maxStamina: 100, facing: 0
         };
         
-        let zombies = [];
-        let items = [];
-        let obstacles = [];
-        
+        let zombies = [], items = [], obstacles = [];
         let keys = {};
         let lastAttackTime = 0;
         let isSprinting = false;
         
-        // Perks
         let selectedAdvantage = null;
         let selectedDisadvantage = null;
         
-        // Game config
         const CONFIG = {
             PLAYER_BASE_SPEED: 2.8,
             SPRINT_SPEED: 4.7,
@@ -746,107 +557,69 @@
             ATTACK_COOLDOWN: 650,
             ATTACK_RANGE: 55,
             ATTACK_DAMAGE: 25,
-            ZOMBIE_SPAWN_INTERVAL: 3800,
-            ITEM_SPAWN_INTERVAL: 6200,
             MAX_ZOMBIES: 18,
             WORLD_WIDTH: 800,
             WORLD_HEIGHT: 600
         };
         
-        // Advantages and Disadvantages
         const ADVANTAGES = [
-            { id: 'runner', name: 'Corredor Veloz', desc: '+25% velocidad de movimiento', effect: () => { player.speed = CONFIG.PLAYER_BASE_SPEED * 1.25; } },
-            { id: 'survivor', name: 'Superviviente Nato', desc: 'Hambre y sed bajan 35% más lento', effect: () => {} },
-            { id: 'fighter', name: 'Luchador Brutal', desc: '+40% daño melee', effect: () => { CONFIG.ATTACK_DAMAGE = 35; } },
-            { id: 'endurant', name: 'Resistente', desc: '+30% estamina máxima', effect: () => { player.maxStamina = 130; player.stamina = 130; } }
+            { id: 'runner', name: 'Corredor Veloz', desc: '+25% velocidad', effect: () => { player.speed = CONFIG.PLAYER_BASE_SPEED * 1.25; } },
+            { id: 'survivor', name: 'Superviviente Nato', desc: 'Hambre/sed más lento', effect: () => {} },
+            { id: 'fighter', name: 'Luchador Brutal', desc: '+40% daño', effect: () => { CONFIG.ATTACK_DAMAGE = 35; } },
+            { id: 'endurant', name: 'Resistente', desc: '+30% estamina', effect: () => { player.maxStamina = 130; player.stamina = 130; } }
         ];
         
         const DISADVANTAGES = [
             { id: 'weak', name: 'Frágil', desc: '-25 salud máxima', effect: () => { player.maxHealth = 75; player.health = 75; } },
-            { id: 'clumsy', name: 'Torpe', desc: 'Estamina se regenera 45% más lento', effect: () => { CONFIG.STAMINA_REGEN = 0.85; } },
-            { id: 'hungry', name: 'Siempre Hambriento', desc: 'Hambre baja un 45% más rápido', effect: () => {} },
-            { id: 'thirsty', name: 'Sed Insaciable', desc: 'Sed baja un 40% más rápido', effect: () => {} }
+            { id: 'clumsy', name: 'Torpe', desc: 'Estamina lenta', effect: () => { CONFIG.STAMINA_REGEN = 0.85; } },
+            { id: 'hungry', name: 'Siempre Hambriento', desc: 'Hambre rápida', effect: () => {} },
+            { id: 'thirsty', name: 'Sed Insaciable', desc: 'Sed rápida', effect: () => {} }
         ];
         
-        let gameStats = {
-            advantageId: null,
-            disadvantageId: null
-        };
+        let gameStats = { advantageId: null, disadvantageId: null };
+        let floatingTexts = [];
+        let attackEffects = [];
+        let bloodParticles = [];
         
         function initPerksUI() {
-            const advContainer = document.getElementById('advantages');
-            const disContainer = document.getElementById('disadvantages');
+            const advCont = document.getElementById('advantages');
+            const disCont = document.getElementById('disadvantages');
             
-            advContainer.innerHTML = '';
-            disContainer.innerHTML = '';
+            advCont.innerHTML = '';
+            disCont.innerHTML = '';
             
-            // Advantages
-            ADVANTAGES.forEach((adv, idx) => {
+            ADVANTAGES.forEach((adv, i) => {
                 const div = document.createElement('div');
-                div.className = `perk-option flex items-center gap-2 px-3 py-2.5 bg-zinc-800 border border-zinc-700 hover:border-emerald-700 cursor-pointer rounded text-xs transition-colors`;
-                div.innerHTML = `
-                    <div class="flex-1">
-                        <div class="font-bold text-emerald-300">${adv.name}</div>
-                        <div class="text-[10px] text-emerald-400/80">${adv.desc}</div>
-                    </div>
-                `;
+                div.className = 'perk-option';
+                div.style.cssText = 'background:#292524; border:2px solid #451a03; padding:6px 8px; font-size:10px; cursor:pointer;';
+                div.innerHTML = `<div style="font-weight:bold;color:#4ade80;">${adv.name}</div><div style="font-size:8px;color:#a1a1aa;">${adv.desc}</div>`;
                 
-                div.onclick = () => selectAdvantage(div, adv, idx);
-                advContainer.appendChild(div);
+                div.onclick = () => {
+                    document.querySelectorAll('#advantages .perk-option').forEach(el => el.style.borderColor = '#451a03');
+                    div.style.borderColor = '#4ade80';
+                    selectedAdvantage = adv;
+                    gameStats.advantageId = adv.id;
+                };
+                advCont.appendChild(div);
             });
             
-            // Disadvantages
-            DISADVANTAGES.forEach((dis, idx) => {
+            DISADVANTAGES.forEach((dis, i) => {
                 const div = document.createElement('div');
-                div.className = `perk-option flex items-center gap-2 px-3 py-2.5 bg-zinc-800 border border-zinc-700 hover:border-red-700 cursor-pointer rounded text-xs transition-colors`;
-                div.innerHTML = `
-                    <div class="flex-1">
-                        <div class="font-bold text-red-300">${dis.name}</div>
-                        <div class="text-[10px] text-red-400/80">${dis.desc}</div>
-                    </div>
-                `;
+                div.className = 'perk-option';
+                div.style.cssText = 'background:#292524; border:2px solid #451a03; padding:6px 8px; font-size:10px; cursor:pointer;';
+                div.innerHTML = `<div style="font-weight:bold;color:#f87171;">${dis.name}</div><div style="font-size:8px;color:#a1a1aa;">${dis.desc}</div>`;
                 
-                div.onclick = () => selectDisadvantage(div, dis, idx);
-                disContainer.appendChild(div);
+                div.onclick = () => {
+                    document.querySelectorAll('#disadvantages .perk-option').forEach(el => el.style.borderColor = '#451a03');
+                    div.style.borderColor = '#f87171';
+                    selectedDisadvantage = dis;
+                    gameStats.disadvantageId = dis.id;
+                };
+                disCont.appendChild(div);
             });
-        }
-        
-        let selectedAdvDiv = null;
-        let selectedDisDiv = null;
-        
-        function selectAdvantage(div, adv, idx) {
-            // Deselect others
-            document.querySelectorAll('#advantages .perk-option').forEach(el => {
-                el.classList.remove('!border-emerald-500', 'bg-emerald-900/30');
-                el.classList.add('border-zinc-700');
-            });
-            
-            div.classList.add('!border-emerald-500', 'bg-emerald-900/30');
-            div.classList.remove('border-zinc-700');
-            
-            selectedAdvantage = adv;
-            selectedAdvDiv = div;
-            
-            gameStats.advantageId = adv.id;
-        }
-        
-        function selectDisadvantage(div, dis, idx) {
-            document.querySelectorAll('#disadvantages .perk-option').forEach(el => {
-                el.classList.remove('!border-red-500', 'bg-red-900/30');
-                el.classList.add('border-zinc-700');
-            });
-            
-            div.classList.add('!border-red-500', 'bg-red-900/30');
-            div.classList.remove('border-zinc-700');
-            
-            selectedDisadvantage = dis;
-            selectedDisDiv = div;
-            
-            gameStats.disadvantageId = dis.id;
         }
         
         function applyPerks() {
-            // Reset base
             player.speed = CONFIG.PLAYER_BASE_SPEED;
             player.maxHealth = 100;
             player.health = 100;
@@ -857,131 +630,102 @@
             CONFIG.HUNGER_DRAIN = 0.65;
             CONFIG.THIRST_DRAIN = 0.95;
             
-            // Apply advantage
-            if (selectedAdvantage) {
-                selectedAdvantage.effect();
-            }
+            if (selectedAdvantage) selectedAdvantage.effect();
+            if (selectedDisadvantage) selectedDisadvantage.effect();
             
-            // Apply disadvantage
-            if (selectedDisadvantage) {
-                selectedDisadvantage.effect();
-            }
+            if (gameStats.disadvantageId === 'hungry') CONFIG.HUNGER_DRAIN = 0.65 * 1.45;
+            if (gameStats.disadvantageId === 'thirsty') CONFIG.THIRST_DRAIN = 0.95 * 1.4;
             
-            // Apply disadvantage-specific drains
-            if (gameStats.disadvantageId === 'hungry') {
-                CONFIG.HUNGER_DRAIN = 0.65 * 1.45;
-            }
-            if (gameStats.disadvantageId === 'thirsty') {
-                CONFIG.THIRST_DRAIN = 0.95 * 1.4;
-            }
-            
-            // Clamp values
             player.health = Math.min(player.health, player.maxHealth);
             player.stamina = Math.min(player.stamina, player.maxStamina);
         }
         
         function showCharacterSelect() {
-            document.getElementById('menuScreen').classList.add('hidden');
-            document.getElementById('characterScreen').classList.remove('hidden');
+            document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('characterScreen').style.display = 'flex';
             
-            // Reset selections
             selectedAdvantage = null;
             selectedDisadvantage = null;
             gameStats = { advantageId: null, disadvantageId: null };
-            
-            // Re-init perks UI
             initPerksUI();
         }
         
         function backToMenu() {
-            document.getElementById('characterScreen').classList.add('hidden');
-            document.getElementById('menuScreen').classList.remove('hidden');
+            document.getElementById('characterScreen').style.display = 'none';
+            document.getElementById('menuScreen').style.display = 'flex';
         }
         
         function showInstructions() {
-            document.getElementById('instructionsModal').classList.remove('hidden');
-            document.getElementById('instructionsModal').classList.add('flex');
+            document.getElementById('instructionsModal').classList.add('active');
         }
         
         function hideInstructions() {
-            const modal = document.getElementById('instructionsModal');
-            modal.classList.remove('flex');
-            modal.classList.add('hidden');
+            document.getElementById('instructionsModal').classList.remove('active');
         }
         
         function showCredits() {
-            const creditsHTML = `
-                <div onclick="this.remove()" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[70]">
-                    <div onclick="event.stopImmediatePropagation()" class="stats-panel max-w-xs w-full p-6 mx-4">
-                        <div class="text-center">
-                            <h3 class="text-xl font-bold mb-4">CRÉDITOS</h3>
-                            
-                            <div class="text-sm mb-6">
-                                <p class="text-emerald-300">ZOMBIE APOCALYPSE</p>
-                                <p class="text-xs mt-1 text-zinc-400">Primera versión HTML5 Survival</p>
-                                
-                                <div class="my-4 border-t border-zinc-700"></div>
-                                
-                                <div class="text-xs leading-tight text-zinc-300">
-                                    Desarrollado con HTML5 Canvas<br>
-                                    Creado con ❤️ para supervivientes<br>
-                                    <span class="text-red-400">2026</span>
-                                </div>
-                            </div>
-                            
-                            <button onclick="event.target.closest('.fixed').remove()" 
-                                    class="retro-btn px-5 py-2 bg-zinc-700 border-4 border-zinc-800 text-sm font-bold w-full">
-                                CERRAR
-                            </button>
-                        </div>
-                    </div>
+            const div = document.createElement('div');
+            div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:999';
+            div.innerHTML = `
+                <div class="stats-panel" style="max-width:260px;width:90%;padding:16px;text-align:center">
+                    <h3 style="margin:0 0 8px">CRÉDITOS</h3>
+                    <p style="margin:4px 0;font-size:12px;color:#4ade80">ZOMBIE APOCALYPSE</p>
+                    <p style="font-size:10px;color:#a1a1aa">Primera versión HTML5 Survival<br>2026</p>
+                    <button onclick="this.closest('.stats-panel').parentNode.remove()" class="retro-btn" style="margin-top:12px;padding:8px 20px;font-size:11px;background:#292524">CERRAR</button>
                 </div>
             `;
-            document.body.insertAdjacentHTML('beforeend', creditsHTML);
+            document.body.appendChild(div);
+        }
+        
+        function quickPlay() {
+            selectedAdvantage = ADVANTAGES[0];
+            selectedDisadvantage = DISADVANTAGES[0];
+            gameStats.advantageId = selectedAdvantage.id;
+            gameStats.disadvantageId = selectedDisadvantage.id;
+            applyPerks();
+            initGame();
         }
         
         function resizeCanvas() {
-            const canvas = document.getElementById('gameCanvas');
-            if (!canvas) return;
+            const c = document.getElementById('gameCanvas');
+            if (!c) return;
             
-            const container = canvas.parentElement;
-            const maxWidth = Math.min(window.innerWidth * 0.96, 800);
-            const maxHeight = Math.min(window.innerHeight * 0.62, 600);
+            const isMobile = window.innerWidth < 768;
             
-            let width = 800;
-            let height = 600;
+            let w, h;
             
-            // Scale to fit screen on mobile
-            if (window.innerWidth < 768) {
-                const aspect = 800 / 600;
-                width = Math.min(maxWidth, 800);
-                height = width / aspect;
+            if (isMobile) {
+                const availW = window.innerWidth * 0.96;
+                const availH = Math.min(window.innerHeight * 0.55, window.innerHeight - 195);
                 
-                // Ensure it doesn't get too tall on small phones
-                if (height > maxHeight) {
-                    height = maxHeight;
-                    width = height * aspect;
+                const ratio = 800 / 600;
+                w = Math.min(availW, 800);
+                h = w / ratio;
+                
+                if (h > availH) {
+                    h = availH;
+                    w = h * ratio;
                 }
+                w = Math.max(w, 260);
+            } else {
+                w = Math.min(800, window.innerWidth * 0.92);
+                h = w * (600 / 800);
             }
             
-            // Apply scaled size
-            canvas.style.width = width + 'px';
-            canvas.style.height = height + 'px';
-            
-            // Keep internal resolution high
-            canvas.width = 800;
-            canvas.height = 600;
+            c.style.width = w + 'px';
+            c.style.height = h + 'px';
+            c.width = 800;
+            c.height = 600;
         }
         
         function initGame() {
             canvas = document.getElementById('gameCanvas');
-            ctx = canvas.getContext('2d', { alpha: true });
+            ctx = canvas.getContext('2d');
             
-            // Make responsive
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
             
-            // Reset game state
+            // Reset
             survivalTime = 0;
             kills = 0;
             frame = 0;
@@ -989,8 +733,10 @@
             items = [];
             keys = {};
             isSprinting = false;
+            floatingTexts = [];
+            attackEffects = [];
+            bloodParticles = [];
             
-            // Reset player
             player.x = 400;
             player.y = 300;
             player.health = player.maxHealth;
@@ -998,74 +744,51 @@
             player.thirst = 100;
             player.stamina = player.maxStamina;
             player.facing = 0;
-            player.speed = CONFIG.PLAYER_BASE_SPEED;
             
-            // Generate world
             generateObstacles();
             
-            // Initial zombies
-            for (let i = 0; i < 5; i++) {
-                spawnZombie();
-            }
+            for (let i = 0; i < 5; i++) spawnZombie();
+            for (let i = 0; i < 4; i++) spawnItem();
             
-            // Initial items
-            for (let i = 0; i < 4; i++) {
-                spawnItem();
-            }
-            
-            // Event listeners
             setupInput();
             
-            // Start game loop
             gameRunning = true;
             paused = false;
             lastTime = performance.now();
             
-            // Start spawners
-            window.spawnZombieInterval = setInterval(spawnZombie, CONFIG.ZOMBIE_SPAWN_INTERVAL);
-            window.spawnItemInterval = setInterval(spawnItem, CONFIG.ITEM_SPAWN_INTERVAL);
+            if (window.spawnZombieInterval) clearInterval(window.spawnZombieInterval);
+            if (window.spawnItemInterval) clearInterval(window.spawnItemInterval);
             
-            // Show game screen
-            document.getElementById('menuScreen').classList.add('hidden');
-            document.getElementById('characterScreen').classList.add('hidden');
-            document.getElementById('gameScreen').classList.remove('hidden');
+            window.spawnZombieInterval = setInterval(spawnZombie, 3800);
+            window.spawnItemInterval = setInterval(spawnItem, 6200);
             
-            // Initial UI
+            document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('characterScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+            
+            // Show mobile controls
+            const mobileCtrls = document.querySelector('.mobile-controls');
+            if (mobileCtrls && window.innerWidth < 768) {
+                mobileCtrls.style.display = 'flex';
+            }
+            
             updateHUD();
-            
-            // Start loop
             requestAnimationFrame(gameLoop);
             
-            // Welcome message
-            showMessage("¡Supervivencia iniciada!", 1600);
+            showMessage("¡Supervivencia iniciada!", 1500);
         }
         
         function generateObstacles() {
             obstacles = [];
-            
-            // Walls / rubble / trees
-            const obstacleTypes = [
-                {x: 130, y: 110, w: 65, h: 80},   // left house
-                {x: 620, y: 80, w: 95, h: 55},    // top right
-                {x: 80, y: 420, w: 50, h: 95},    // bottom left
-                {x: 540, y: 380, w: 80, h: 60},   // bottom right
-                {x: 320, y: 150, w: 40, h: 40},   // middle tree
-                {x: 210, y: 310, w: 70, h: 35},   // car wreck
-                {x: 650, y: 280, w: 55, h: 110},  // side wall
-                {x: 410, y: 470, w: 95, h: 40}    // bottom rubble
+            const types = [
+                {x:130,y:110,w:65,h:80}, {x:620,y:80,w:95,h:55}, 
+                {x:80,y:420,w:50,h:95}, {x:540,y:380,w:80,h:60},
+                {x:320,y:150,w:40,h:40}, {x:210,y:310,w:70,h:35},
+                {x:650,y:280,w:55,h:110}, {x:410,y:470,w:95,h:40}
             ];
             
-            obstacleTypes.forEach(obs => {
-                obstacles.push({
-                    x: obs.x,
-                    y: obs.y,
-                    width: obs.w,
-                    height: obs.h,
-                    type: Math.random() > 0.6 ? 'wall' : 'rubble'
-                });
-            });
+            types.forEach(o => obstacles.push({...o, type: Math.random() > 0.6 ? 'wall' : 'rubble'}));
             
-            // Add some scattered debris
             for (let i = 0; i < 6; i++) {
                 obstacles.push({
                     x: Math.random() * 700 + 40,
@@ -1079,229 +802,142 @@
         
         function setupInput() {
             // Keyboard
-            window.addEventListener('keydown', (e) => {
+            window.addEventListener('keydown', e => {
                 keys[e.key.toLowerCase()] = true;
-                
                 if (e.key === ' ' && gameRunning && !paused) {
                     e.preventDefault();
                     attack();
                 }
-                
-                if (e.key.toLowerCase() === 'e' && gameRunning && !paused) {
-                    tryPickupItem();
-                }
-                
-                if (e.key === 'Escape' && gameRunning) {
-                    if (paused) resumeGame();
-                    else pauseGame();
-                }
-                
-                if ((e.key.toLowerCase() === 'r') && gameRunning && !paused) {
-                    // Quick restart shortcut
-                    if (confirm('¿Reiniciar partida?')) restartGame();
-                }
+                if (e.key.toLowerCase() === 'e' && gameRunning && !paused) tryPickupItem();
+                if (e.key === 'Escape' && gameRunning) paused ? resumeGame() : pauseGame();
             });
             
-            window.addEventListener('keyup', (e) => {
+            window.addEventListener('keyup', e => {
                 keys[e.key.toLowerCase()] = false;
-                
-                // stop sprinting on shift release
-                if (e.key === 'Shift') {
-                    isSprinting = false;
-                }
+                if (e.key === 'Shift') isSprinting = false;
             });
             
-            // Mouse controls
-            canvas.addEventListener('mousedown', (e) => {
+            // Mouse
+            canvas.addEventListener('mousedown', e => {
                 if (!gameRunning || paused) return;
-                
                 const rect = canvas.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
-                
-                const dx = mouseX - player.x;
-                const dy = mouseY - player.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                
-                if (dist < 130) {
-                    attack(mouseX, mouseY);
-                } else {
-                    attack(mouseX, mouseY);
-                }
+                const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+                const my = (e.clientY - rect.top) * (canvas.height / rect.height);
+                attack(mx, my);
             });
             
-            // Prevent context menu
-            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            canvas.addEventListener('contextmenu', e => e.preventDefault());
             
-            // === TOUCH SUPPORT ===
-            canvas.addEventListener('touchstart', handleTouch, { passive: false });
-            canvas.addEventListener('touchmove', handleTouch, { passive: false });
-            canvas.addEventListener('touchend', () => {
-                if (window.mobileTouch) window.mobileTouch.active = false;
-            }, { passive: false });
+            // Touch on canvas
+            canvas.addEventListener('touchstart', handleCanvasTouch, {passive: false});
             
-            function handleTouch(e) {
+            function handleCanvasTouch(e) {
                 if (!gameRunning || paused) return;
                 e.preventDefault();
-                
                 const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                const touchX = touch.clientX - rect.left;
-                const touchY = touch.clientY - rect.top;
+                const t = e.touches[0];
+                const tx = (t.clientX - rect.left) * (canvas.width / rect.width);
+                const ty = (t.clientY - rect.top) * (canvas.height / rect.height);
                 
-                // Scale touch coordinates to canvas internal resolution
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                const worldX = touchX * scaleX;
-                const worldY = touchY * scaleY;
-                
-                const dist = getDistance(worldX, worldY, player.x, player.y);
-                
-                if (dist < 95) {
-                    attack(worldX, worldY);
-                } else {
-                    // Move direction hint
-                    player.facing = Math.atan2(worldY - player.y, worldX - player.x);
+                if (getDistance(tx, ty, player.x, player.y) < 90) {
+                    attack(tx, ty);
                 }
             }
             
-            // Setup Mobile Controls
+            // Mobile controls
             setupMobileControls();
         }
         
         function setupMobileControls() {
-            // Only set up if on mobile
-            if (window.innerWidth > 768) return;
-            
-            const joystickContainer = document.getElementById('joystickContainer');
-            const joystick = document.getElementById('joystick');
+            const container = document.getElementById('joystickContainer');
+            const stick = document.getElementById('joystick');
             const attackBtn = document.getElementById('attackBtn');
             const pickupBtn = document.getElementById('pickupBtn');
             
-            if (!joystickContainer || !joystick) return;
+            if (!container || !stick) return;
             
-            let joystickActive = false;
-            let joystickStartX = 0;
-            let joystickStartY = 0;
+            let active = false;
             
-            // Joystick
-            joystickContainer.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                joystickActive = true;
+            const updateStick = (touch) => {
+                const rect = container.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
                 
-                const rect = joystickContainer.getBoundingClientRect();
-                joystickStartX = rect.left + rect.width / 2;
-                joystickStartY = rect.top + rect.height / 2;
+                let dx = touch.clientX - cx;
+                let dy = touch.clientY - cy;
                 
-                updateJoystick(e.touches[0]);
-            }, { passive: false });
-            
-            joystickContainer.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                if (joystickActive) {
-                    updateJoystick(e.touches[0]);
+                const max = rect.width / 2 - 6;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist > max) {
+                    dx = dx / dist * max;
+                    dy = dy / dist * max;
                 }
-            }, { passive: false });
+                
+                stick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+                
+                window.mobileJoystick = {
+                    x: dx / max,
+                    y: dy / max
+                };
+            };
             
-            joystickContainer.addEventListener('touchend', () => {
-                joystickActive = false;
-                joystick.style.transform = 'translate(-50%, -50%)';
-                window.mobileJoystick = { x: 0, y: 0 };
+            container.addEventListener('touchstart', e => {
+                e.preventDefault();
+                active = true;
+                updateStick(e.touches[0]);
+            }, {passive: false});
+            
+            container.addEventListener('touchmove', e => {
+                e.preventDefault();
+                if (active) updateStick(e.touches[0]);
+            }, {passive: false});
+            
+            container.addEventListener('touchend', () => {
+                active = false;
+                stick.style.transform = 'translate(-50%, -50%)';
+                window.mobileJoystick = {x:0, y:0};
             });
             
-            function updateJoystick(touch) {
-                const rect = joystickContainer.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                
-                let dx = touch.clientX - centerX;
-                let dy = touch.clientY - centerY;
-                
-                const maxDist = rect.width / 2 - 8;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                
-                if (dist > maxDist) {
-                    dx = (dx / dist) * maxDist;
-                    dy = (dy / dist) * maxDist;
-                }
-                
-                joystick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-                
-                // Store normalized direction
-                window.mobileJoystick = {
-                    x: dx / maxDist,
-                    y: dy / maxDist
-                };
-            }
-            
-            // Attack button
             if (attackBtn) {
-                attackBtn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    if (gameRunning && !paused) {
-                        attack();
-                    }
-                });
-                
-                attackBtn.addEventListener('click', (e) => {
+                attackBtn.addEventListener('touchstart', e => {
                     e.preventDefault();
                     if (gameRunning && !paused) attack();
                 });
             }
             
-            // Pickup button
             if (pickupBtn) {
-                pickupBtn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    if (gameRunning && !paused) {
-                        tryPickupItem();
-                    }
-                });
-                
-                pickupBtn.addEventListener('click', (e) => {
+                pickupBtn.addEventListener('touchstart', e => {
                     e.preventDefault();
                     if (gameRunning && !paused) tryPickupItem();
                 });
             }
             
-            // Store for game loop
-            window.mobileJoystick = { x: 0, y: 0 };
+            window.mobileJoystick = {x: 0, y: 0};
         }
         
         function spawnZombie() {
             if (!gameRunning || zombies.length >= CONFIG.MAX_ZOMBIES) return;
             
-            let x, y;
-            let attempts = 0;
-            
+            let x, y, attempts = 0;
             do {
-                // Spawn from edges or random
                 if (Math.random() < 0.7) {
-                    // Edge spawn
-                    if (Math.random() < 0.5) {
-                        x = Math.random() < 0.5 ? 15 : CONFIG.WORLD_WIDTH - 15;
-                        y = Math.random() * CONFIG.WORLD_HEIGHT;
-                    } else {
-                        x = Math.random() * CONFIG.WORLD_WIDTH;
-                        y = Math.random() < 0.5 ? 15 : CONFIG.WORLD_HEIGHT - 15;
-                    }
+                    x = Math.random() < 0.5 ? 15 : CONFIG.WORLD_WIDTH - 15;
+                    y = Math.random() * CONFIG.WORLD_HEIGHT;
                 } else {
-                    // random
                     x = Math.random() * CONFIG.WORLD_WIDTH;
                     y = Math.random() * CONFIG.WORLD_HEIGHT;
                 }
                 attempts++;
-            } while (attempts < 12 && getDistance(x, y, player.x, player.y) < 150);
+            } while (attempts < 10 && getDistance(x, y, player.x, player.y) < 140);
             
-            const isRunner = Math.random() < 0.25;
-            
+            const runner = Math.random() < 0.25;
             zombies.push({
-                x: x,
-                y: y,
-                size: isRunner ? 13 : 15,
-                speed: isRunner ? 1.85 : 1.05,
-                health: isRunner ? 18 : 30,
-                type: isRunner ? 'runner' : 'walker',
+                x, y,
+                size: runner ? 13 : 15,
+                speed: runner ? 1.85 : 1.05,
+                health: runner ? 18 : 30,
+                type: runner ? 'runner' : 'walker',
                 lastBite: 0
             });
         }
@@ -1309,1003 +945,528 @@
         function spawnItem() {
             if (!gameRunning || items.length > 7) return;
             
-            let x, y;
-            let attempts = 0;
-            do {
-                x = 40 + Math.random() * (CONFIG.WORLD_WIDTH - 80);
-                y = 40 + Math.random() * (CONFIG.WORLD_HEIGHT - 80);
-                attempts++;
-            } while (attempts < 10 && isPositionBlocked(x, y, 14));
+            let x = 40 + Math.random() * (CONFIG.WORLD_WIDTH - 80);
+            let y = 40 + Math.random() * (CONFIG.WORLD_HEIGHT - 80);
             
-            const typeRoll = Math.random();
-            let type = 'food';
-            let value = 25;
-            
-            if (typeRoll < 0.42) {
-                type = 'food';
-                value = 26 + Math.random() * 8;
-            } else if (typeRoll < 0.82) {
-                type = 'water';
-                value = 28 + Math.random() * 9;
-            } else {
-                type = 'medkit';
-                value = 32;
-            }
+            const roll = Math.random();
+            let type = roll < 0.42 ? 'food' : roll < 0.82 ? 'water' : 'medkit';
+            let val = type === 'food' ? 26 : type === 'water' ? 28 : 32;
             
             items.push({
-                x: x,
-                y: y,
-                size: 11,
-                type: type,
-                value: Math.floor(value),
+                x, y, size: 11, type, value: Math.floor(val),
                 pulse: Math.random() * Math.PI * 2
             });
-        }
-        
-        function isPositionBlocked(x, y, radius) {
-            // Check player
-            if (getDistance(x, y, player.x, player.y) < radius + 22) return true;
-            
-            // Check obstacles
-            for (let obs of obstacles) {
-                const closestX = Math.max(obs.x, Math.min(x, obs.x + obs.width));
-                const closestY = Math.max(obs.y, Math.min(y, obs.y + obs.height));
-                const distX = x - closestX;
-                const distY = y - closestY;
-                
-                if ((distX * distX + distY * distY) < (radius * radius)) {
-                    return true;
-                }
-            }
-            
-            // Check zombies
-            for (let z of zombies) {
-                if (getDistance(x, y, z.x, z.y) < radius + z.size + 5) return true;
-            }
-            
-            return false;
         }
         
         function updatePlayer(delta) {
             if (!gameRunning || paused) return;
             
-            let dx = 0;
-            let dy = 0;
-            let moved = false;
+            let dx = 0, dy = 0, moved = false;
             
-            // Movement (keyboard)
             if (keys['w'] || keys['arrowup']) { dy -= 1; moved = true; }
             if (keys['s'] || keys['arrowdown']) { dy += 1; moved = true; }
             if (keys['a'] || keys['arrowleft']) { dx -= 1; moved = true; }
             if (keys['d'] || keys['arrowright']) { dx += 1; moved = true; }
             
-            // Mobile joystick
-            if (window.mobileJoystick && (window.mobileJoystick.x !== 0 || window.mobileJoystick.y !== 0)) {
+            if (window.mobileJoystick && (window.mobileJoystick.x || window.mobileJoystick.y)) {
                 dx += window.mobileJoystick.x;
                 dy += window.mobileJoystick.y;
                 moved = true;
             }
             
-            // Sprint
             isSprinting = keys['shift'] && player.stamina > 4;
             
-            let currentSpeed = player.speed;
+            let spd = player.speed;
             if (isSprinting) {
-                currentSpeed = CONFIG.SPRINT_SPEED;
-                player.stamina = Math.max(0, player.stamina - CONFIG.STAMINA_DRAIN * (delta / 1000));
+                spd = CONFIG.SPRINT_SPEED;
+                player.stamina = Math.max(0, player.stamina - CONFIG.STAMINA_DRAIN * (delta/1000));
             } else {
-                // regen stamina
                 if (player.stamina < player.maxStamina) {
-                    let regen = CONFIG.STAMINA_REGEN;
-                    // small penalty if moving
-                    if (moved) regen *= 0.65;
-                    player.stamina = Math.min(player.maxStamina, player.stamina + regen * (delta / 1000));
+                    let r = CONFIG.STAMINA_REGEN * (moved ? 0.65 : 1);
+                    player.stamina = Math.min(player.maxStamina, player.stamina + r * (delta/1000));
                 }
             }
             
-            if (dx !== 0 || dy !== 0) {
-                const len = Math.sqrt(dx * dx + dy * dy);
-                dx /= len;
-                dy /= len;
-                
-                player.x += dx * currentSpeed;
-                player.y += dy * currentSpeed;
-                
-                // Update facing
+            if (dx || dy) {
+                const len = Math.sqrt(dx*dx + dy*dy);
+                player.x += (dx/len) * spd;
+                player.y += (dy/len) * spd;
                 player.facing = Math.atan2(dy, dx);
                 
-                // Hunger / thirst drain extra when moving
-                player.hunger = Math.max(0, player.hunger - (CONFIG.HUNGER_DRAIN * 0.7) * (delta / 1000));
-                player.thirst = Math.max(0, player.thirst - (CONFIG.THIRST_DRAIN * 0.7) * (delta / 1000));
+                player.hunger = Math.max(0, player.hunger - CONFIG.HUNGER_DRAIN * 0.7 * (delta/1000));
+                player.thirst = Math.max(0, player.thirst - CONFIG.THIRST_DRAIN * 0.7 * (delta/1000));
             }
             
-            // Clamp to world
+            // Clamp
             player.x = Math.max(player.size + 5, Math.min(CONFIG.WORLD_WIDTH - player.size - 5, player.x));
             player.y = Math.max(player.size + 5, Math.min(CONFIG.WORLD_HEIGHT - player.size - 5, player.y));
             
-            // Obstacle collisions
-            for (let obs of obstacles) {
-                handlePlayerObstacleCollision(obs);
-            }
-            
-            // Update stats over time
-            const timeFactor = delta / 1000;
-            
-            // Base drain
-            if (!moved) {
-                player.hunger = Math.max(0, player.hunger - CONFIG.HUNGER_DRAIN * timeFactor);
-                player.thirst = Math.max(0, player.thirst - CONFIG.THIRST_DRAIN * timeFactor);
-            }
-            
-            // Low hunger / thirst penalties
-            let speedPenalty = 1;
-            if (player.hunger < 22 || player.thirst < 22) {
-                speedPenalty = 0.7;
-                player.speed = CONFIG.PLAYER_BASE_SPEED * speedPenalty;
-            } else {
-                // restore speed
-                if (!selectedAdvantage || selectedAdvantage.id !== 'runner') {
-                    player.speed = CONFIG.PLAYER_BASE_SPEED;
+            // Obstacles
+            obstacles.forEach(obs => {
+                const left = player.x - player.size;
+                const right = player.x + player.size;
+                const top = player.y - player.size;
+                const bot = player.y + player.size;
+                
+                if (right > obs.x && left < obs.x + obs.width && bot > obs.y && top < obs.y + obs.height) {
+                    const ox = Math.min(right - obs.x, obs.x + obs.width - left);
+                    const oy = Math.min(bot - obs.y, obs.y + obs.height - top);
+                    
+                    if (ox < oy) {
+                        player.x = player.x < obs.x + obs.width/2 ? obs.x - player.size : obs.x + obs.width + player.size;
+                    } else {
+                        player.y = player.y < obs.y + obs.height/2 ? obs.y - player.size : obs.y + obs.height + player.size;
+                    }
                 }
+            });
+            
+            // Stats drain
+            const t = delta / 1000;
+            if (!moved) {
+                player.hunger = Math.max(0, player.hunger - CONFIG.HUNGER_DRAIN * t);
+                player.thirst = Math.max(0, player.thirst - CONFIG.THIRST_DRAIN * t);
             }
             
-            // Starvation damage
+            if (player.hunger < 22 || player.thirst < 22) {
+                player.speed = CONFIG.PLAYER_BASE_SPEED * 0.7;
+            }
+            
             if (player.hunger <= 0 || player.thirst <= 0) {
-                player.health -= 3.5 * timeFactor;
+                player.health -= 3.5 * t;
             }
             
-            // Health cap
-            if (player.health > player.maxHealth) player.health = player.maxHealth;
-            
-            // Clamp stats
+            player.health = Math.min(player.health, player.maxHealth);
             player.hunger = Math.max(0, Math.min(100, player.hunger));
             player.thirst = Math.max(0, Math.min(100, player.thirst));
             player.stamina = Math.max(0, Math.min(player.maxStamina, player.stamina));
             
-            // Death condition
-            if (player.health <= 0) {
-                endGame();
-            }
-            
-            // Apply debuffs
-            if (player.stamina <= 12 && isSprinting) {
-                isSprinting = false;
-            }
-        }
-        
-        function handlePlayerObstacleCollision(obs) {
-            const playerLeft = player.x - player.size;
-            const playerRight = player.x + player.size;
-            const playerTop = player.y - player.size;
-            const playerBottom = player.y + player.size;
-            
-            const obsLeft = obs.x;
-            const obsRight = obs.x + obs.width;
-            const obsTop = obs.y;
-            const obsBottom = obs.y + obs.height;
-            
-            if (playerRight > obsLeft && playerLeft < obsRight && playerBottom > obsTop && playerTop < obsBottom) {
-                // Push back
-                const overlapX = Math.min(playerRight - obsLeft, obsRight - playerLeft);
-                const overlapY = Math.min(playerBottom - obsTop, obsBottom - playerTop);
-                
-                if (overlapX < overlapY) {
-                    // horizontal collision
-                    if (player.x < obs.x + obs.width / 2) {
-                        player.x = obsLeft - player.size;
-                    } else {
-                        player.x = obsRight + player.size;
-                    }
-                } else {
-                    // vertical
-                    if (player.y < obs.y + obs.height / 2) {
-                        player.y = obsTop - player.size;
-                    } else {
-                        player.y = obsBottom + player.size;
-                    }
-                }
-            }
+            if (player.health <= 0) endGame();
         }
         
         function updateZombies(delta) {
             if (!gameRunning || paused) return;
             
-            const timeFactor = delta / 1000;
-            
             for (let i = zombies.length - 1; i >= 0; i--) {
                 const z = zombies[i];
-                
-                // Move toward player
                 const dx = player.x - z.x;
                 const dy = player.y - z.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
+                const d = Math.sqrt(dx*dx + dy*dy);
                 
-                if (dist > 0.1) {
-                    const nx = dx / dist;
-                    const ny = dy / dist;
-                    
-                    z.x += nx * z.speed;
-                    z.y += ny * z.speed;
+                if (d > 0.1) {
+                    z.x += (dx/d) * z.speed;
+                    z.y += (dy/d) * z.speed;
                 }
                 
-                // Obstacle collision for zombies (simple)
-                for (let obs of obstacles) {
-                    const obsLeft = obs.x;
-                    const obsRight = obs.x + obs.width;
-                    const obsTop = obs.y;
-                    const obsBottom = obs.y + obs.height;
-                    
-                    const zLeft = z.x - z.size;
-                    const zRight = z.x + z.size;
-                    const zTop = z.y - z.size;
-                    const zBottom = z.y + z.size;
-                    
-                    if (zRight > obsLeft && zLeft < obsRight && zBottom > obsTop && zTop < obsBottom) {
-                        // simple push away from center
-                        const centerX = obs.x + obs.width / 2;
-                        const centerY = obs.y + obs.height / 2;
-                        
-                        const pushX = (z.x - centerX) * 0.9;
-                        const pushY = (z.y - centerY) * 0.9;
-                        
-                        z.x += pushX * 0.5;
-                        z.y += pushY * 0.5;
-                    }
-                }
-                
-                // Zombie to player collision
-                const playerDist = getDistance(z.x, z.y, player.x, player.y);
-                
-                if (playerDist < player.size + z.size + 4) {
+                // Player collision
+                if (getDistance(z.x, z.y, player.x, player.y) < player.size + z.size + 4) {
                     const now = Date.now();
-                    
-                    // bite damage
                     if (now - z.lastBite > 1100) {
-                        const biteDmg = (z.type === 'runner') ? 13 : 9;
-                        player.health -= biteDmg;
+                        const dmg = z.type === 'runner' ? 13 : 9;
+                        player.health -= dmg;
                         z.lastBite = now;
                         
-                        // knockback
-                        const kx = (player.x - z.x) / playerDist * 3;
-                        const ky = (player.y - z.y) / playerDist * 3;
-                        player.x += kx;
-                        player.y += ky;
+                        const k = 3;
+                        player.x += (player.x - z.x) / d * k;
+                        player.y += (player.y - z.y) / d * k;
                         
-                        // show damage flash
-                        showMessage("-" + biteDmg, 650, player.x, player.y - 25, true);
+                        showMessage("-" + dmg, 600, player.x, player.y - 22, true);
                         
-                        // check death
-                        if (player.health <= 0) {
-                            endGame();
-                            return;
-                        }
+                        if (player.health <= 0) { endGame(); return; }
                     }
                 }
                 
-                // Clamp zombie
                 z.x = Math.max(z.size, Math.min(CONFIG.WORLD_WIDTH - z.size, z.x));
                 z.y = Math.max(z.size, Math.min(CONFIG.WORLD_HEIGHT - z.size, z.y));
                 
-                // Remove dead zombies
-                if (z.health <= 0) {
-                    zombies.splice(i, 1);
-                }
+                if (z.health <= 0) zombies.splice(i, 1);
             }
         }
         
-        function updateItems(delta) {
-            // update pulse animation
-            for (let item of items) {
-                item.pulse = (item.pulse + 0.07) % (Math.PI * 2);
-            }
-            
-            // auto pickup if very close
+        function updateItems() {
             for (let i = items.length - 1; i >= 0; i--) {
-                const item = items[i];
-                const dist = getDistance(item.x, item.y, player.x, player.y);
+                const it = items[i];
+                it.pulse = (it.pulse + 0.07) % (Math.PI * 2);
                 
-                if (dist < 25) {
+                if (getDistance(it.x, it.y, player.x, player.y) < 25) {
                     pickupItem(i);
                 }
             }
         }
         
-        function pickupItem(index) {
-            const item = items[index];
+        function pickupItem(idx) {
+            const it = items[idx];
             
-            if (item.type === 'food') {
-                player.hunger = Math.min(100, player.hunger + item.value);
-                showMessage('+' + Math.floor(item.value) + ' HAMBRE', 800, item.x, item.y - 18);
-            } else if (item.type === 'water') {
-                player.thirst = Math.min(100, player.thirst + item.value);
-                showMessage('+' + Math.floor(item.value) + ' SED', 800, item.x, item.y - 18);
-            } else if (item.type === 'medkit') {
-                player.health = Math.min(player.maxHealth, player.health + item.value);
-                showMessage('+' + Math.floor(item.value) + ' SALUD', 800, item.x, item.y - 18);
+            if (it.type === 'food') {
+                player.hunger = Math.min(100, player.hunger + it.value);
+                showMessage('+' + it.value + ' HAMBRE', 700, it.x, it.y - 16);
+            } else if (it.type === 'water') {
+                player.thirst = Math.min(100, player.thirst + it.value);
+                showMessage('+' + it.value + ' SED', 700, it.x, it.y - 16);
+            } else if (it.type === 'medkit') {
+                player.health = Math.min(player.maxHealth, player.health + it.value);
+                showMessage('+' + it.value + ' SALUD', 700, it.x, it.y - 16);
             }
             
-            // Remove item
-            items.splice(index, 1);
-            
-            // small chance to spawn a new one soon
-            if (Math.random() < 0.3 && items.length < 6) {
-                setTimeout(() => {
-                    if (gameRunning && !paused) spawnItem();
-                }, 2600);
-            }
+            items.splice(idx, 1);
         }
         
         function tryPickupItem() {
-            let closestIndex = -1;
-            let closestDist = 46;
-            
-            for (let i = 0; i < items.length; i++) {
-                const dist = getDistance(items[i].x, items[i].y, player.x, player.y);
-                if (dist < closestDist) {
-                    closestDist = dist;
-                    closestIndex = i;
-                }
-            }
-            
-            if (closestIndex !== -1) {
-                pickupItem(closestIndex);
-            } else {
-                showMessage("Nada cerca", 700, player.x, player.y - 32);
-            }
+            let best = -1, bestD = 48;
+            items.forEach((it, i) => {
+                const d = getDistance(it.x, it.y, player.x, player.y);
+                if (d < bestD) { bestD = d; best = i; }
+            });
+            if (best !== -1) pickupItem(best);
+            else showMessage("Nada cerca", 600, player.x, player.y - 28);
         }
         
-        function attack(targetX = null, targetY = null) {
+        function attack(tx = null, ty = null) {
             if (!gameRunning || paused || Date.now() - lastAttackTime < CONFIG.ATTACK_COOLDOWN) return;
-            
-            // Stamina cost
             if (player.stamina < 11) {
-                showMessage("¡Sin estamina!", 700, player.x, player.y - 30);
+                showMessage("¡Sin estamina!", 600, player.x, player.y - 25);
                 return;
             }
             
             player.stamina = Math.max(0, player.stamina - 15);
             lastAttackTime = Date.now();
             
-            // Determine attack position
-            let attackX = player.x;
-            let attackY = player.y;
-            let attackAngle = player.facing;
+            let ax = player.x, ay = player.y;
+            let angle = player.facing;
             
-            if (targetX !== null && targetY !== null) {
-                const dx = targetX - player.x;
-                const dy = targetY - player.y;
-                attackAngle = Math.atan2(dy, dx);
-                attackX = player.x + Math.cos(attackAngle) * 18;
-                attackY = player.y + Math.sin(attackAngle) * 18;
+            if (tx !== null && ty !== null) {
+                angle = Math.atan2(ty - player.y, tx - player.x);
+                ax = player.x + Math.cos(angle) * 18;
+                ay = player.y + Math.sin(angle) * 18;
             } else {
-                // forward attack
-                attackX = player.x + Math.cos(player.facing) * 20;
-                attackY = player.y + Math.sin(player.facing) * 20;
+                ax = player.x + Math.cos(angle) * 20;
+                ay = player.y + Math.sin(angle) * 20;
             }
             
-            let hitCount = 0;
+            let hits = 0;
             
-            // Damage zombies in range
             for (let i = zombies.length - 1; i >= 0; i--) {
                 const z = zombies[i];
-                const dist = getDistance(attackX, attackY, z.x, z.y);
+                const d = getDistance(ax, ay, z.x, z.y);
                 
-                // Cone check (or simply range)
-                if (dist < CONFIG.ATTACK_RANGE) {
-                    const angleToZombie = Math.atan2(z.y - player.y, z.x - player.x);
-                    const angleDiff = Math.abs(angleToZombie - attackAngle);
-                    const normalizedDiff = Math.min(angleDiff, Math.PI * 2 - angleDiff);
+                if (d < CONFIG.ATTACK_RANGE) {
+                    z.health -= CONFIG.ATTACK_DAMAGE;
+                    hits++;
                     
-                    // allow some tolerance
-                    if (normalizedDiff < 1.35 || dist < 30) {
-                        // Hit!
-                        z.health -= CONFIG.ATTACK_DAMAGE;
-                        hitCount++;
-                        
-                        // Knockback
-                        const kx = (z.x - player.x) / dist * 7;
-                        const ky = (z.y - player.y) / dist * 7;
-                        z.x += kx;
-                        z.y += ky;
-                        
-                        // Blood effect
-                        createBloodEffect(z.x, z.y);
-                        
-                        if (z.health <= 0) {
-                            kills++;
-                            showMessage("¡KILLED!", 520, z.x, z.y - 25);
-                            zombies.splice(i, 1);
-                        }
+                    const k = 7;
+                    z.x += (z.x - player.x) / d * k;
+                    z.y += (z.y - player.y) / d * k;
+                    
+                    createBloodEffect(z.x, z.y);
+                    
+                    if (z.health <= 0) {
+                        kills++;
+                        showMessage("¡KILLED!", 500, z.x, z.y - 20);
+                        zombies.splice(i, 1);
                     }
                 }
             }
             
-            // Visual attack
-            createAttackEffect(attackX, attackY, attackAngle);
+            createAttackEffect(ax, ay, angle);
             
-            if (hitCount > 0) {
-                showMessage(hitCount > 1 ? "¡COMBO!" : "¡GOLPE!", 550, attackX, attackY - 24);
+            if (hits > 0) {
+                showMessage(hits > 1 ? "¡COMBO!" : "¡GOLPE!", 500, ax, ay - 20);
             } else {
-                // miss sound visual
-                showMessage("¡MISS!", 450, attackX + Math.cos(attackAngle) * 26, attackY + Math.sin(attackAngle) * 26);
+                showMessage("¡MISS!", 400, ax + Math.cos(angle) * 24, ay + Math.sin(angle) * 24);
             }
         }
         
-        let floatingTexts = [];
-        
-        function showMessage(text, duration, x = null, y = null, isDamage = false) {
-            const msg = {
-                text: text,
-                duration: duration,
-                x: x !== null ? x : player.x,
-                y: y !== null ? y : player.y - 25,
+        function showMessage(text, dur, x = null, y = null, damage = false) {
+            floatingTexts.push({
+                text, duration: dur,
+                x: x ?? player.x,
+                y: y ?? player.y - 22,
                 alpha: 1,
-                isDamage: isDamage,
+                damage,
                 created: Date.now()
-            };
-            floatingTexts.push(msg);
-            
-            // limit
-            if (floatingTexts.length > 7) floatingTexts.shift();
+            });
         }
         
         function createAttackEffect(x, y, angle) {
-            // Simple particle slash
-            const slash = {
-                x: x,
-                y: y,
-                angle: angle,
-                life: 12,
-                size: 26
-            };
-            
-            // Store for rendering (temporary array)
-            if (!window.attackEffects) window.attackEffects = [];
-            window.attackEffects.push(slash);
-            
-            // Clean old
-            if (window.attackEffects.length > 4) window.attackEffects.shift();
+            attackEffects.push({x, y, angle, life: 11});
         }
         
         function createBloodEffect(x, y) {
-            if (!window.bloodParticles) window.bloodParticles = [];
-            
             for (let i = 0; i < 6; i++) {
-                window.bloodParticles.push({
-                    x: x,
-                    y: y,
-                    vx: (Math.random() - 0.5) * 3.5,
-                    vy: (Math.random() - 0.5) * 3.5 - 1,
-                    life: 12 + Math.random() * 9,
-                    size: 2.5 + Math.random() * 2
+                bloodParticles.push({
+                    x, y,
+                    vx: (Math.random()-0.5)*3.4,
+                    vy: (Math.random()-0.5)*3.4 - 0.8,
+                    life: 14 + Math.random()*8,
+                    size: 2 + Math.random()*1.8
                 });
-            }
-            
-            if (window.bloodParticles.length > 35) {
-                window.bloodParticles.splice(0, 12);
             }
         }
         
         function updateEffects() {
-            // Floating texts
-            for (let i = floatingTexts.length - 1; i >= 0; i--) {
-                const txt = floatingTexts[i];
-                txt.y -= 0.45;
-                txt.alpha = Math.max(0.1, txt.alpha - 0.025);
-                
-                if (Date.now() - txt.created > txt.duration) {
-                    floatingTexts.splice(i, 1);
-                }
+            for (let i = floatingTexts.length-1; i>=0; i--) {
+                const t = floatingTexts[i];
+                t.y -= 0.4;
+                t.alpha = Math.max(0.1, t.alpha - 0.028);
+                if (Date.now() - t.created > t.duration) floatingTexts.splice(i, 1);
             }
             
-            // Attack effects
-            if (window.attackEffects) {
-                for (let i = window.attackEffects.length - 1; i >= 0; i--) {
-                    window.attackEffects[i].life--;
-                    if (window.attackEffects[i].life <= 0) window.attackEffects.splice(i, 1);
-                }
+            for (let i = attackEffects.length-1; i>=0; i--) {
+                attackEffects[i].life--;
+                if (attackEffects[i].life <= 0) attackEffects.splice(i, 1);
             }
             
-            // Blood particles
-            if (window.bloodParticles) {
-                for (let i = window.bloodParticles.length - 1; i >= 0; i--) {
-                    const p = window.bloodParticles[i];
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vy += 0.1;
-                    p.life--;
-                    
-                    if (p.life <= 0) window.bloodParticles.splice(i, 1);
-                }
+            for (let i = bloodParticles.length-1; i>=0; i--) {
+                const p = bloodParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.12;
+                p.life--;
+                if (p.life <= 0) bloodParticles.splice(i, 1);
             }
         }
         
         function updateHUD() {
-            // Health
-            const healthPercent = Math.max(0, Math.min(100, player.health / player.maxHealth * 100));
-            document.getElementById('healthBar').style.width = healthPercent + '%';
+            const hp = Math.max(0, Math.min(100, player.health / player.maxHealth * 100));
+            document.getElementById('healthBar').style.width = hp + '%';
             document.getElementById('healthValue').textContent = Math.floor(player.health);
             
-            // Hunger
-            const hungerPercent = Math.max(0, player.hunger);
-            document.getElementById('hungerBar').style.width = hungerPercent + '%';
+            document.getElementById('hungerBar').style.width = player.hunger + '%';
             document.getElementById('hungerValue').textContent = Math.floor(player.hunger);
             
-            // Thirst
-            const thirstPercent = Math.max(0, player.thirst);
-            document.getElementById('thirstBar').style.width = thirstPercent + '%';
+            document.getElementById('thirstBar').style.width = player.thirst + '%';
             document.getElementById('thirstValue').textContent = Math.floor(player.thirst);
             
-            // Stamina
-            const staminaPercent = Math.max(0, player.stamina / player.maxStamina * 100);
-            document.getElementById('staminaBar').style.width = staminaPercent + '%';
+            const st = Math.max(0, player.stamina / player.maxStamina * 100);
+            document.getElementById('staminaBar').style.width = st + '%';
             document.getElementById('staminaValue').textContent = Math.floor(player.stamina);
             
-            // Time and kills
-            const minutes = Math.floor(survivalTime / 60);
-            const seconds = Math.floor(survivalTime % 60);
+            const min = Math.floor(survivalTime / 60);
+            const sec = Math.floor(survivalTime % 60);
             document.getElementById('survivalTime').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                `${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
             
             document.getElementById('killCount').textContent = kills;
             
-            // Status text
-            const statusEl = document.getElementById('playerStatus');
-            let status = "SUPERVIVIENTE";
+            const status = document.getElementById('playerStatus');
+            let txt = "SUPERVIVIENTE";
+            if (player.health < 25) txt = "CRÍTICO";
+            else if (player.hunger < 20 || player.thirst < 20) txt = "DEBILITADO";
+            else if (isSprinting) txt = "CORRIENDO";
             
-            if (player.health < 25) status = "CRÍTICO";
-            else if (player.hunger < 20 || player.thirst < 20) status = "DEBILITADO";
-            else if (isSprinting) status = "CORRIENDO";
-            else if (player.stamina < 25) status = "CANSADO";
-            
-            statusEl.textContent = status;
-            statusEl.style.color = (player.health < 25) ? '#f87171' : '#4ade80';
+            status.textContent = txt;
+            status.style.color = player.health < 25 ? '#f87171' : '#4ade80';
         }
         
-        function drawBackground() {
-            // Ground
+        function draw() {
             ctx.fillStyle = '#292524';
-            ctx.fillRect(0, 0, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
+            ctx.fillRect(0, 0, 800, 600);
             
-            // Grid / cracked ground
+            // Grid
             ctx.strokeStyle = '#3f3a35';
             ctx.lineWidth = 1;
-            
-            for (let x = 0; x < CONFIG.WORLD_WIDTH; x += 32) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, CONFIG.WORLD_HEIGHT);
-                ctx.stroke();
+            for (let x = 0; x < 800; x += 32) {
+                ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,600); ctx.stroke();
+            }
+            for (let y = 0; y < 600; y += 32) {
+                ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(800,y); ctx.stroke();
             }
             
-            for (let y = 0; y < CONFIG.WORLD_HEIGHT; y += 32) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(CONFIG.WORLD_WIDTH, y);
-                ctx.stroke();
-            }
-            
-            // Some dirt patches
-            ctx.fillStyle = '#3f3a35';
-            for (let i = 0; i < 14; i++) {
-                const px = (i * 57) % (CONFIG.WORLD_WIDTH - 30);
-                const py = ((i * 31) + 80) % (CONFIG.WORLD_HEIGHT - 30);
-                ctx.fillRect(px, py, 27, 9);
-                ctx.fillRect(px + 9, py + 11, 18, 11);
-            }
-            
-            // Apocalyptic feel: some blood stains
-            ctx.fillStyle = '#3f1f1f';
-            ctx.fillRect(120, 260, 38, 14);
-            ctx.fillRect(540, 130, 27, 23);
-            ctx.fillRect(310, 440, 52, 8);
-        }
-        
-        function drawObstacles() {
-            for (let obs of obstacles) {
+            // Obstacles
+            ctx.strokeStyle = '#1c1917';
+            ctx.lineWidth = 2;
+            obstacles.forEach(obs => {
                 if (obs.type === 'wall') {
-                    // Building / wall
                     ctx.fillStyle = '#374151';
                     ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-                    
-                    // Details
                     ctx.fillStyle = '#1f2937';
-                    ctx.fillRect(obs.x + 4, obs.y + 4, obs.width - 8, obs.height - 8);
-                    
-                    // windows
-                    ctx.fillStyle = '#4b5563';
-                    for (let wx = 7; wx < obs.width - 14; wx += 16) {
-                        for (let wy = 8; wy < obs.height - 14; wy += 16) {
-                            ctx.fillRect(obs.x + wx, obs.y + wy, 9, 7);
-                        }
-                    }
-                    
-                    // outline
-                    ctx.strokeStyle = '#1c1917';
-                    ctx.lineWidth = 3;
-                    ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
-                    
-                } else if (obs.type === 'rubble') {
+                    ctx.fillRect(obs.x+4, obs.y+4, obs.width-8, obs.height-8);
+                } else {
                     ctx.fillStyle = '#44403c';
                     ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-                    
-                    ctx.fillStyle = '#57534e';
-                    ctx.fillRect(obs.x + 3, obs.y + 2, obs.width - 6, obs.height * 0.6);
-                    
-                    ctx.strokeStyle = '#292524';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
-                } else {
-                    // debris
-                    ctx.fillStyle = '#4b5563';
-                    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-                    ctx.fillStyle = '#374151';
-                    ctx.fillRect(obs.x + 2, obs.y + 2, obs.width * 0.5, obs.height * 0.6);
                 }
-            }
-        }
-        
-        function drawPlayer() {
+                ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
+            });
+            
+            // Items
+            items.forEach(it => {
+                const p = Math.sin(it.pulse) * 1.3 + 1;
+                ctx.save();
+                ctx.translate(it.x, it.y);
+                
+                if (it.type === 'food') {
+                    ctx.fillStyle = '#854d0e';
+                    ctx.fillRect(-9, -7, 18, 14);
+                    ctx.fillStyle = '#c2410c';
+                    ctx.fillRect(-5, -3, 10, 3);
+                } else if (it.type === 'water') {
+                    ctx.fillStyle = '#1e40af';
+                    ctx.fillRect(-5, -9, 10, 18);
+                } else {
+                    ctx.fillStyle = '#b91c1c';
+                    ctx.fillRect(-10, -7, 20, 14);
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(-2, -3, 4, 6);
+                    ctx.fillRect(-3, -2, 6, 4);
+                }
+                
+                ctx.strokeStyle = it.type === 'food' ? '#c2410c' : (it.type === 'water' ? '#3b82f6' : '#f87171');
+                ctx.globalAlpha = 0.3 + Math.sin(it.pulse) * 0.25;
+                ctx.beginPath();
+                ctx.arc(0, 0, 13 + p, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            });
+            
+            // Zombies
+            zombies.forEach(z => {
+                ctx.save();
+                ctx.translate(z.x, z.y);
+                
+                ctx.fillStyle = z.type === 'runner' ? '#4b2e2e' : '#3f3a35';
+                ctx.beginPath();
+                ctx.arc(0, 0, z.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#292524';
+                ctx.beginPath();
+                ctx.arc(0, -6, z.size * 0.65, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#9f1239';
+                ctx.beginPath();
+                ctx.arc(-4.5, -8, 2.2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(4.5, -8, 2.2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                if (z.type === 'runner') {
+                    ctx.strokeStyle = '#b91c1c';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, z.size + 2.5, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            });
+            
+            // Player
             ctx.save();
             ctx.translate(player.x, player.y);
             ctx.rotate(player.facing);
             
-            // Shadow
             ctx.fillStyle = 'rgba(0,0,0,0.3)';
             ctx.beginPath();
-            ctx.ellipse(0, 10, 13, 6, 0, 0, Math.PI * 2);
+            ctx.ellipse(0, 10, 12, 5, 0, 0, Math.PI * 2);
             ctx.fill();
             
-            // Body
-            ctx.fillStyle = '#166534'; // green jacket
-            ctx.fillRect(-11, -8, 22, 22);
+            ctx.fillStyle = '#166534';
+            ctx.fillRect(-10, -7, 20, 20);
             
-            // Backpack
-            ctx.fillStyle = '#14532d';
-            ctx.fillRect(-7, -12, 15, 11);
-            
-            // Head
             ctx.fillStyle = '#854d0e';
             ctx.beginPath();
-            ctx.arc(0, -9, 8, 0, Math.PI * 2);
+            ctx.arc(0, -8, 7, 0, Math.PI * 2);
             ctx.fill();
             
-            // Face
-            ctx.fillStyle = '#451a03';
-            ctx.fillRect(-3, -12, 6, 3);
-            
-            // Arms (left)
-            ctx.fillStyle = '#166534';
-            ctx.fillRect(-13, -4, 6, 13);
-            
-            // Arms (right)
-            ctx.fillRect(8, -4, 6, 13);
-            
-            // Weapon
             ctx.fillStyle = '#57534e';
-            ctx.fillRect(9, -2, 16, 4);
-            ctx.fillStyle = '#292524';
-            ctx.fillRect(20, -4, 5, 2);
+            ctx.fillRect(8, -1, 14, 3);
             
             ctx.restore();
             
-            // Health ring
-            if (player.health < 45) {
-                ctx.strokeStyle = '#b91c1c';
-                ctx.lineWidth = 2.5;
-                ctx.beginPath();
-                ctx.arc(player.x, player.y, player.size + 6, 0, Math.PI * 2 * (player.health / player.maxHealth));
-                ctx.stroke();
-            }
-        }
-        
-        function drawZombies() {
-            for (let z of zombies) {
-                ctx.save();
-                
-                // Shadow
-                ctx.fillStyle = 'rgba(0,0,0,0.4)';
-                ctx.beginPath();
-                ctx.ellipse(z.x, z.y + 10, z.size * 0.8, 5, 0, 0, Math.PI * 2);
-                ctx.fill();
-                
-                const isRunner = z.type === 'runner';
-                
-                // Body
-                ctx.fillStyle = isRunner ? '#4b2e2e' : '#3f3a35';
-                ctx.beginPath();
-                ctx.arc(z.x, z.y, z.size, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Head
-                ctx.fillStyle = isRunner ? '#3f2a2a' : '#292524';
-                ctx.beginPath();
-                ctx.arc(z.x, z.y - 6, z.size * 0.68, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Eyes
-                ctx.fillStyle = '#9f1239';
-                ctx.beginPath();
-                ctx.arc(z.x - 5, z.y - 8, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(z.x + 5, z.y - 8, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Mouth
-                ctx.strokeStyle = '#451a03';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.moveTo(z.x - 4, z.y - 2);
-                ctx.lineTo(z.x + 4, z.y - 2);
-                ctx.stroke();
-                
-                // Torn clothes / damage
-                ctx.fillStyle = '#1f2937';
-                ctx.fillRect(z.x - z.size + 2, z.y + 1, 7, 6);
-                
-                // Runner speed effect
-                if (isRunner) {
-                    ctx.strokeStyle = '#b91c1c';
-                    ctx.lineWidth = 1.5;
-                    ctx.beginPath();
-                    ctx.arc(z.x, z.y, z.size + 2.5, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-                
-                ctx.restore();
-                
-                // Health bar for zombies
-                if (z.health < 30 && z.health > 0) {
-                    const hpPercent = Math.max(0, z.health / (z.type === 'runner' ? 18 : 30));
-                    ctx.fillStyle = '#1c1917';
-                    ctx.fillRect(z.x - 11, z.y - z.size - 11, 22, 5);
-                    ctx.fillStyle = '#b91c1c';
-                    ctx.fillRect(z.x - 11, z.y - z.size - 11, 22 * hpPercent, 5);
-                }
-            }
-        }
-        
-        function drawItems() {
-            for (let item of items) {
-                const pulseSize = Math.sin(item.pulse) * 1.5 + 1;
-                
-                ctx.save();
-                ctx.translate(item.x, item.y);
-                
-                if (item.type === 'food') {
-                    // Can of food
-                    ctx.fillStyle = '#854d0e';
-                    ctx.fillRect(-item.size * 0.8, -item.size * 0.65, item.size * 1.6, item.size * 1.3);
-                    
-                    ctx.fillStyle = '#451a03';
-                    ctx.fillRect(-item.size * 0.65, -item.size * 0.45, item.size * 1.3, 4);
-                    
-                    // label
-                    ctx.fillStyle = '#c2410c';
-                    ctx.fillRect(-item.size * 0.5, -item.size * 0.3, item.size, 3);
-                    
-                } else if (item.type === 'water') {
-                    // Bottle
-                    ctx.fillStyle = '#1e40af';
-                    ctx.fillRect(-6, -item.size * 0.8, 12, item.size * 1.6);
-                    
-                    ctx.fillStyle = '#1e3a8a';
-                    ctx.fillRect(-4, -item.size * 0.4, 8, item.size);
-                    
-                    // cap
-                    ctx.fillStyle = '#1e40af';
-                    ctx.fillRect(-4, -item.size * 0.95, 8, 6);
-                    
-                } else if (item.type === 'medkit') {
-                    // Medkit
-                    ctx.fillStyle = '#b91c1c';
-                    ctx.fillRect(-item.size * 0.9, -item.size * 0.65, item.size * 1.8, item.size * 1.3);
-                    
-                    ctx.fillStyle = '#fff';
-                    ctx.fillRect(-3, -item.size * 0.35, 6, item.size * 0.7);
-                    ctx.fillRect(-item.size * 0.35, -3, item.size * 0.7, 6);
-                }
-                
-                // Glow pulse
-                ctx.strokeStyle = (item.type === 'food') ? '#c2410c' : 
-                                  (item.type === 'water') ? '#3b82f6' : '#f87171';
-                ctx.lineWidth = 1.2;
-                ctx.globalAlpha = 0.35 + Math.sin(item.pulse) * 0.3;
-                ctx.beginPath();
-                ctx.arc(0, 0, item.size * (1.25 + pulseSize * 0.15), 0, Math.PI * 2);
-                ctx.stroke();
-                
-                ctx.restore();
-            }
-        }
-        
-        function drawEffects() {
-            // Floating texts
-            ctx.font = 'bold 13px "Press Start 2P", monospace';
+            // Effects
+            ctx.font = 'bold 12px "Press Start 2P", monospace';
             ctx.textAlign = 'center';
             
-            for (let txt of floatingTexts) {
-                ctx.globalAlpha = txt.alpha;
-                ctx.fillStyle = txt.isDamage ? '#f87171' : '#fde047';
-                
-                if (txt.isDamage) {
-                    ctx.fillStyle = '#e11d48';
-                }
-                
-                ctx.fillText(txt.text, txt.x, txt.y);
-                
-                // slight shadow
-                ctx.fillStyle = '#00000055';
-                ctx.fillText(txt.text, txt.x + 1, txt.y + 1);
-            }
+            floatingTexts.forEach(t => {
+                ctx.globalAlpha = t.alpha;
+                ctx.fillStyle = t.damage ? '#f87171' : '#fde047';
+                ctx.fillText(t.text, t.x, t.y);
+            });
             ctx.globalAlpha = 1;
             
             // Attack effects
-            if (window.attackEffects) {
-                for (let eff of window.attackEffects) {
-                    const alpha = eff.life / 13;
-                    ctx.strokeStyle = `rgba(234, 179, 8, ${alpha})`;
-                    ctx.lineWidth = 3.5;
-                    
-                    ctx.save();
-                    ctx.translate(eff.x, eff.y);
-                    ctx.rotate(eff.angle);
-                    
-                    // slash line
-                    ctx.beginPath();
-                    ctx.moveTo(-eff.size * 0.5, 0);
-                    ctx.lineTo(eff.size * 1.2, 0);
-                    ctx.stroke();
-                    
-                    // extra slash
-                    ctx.lineWidth = 1.5;
-                    ctx.beginPath();
-                    ctx.moveTo(-eff.size * 0.3, -6);
-                    ctx.lineTo(eff.size * 0.8, -6);
-                    ctx.stroke();
-                    
-                    ctx.restore();
-                }
-            }
+            attackEffects.forEach(e => {
+                const a = e.life / 11;
+                ctx.strokeStyle = `rgba(234,179,8,${a})`;
+                ctx.lineWidth = 3;
+                ctx.save();
+                ctx.translate(e.x, e.y);
+                ctx.rotate(e.angle);
+                ctx.beginPath();
+                ctx.moveTo(-12, 0);
+                ctx.lineTo(26, 0);
+                ctx.stroke();
+                ctx.restore();
+            });
             
-            // Blood particles
-            if (window.bloodParticles) {
-                ctx.fillStyle = '#9f1239';
-                for (let p of window.bloodParticles) {
-                    const a = p.life / 20;
-                    ctx.globalAlpha = a;
-                    ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
-                }
-                ctx.globalAlpha = 1;
-            }
-        }
-        
-        function draw() {
-            ctx.clearRect(0, 0, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
-            
-            // Draw layers
-            drawBackground();
-            drawObstacles();
-            drawItems();
-            drawZombies();
-            drawPlayer();
-            drawEffects();
+            // Blood
+            ctx.fillStyle = '#9f1239';
+            bloodParticles.forEach(p => {
+                ctx.globalAlpha = p.life / 18;
+                ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+            });
+            ctx.globalAlpha = 1;
             
             // Border
             ctx.strokeStyle = '#451a03';
-            ctx.lineWidth = 8;
-            ctx.strokeRect(0, 0, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
-            
-            // Very faint vignette
-            const grad = ctx.createRadialGradient(
-                CONFIG.WORLD_WIDTH / 2, CONFIG.WORLD_HEIGHT / 2, 180,
-                CONFIG.WORLD_WIDTH / 2, CONFIG.WORLD_HEIGHT / 2, 470
-            );
-            grad.addColorStop(0, 'transparent');
-            grad.addColorStop(1, 'rgba(0,0,0,0.3)');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, CONFIG.WORLD_WIDTH, CONFIG.WORLD_HEIGHT);
-            
-            // Debug info (optional)
-            if (false) {
-                ctx.fillStyle = '#fff';
-                ctx.font = '10px monospace';
-                ctx.fillText(`Z: ${zombies.length} | I: ${items.length}`, 15, 22);
-            }
+            ctx.lineWidth = 7;
+            ctx.strokeRect(0, 0, 800, 600);
         }
         
-        function gameLoop(timestamp = 0) {
+        function gameLoop(ts = 0) {
             if (!gameRunning) return;
             
-            if (!timestamp) timestamp = performance.now();
-            
-            const delta = timestamp - lastTime;
-            lastTime = timestamp;
+            const delta = ts - lastTime || 16;
+            lastTime = ts;
             
             if (!paused) {
                 frame++;
-                
-                // Update time
                 survivalTime += delta / 1000;
                 
-                // Update entities
                 updatePlayer(delta);
                 updateZombies(delta);
                 updateItems(delta);
                 updateEffects();
                 
-                // Periodic zombie spawn
-                if (frame % 180 === 0 && zombies.length < CONFIG.MAX_ZOMBIES - 2) {
-                    if (Math.random() < 0.5) spawnZombie();
-                }
+                if (frame % 6 === 0) updateHUD();
                 
-                // Check collisions with zombies (already handled in update)
-                
-                // Occasionally spawn items
-                if (frame % 260 === 0 && items.length < 5) {
-                    if (Math.random() < 0.45) spawnItem();
-                }
-                
-                // Random spawn of zombies as time progresses
-                if (survivalTime > 60 && frame % 270 === 0 && zombies.length < CONFIG.MAX_ZOMBIES) {
-                    spawnZombie();
-                }
-                
-                // Update HUD every few frames
-                if (frame % 6 === 0) {
-                    updateHUD();
-                }
-                
-                // Draw everything
                 draw();
                 
-                // Win condition hint (very long survival)
-                if (survivalTime > 300 && frame % 140 === 0) {
-                    // nothing
+                // Random spawns
+                if (frame % 190 === 0 && zombies.length < CONFIG.MAX_ZOMBIES) {
+                    spawnZombie();
                 }
             } else {
-                // paused: still draw
                 draw();
             }
             
-            // Continue loop
             requestAnimationFrame(gameLoop);
         }
         
         function getDistance(x1, y1, x2, y2) {
-            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
         }
         
         function pauseGame() {
             if (!gameRunning) return;
             paused = true;
-            document.getElementById('pauseScreen').classList.remove('hidden');
-            document.getElementById('pauseScreen').classList.add('flex');
+            document.getElementById('pauseScreen').classList.add('active');
         }
         
         function resumeGame() {
             paused = false;
-            document.getElementById('pauseScreen').classList.remove('flex');
-            document.getElementById('pauseScreen').classList.add('hidden');
-            
-            // resume loop if needed
+            document.getElementById('pauseScreen').classList.remove('active');
             lastTime = performance.now();
             requestAnimationFrame(gameLoop);
         }
         
         function restartGame() {
-            // clean intervals
             if (window.spawnZombieInterval) clearInterval(window.spawnZombieInterval);
             if (window.spawnItemInterval) clearInterval(window.spawnItemInterval);
             
-            // hide screens
-            document.getElementById('pauseScreen').classList.add('hidden');
-            document.getElementById('pauseScreen').classList.remove('flex');
-            document.getElementById('gameOverScreen').classList.add('hidden');
-            document.getElementById('gameOverScreen').classList.remove('flex');
+            document.getElementById('pauseScreen').classList.remove('active');
+            document.getElementById('gameOverScreen').classList.remove('active');
             
-            // restart game
             initGame();
         }
         
@@ -2313,54 +1474,30 @@
             gameRunning = false;
             paused = true;
             
-            // Clean intervals
             if (window.spawnZombieInterval) clearInterval(window.spawnZombieInterval);
             if (window.spawnItemInterval) clearInterval(window.spawnItemInterval);
             
-            // Calculate score
-            const finalScore = Math.floor(survivalTime * 4.5 + kills * 16);
+            const score = Math.floor(survivalTime * 4.5 + kills * 16);
             
-            // Show game over
-            const overScreen = document.getElementById('gameOverScreen');
-            overScreen.classList.remove('hidden');
-            overScreen.classList.add('flex');
-            
-            // Populate stats
-            const mins = Math.floor(survivalTime / 60);
-            const secs = Math.floor(survivalTime % 60);
-            document.getElementById('finalTime').textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            document.getElementById('finalTime').textContent = 
+                `${Math.floor(survivalTime/60).toString().padStart(2,'0')}:${Math.floor(survivalTime%60).toString().padStart(2,'0')}`;
             document.getElementById('finalKills').textContent = kills;
-            document.getElementById('finalScore').textContent = finalScore;
+            document.getElementById('finalScore').textContent = score;
             
-            // Store high score
+            document.getElementById('gameOverScreen').classList.add('active');
+            
+            // Save highscore
             try {
-                const highScore = localStorage.getItem('zombieHighScore') || 0;
-                if (finalScore > highScore) {
-                    localStorage.setItem('zombieHighScore', finalScore);
-                    // show new record toast
-                    setTimeout(() => {
-                        const toast = document.createElement('div');
-                        toast.style.cssText = 'position:fixed;bottom:25px;left:50%;transform:translate(-50%,0);background:#166534;color:white;padding:5px 15px;border-radius:4px;font-size:11px;border:2px solid #4ade80';
-                        toast.innerHTML = `¡NUEVO RÉCORD! ${finalScore}`;
-                        document.body.appendChild(toast);
-                        setTimeout(() => toast.remove(), 3100);
-                    }, 800);
-                }
-            } catch(e) {}
-            
-            // Final draw
-            setTimeout(() => {
-                if (ctx) draw();
-            }, 150);
+                const hs = localStorage.getItem('zombieHS') || 0;
+                if (score > hs) localStorage.setItem('zombieHS', score);
+            } catch(e){}
         }
         
         function backToMenuFromGameOver() {
-            document.getElementById('gameOverScreen').classList.remove('flex');
-            document.getElementById('gameOverScreen').classList.add('hidden');
-            document.getElementById('gameScreen').classList.add('hidden');
-            document.getElementById('menuScreen').classList.remove('hidden');
+            document.getElementById('gameOverScreen').classList.remove('active');
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('menuScreen').style.display = 'flex';
             
-            // Clean up
             if (window.spawnZombieInterval) clearInterval(window.spawnZombieInterval);
             if (window.spawnItemInterval) clearInterval(window.spawnItemInterval);
             
@@ -2368,68 +1505,34 @@
         }
         
         function startGame() {
-            // Validate perks selection
             if (!selectedAdvantage || !selectedDisadvantage) {
-                alert('¡Debes elegir 1 ventaja y 1 desventaja!');
+                alert('¡Elige 1 ventaja y 1 desventaja!');
                 return;
             }
-            
-            // Apply perks
             applyPerks();
-            
-            // Start the game
             initGame();
         }
         
         function init() {
-            initTailwind();
+            // Show menu
+            document.getElementById('menuScreen').style.display = 'flex';
+            document.getElementById('characterScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'none';
             
-            // Random default perks for quick play (optional)
-            // But we force user to choose
-            
-            // Keyboard hint
-            console.log('%c[Zombie Apocalypse] Juego iniciado. Primera versión survival.', 'color:#854d0e');
-            
-            // Make sure all screens are ready
-            document.getElementById('gameScreen').classList.add('hidden');
-            document.getElementById('characterScreen').classList.add('hidden');
-            
-            // Optional: auto select a perk if testing (but disabled)
-            // setTimeout(() => { if (!selectedAdvantage) ... }, 200)
-            
-            // Add some keyboard global hints
+            // Keyboard help
             document.addEventListener('keydown', function(e) {
-                if (e.key === '?' && document.getElementById('menuScreen').classList.contains('hidden') === false) {
+                if (e.key === '?' && document.getElementById('menuScreen').style.display !== 'none') {
                     showInstructions();
                 }
             });
             
-            // Easter egg: click on title to spawn random zombie in demo
-            const titleArea = document.querySelector('#menuScreen h1');
-            if (titleArea) {
-                titleArea.style.cursor = 'pointer';
-                titleArea.onclick = () => {
-                    const demoZombie = {x: 200 + Math.random()*300, y: 180 + Math.random()*180, size: 14};
-                    if (ctx) {
-                        ctx.fillStyle = '#4b2e2e';
-                        ctx.beginPath();
-                        ctx.arc(demoZombie.x, demoZombie.y, demoZombie.size, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                };
-            }
-            
-            // Preload a message
-            console.log('%c[Zombie Survival] Primera versión lista. Usa WASD + SHIFT + ESPACIO.', 'color:#57534e');
+            console.log('%c[Zombie Apocalypse v1.2] Juego mobile-ready listo.', 'color:#854d0e');
         }
         
-        // Boot
-        window.onload = function() {
-            init();
-        };
+        window.onload = init;
         
-        // Expose for debug (optional)
-        window.ZOMBIE_GAME = { restart: () => location.reload() };
+        // Expose
+        window.ZOMBIE = { quickPlay: () => quickPlay() };
     </script>
 </body>
 </html>
