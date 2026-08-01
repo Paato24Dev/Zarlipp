@@ -562,7 +562,7 @@
             ATTACK_COOLDOWN: 650,
             ATTACK_RANGE: 190,
             BULLET_SPEED: 12,
-            BULLET_MAX_DISTANCE: 720,
+            BULLET_MAX_DISTANCE: 780,
             ATTACK_DAMAGE: 25,
             MAX_ZOMBIES: 18,
             WORLD_WIDTH: 800,
@@ -1205,7 +1205,7 @@
             }
         }
         
-        // === BULLET SYSTEM ===
+        // === BULLET SYSTEM (PIERCING BULLETS) ===
         function updateBullets() {
             if (!gameRunning || paused) return;
             
@@ -1217,39 +1217,39 @@
                 b.y += b.vy;
                 b.life -= 12;
                 
-                // Check bounds
+                // Check bounds / max distance
                 if (b.x < 0 || b.x > CONFIG.WORLD_WIDTH || b.y < 0 || b.y > CONFIG.WORLD_HEIGHT || b.life <= 0) {
                     bullets.splice(i, 1);
                     continue;
                 }
                 
-                // Check collision with zombies
-                let hit = false;
+                // Check collision with zombies — PIERCING: bullet goes through multiple enemies
                 for (let j = zombies.length - 1; j >= 0; j--) {
                     const z = zombies[j];
-                    if (getDistance(b.x, b.y, z.x, z.y) < z.size + 7) {
-                        z.health -= b.damage;
+                    if (getDistance(b.x, b.y, z.x, z.y) < z.size + 8) {
+                        // Apply damage (slightly reduced after piercing)
+                        const currentDamage = b.damage * Math.max(0.55, 1 - (b.pierced || 0) * 0.22);
+                        z.health -= currentDamage;
                         
                         createBloodEffect(z.x, z.y);
                         
                         // Knockback
                         const d = Math.max(1, getDistance(b.x, b.y, z.x, z.y));
-                        z.x += (b.vx / d) * 9;
-                        z.y += (b.vy / d) * 9;
+                        z.x += (b.vx / d) * 8;
+                        z.y += (b.vy / d) * 8;
                         
+                        // Count piercing
+                        b.pierced = (b.pierced || 0) + 1;
+                        
+                        // Kill if dead
                         if (z.health <= 0) {
                             kills++;
                             showMessage("¡KILLED!", 450, z.x, z.y - 18);
                             zombies.splice(j, 1);
                         }
                         
-                        hit = true;
-                        break;
+                        // Bullet continues flying through — no removal
                     }
-                }
-                
-                if (hit) {
-                    bullets.splice(i, 1);
                 }
             }
         }
@@ -1300,19 +1300,20 @@
                 angle = Math.atan2(ty - player.y, tx - player.x);
             }
             
-            // Fire a visible bullet
-            const bulletSpeed = CONFIG.BULLET_SPEED || 9.5;
-            const startX = player.x + Math.cos(angle) * 18;
-            const startY = player.y + Math.sin(angle) * 18;
+            // Fire a visible bullet (piercing)
+            const bulletSpeed = CONFIG.BULLET_SPEED || 12;
+            const startX = player.x + Math.cos(angle) * 20;
+            const startY = player.y + Math.sin(angle) * 20;
             
             bullets.push({
                 x: startX,
                 y: startY,
                 vx: Math.cos(angle) * bulletSpeed,
                 vy: Math.sin(angle) * bulletSpeed,
-                life: CONFIG.BULLET_MAX_DISTANCE || 520,
+                life: CONFIG.BULLET_MAX_DISTANCE || 780,
                 damage: CONFIG.ATTACK_DAMAGE,
-                angle: angle
+                angle: angle,
+                pierced: 0   // how many zombies it went through
             });
             
             // Visual muzzle flash
