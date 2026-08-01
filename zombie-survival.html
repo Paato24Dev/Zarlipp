@@ -560,7 +560,9 @@
             HUNGER_DRAIN: 0.65,
             THIRST_DRAIN: 0.95,
             ATTACK_COOLDOWN: 650,
-            ATTACK_RANGE: 155,
+            ATTACK_RANGE: 180,
+            BULLET_SPEED: 11.5,
+            BULLET_MAX_DISTANCE: 650,
             ATTACK_DAMAGE: 25,
             MAX_ZOMBIES: 18,
             WORLD_WIDTH: 800,
@@ -585,6 +587,7 @@
         let floatingTexts = [];
         let attackEffects = [];
         let bloodParticles = [];
+        let bullets = [];   // visible projectiles / bullets
         
         function initPerksUI() {
             const advCont = document.getElementById('advantages');
@@ -1042,14 +1045,24 @@
         }
         
         function spawnItem() {
-            if (!gameRunning || items.length > 7) return;
+            if (!gameRunning || items.length > 8) return;
             
             let x = 40 + Math.random() * (CONFIG.WORLD_WIDTH - 80);
             let y = 40 + Math.random() * (CONFIG.WORLD_HEIGHT - 80);
             
             const roll = Math.random();
-            let type = roll < 0.42 ? 'food' : roll < 0.82 ? 'water' : 'medkit';
-            let val = type === 'food' ? 26 : type === 'water' ? 28 : 32;
+            let type, val;
+            
+            if (roll < 0.32) {
+                type = 'food'; val = 26 + Math.random() * 7;
+            } else if (roll < 0.60) {
+                type = 'water'; val = 27 + Math.random() * 8;
+            } else if (roll < 0.78) {
+                type = 'medkit'; val = 30;
+            } else {
+                // STAMINA PROVISION - high chance so player doesn't get stuck
+                type = 'stamina'; val = 50 + Math.random() * 18;
+            }
             
             items.push({
                 x, y, size: 11, type, value: Math.floor(val),
@@ -1192,6 +1205,55 @@
             }
         }
         
+        // === BULLET SYSTEM ===
+        function updateBullets() {
+            if (!gameRunning || paused) return;
+            
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const b = bullets[i];
+                
+                // Move bullet
+                b.x += b.vx;
+                b.y += b.vy;
+                b.life -= 12;
+                
+                // Check bounds
+                if (b.x < 0 || b.x > CONFIG.WORLD_WIDTH || b.y < 0 || b.y > CONFIG.WORLD_HEIGHT || b.life <= 0) {
+                    bullets.splice(i, 1);
+                    continue;
+                }
+                
+                // Check collision with zombies
+                let hit = false;
+                for (let j = zombies.length - 1; j >= 0; j--) {
+                    const z = zombies[j];
+                    if (getDistance(b.x, b.y, z.x, z.y) < z.size + 7) {
+                        z.health -= b.damage;
+                        
+                        createBloodEffect(z.x, z.y);
+                        
+                        // Knockback
+                        const d = Math.max(1, getDistance(b.x, b.y, z.x, z.y));
+                        z.x += (b.vx / d) * 9;
+                        z.y += (b.vy / d) * 9;
+                        
+                        if (z.health <= 0) {
+                            kills++;
+                            showMessage("¡KILLED!", 450, z.x, z.y - 18);
+                            zombies.splice(j, 1);
+                        }
+                        
+                        hit = true;
+                        break;
+                    }
+                }
+                
+                if (hit) {
+                    bullets.splice(i, 1);
+                }
+            }
+        }
+        
         function pickupItem(idx) {
             const it = items[idx];
             
@@ -1204,6 +1266,9 @@
             } else if (it.type === 'medkit') {
                 player.health = Math.min(player.maxHealth, player.health + it.value);
                 showMessage('+' + it.value + ' SALUD', 700, it.x, it.y - 16);
+            } else if (it.type === 'stamina') {
+                player.stamina = Math.min(player.maxStamina, player.stamina + it.value);
+                showMessage('+' + it.value + ' ESTAMINA', 700, it.x, it.y - 16);
             }
             
             items.splice(idx, 1);
@@ -1226,53 +1291,34 @@
                 return;
             }
             
-            player.stamina = Math.max(0, player.stamina - 15);
+            player.stamina = Math.max(0, player.stamina - 12);
             lastAttackTime = Date.now();
             
-            let ax = player.x, ay = player.y;
             let angle = player.facing;
             
             if (tx !== null && ty !== null) {
                 angle = Math.atan2(ty - player.y, tx - player.x);
-                // Attack point is now much farther for long reach
-                ax = player.x + Math.cos(angle) * 48;
-                ay = player.y + Math.sin(angle) * 48;
-            } else {
-                ax = player.x + Math.cos(angle) * 20;
-                ay = player.y + Math.sin(angle) * 20;
             }
             
-            let hits = 0;
+            // Fire a visible bullet
+            const bulletSpeed = CONFIG.BULLET_SPEED || 9.5;
+            const startX = player.x + Math.cos(angle) * 18;
+            const startY = player.y + Math.sin(angle) * 18;
             
-            for (let i = zombies.length - 1; i >= 0; i--) {
-                const z = zombies[i];
-                const d = getDistance(ax, ay, z.x, z.y);
-                
-                if (d < CONFIG.ATTACK_RANGE) {
-                    z.health -= CONFIG.ATTACK_DAMAGE;
-                    hits++;
-                    
-                    const k = 7;
-                    z.x += (z.x - player.x) / d * k;
-                    z.y += (z.y - player.y) / d * k;
-                    
-                    createBloodEffect(z.x, z.y);
-                    
-                    if (z.health <= 0) {
-                        kills++;
-                        showMessage("¡KILLED!", 500, z.x, z.y - 20);
-                        zombies.splice(i, 1);
-                    }
-                }
-            }
+            bullets.push({
+                x: startX,
+                y: startY,
+                vx: Math.cos(angle) * bulletSpeed,
+                vy: Math.sin(angle) * bulletSpeed,
+                life: CONFIG.BULLET_MAX_DISTANCE || 520,
+                damage: CONFIG.ATTACK_DAMAGE,
+                angle: angle
+            });
             
-            createAttackEffect(ax, ay, angle, true); // long reach visual
+            // Visual muzzle flash
+            createAttackEffect(startX, startY, angle, true);
             
-            if (hits > 0) {
-                showMessage(hits > 1 ? "¡COMBO!" : "¡GOLPE!", 500, ax, ay - 20);
-            } else {
-                showMessage("¡MISS!", 400, ax + Math.cos(angle) * 24, ay + Math.sin(angle) * 24);
-            }
+            // Small message if no bullet hits (will be updated by bullet logic)
         }
         
         function showMessage(text, dur, x = null, y = null, damage = false) {
@@ -1405,12 +1451,30 @@
                 } else if (it.type === 'water') {
                     ctx.fillStyle = '#1e40af';
                     ctx.fillRect(-5, -9, 10, 18);
-                } else {
+                } else if (it.type === 'medkit') {
                     ctx.fillStyle = '#b91c1c';
                     ctx.fillRect(-10, -7, 20, 14);
                     ctx.fillStyle = '#fff';
                     ctx.fillRect(-2, -3, 4, 6);
                     ctx.fillRect(-3, -2, 6, 4);
+                } else if (it.type === 'stamina') {
+                    // Very visible yellow stamina can
+                    ctx.fillStyle = '#ca8a04';
+                    ctx.fillRect(-8, -9, 16, 18);
+                    ctx.fillStyle = '#fef08c';
+                    ctx.fillRect(-5, -6, 10, 12);
+                    // Lightning bolt
+                    ctx.fillStyle = '#fef08c';
+                    ctx.beginPath();
+                    ctx.moveTo(-2, -3);
+                    ctx.lineTo(3, -3);
+                    ctx.lineTo(0, 4);
+                    ctx.lineTo(2, 4);
+                    ctx.lineTo(-3, 9);
+                    ctx.lineTo(0, 1);
+                    ctx.lineTo(-2, 1);
+                    ctx.closePath();
+                    ctx.fill();
                 }
                 
                 ctx.strokeStyle = it.type === 'food' ? '#c2410c' : (it.type === 'water' ? '#3b82f6' : '#f87171');
@@ -1524,6 +1588,45 @@
             });
             ctx.globalAlpha = 1;
             
+            // === VISIBLE BULLETS (bright yellow projectiles with long trail) ===
+            bullets.forEach(b => {
+                const alpha = Math.min(1, b.life / 140);
+                ctx.globalAlpha = alpha;
+                
+                // Thick bright yellow body
+                ctx.strokeStyle = '#fef08c';
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(b.x - b.vx * 1.1, b.y - b.vy * 1.1);
+                ctx.lineTo(b.x, b.y);
+                ctx.stroke();
+                
+                // White hot core
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(b.x - b.vx * 0.6, b.y - b.vy * 0.6);
+                ctx.lineTo(b.x, b.y);
+                ctx.stroke();
+                
+                // Big bright head
+                ctx.fillStyle = '#fef08c';
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, 4.5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Very long glowing trail
+                ctx.strokeStyle = '#ca8a04';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(b.x - b.vx * 4.5, b.y - b.vy * 4.5);
+                ctx.lineTo(b.x - b.vx * 1.4, b.y - b.vy * 1.4);
+                ctx.stroke();
+            });
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = '#451a03';
+            ctx.lineWidth = 1;
+            
             // Border
             ctx.strokeStyle = '#451a03';
             ctx.lineWidth = 7;
@@ -1543,6 +1646,7 @@
                 updatePlayer(delta);
                 updateZombies(delta);
                 updateItems(delta);
+                updateBullets();
                 updateEffects();
                 
                 if (frame % 6 === 0) updateHUD();
