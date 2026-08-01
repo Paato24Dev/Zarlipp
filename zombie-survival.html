@@ -155,27 +155,31 @@
             pointer-events: all;
         }
         
-        .joystick-container {
-            width: 85px;
-            height: 85px;
-            background: rgba(28, 25, 23, 0.9);
-            border: 3px solid #451a03;
+        /* Dynamic / Floating Joystick */
+        #dynamicJoystick {
+            position: fixed;
+            width: 92px;
+            height: 92px;
+            background: rgba(28, 25, 23, 0.85);
+            border: 4px solid #451a03;
             border-radius: 50%;
-            position: relative;
-            box-shadow: 0 0 0 3px #111;
+            z-index: 250;
+            pointer-events: none;
+            display: none;
+            box-shadow: 0 0 0 4px #111;
         }
         
-        .joystick {
-            width: 36px;
-            height: 36px;
+        #dynamicJoystick .stick {
+            width: 40px;
+            height: 40px;
             background: #57534e;
-            border: 3px solid #78350f;
+            border: 4px solid #78350f;
             border-radius: 50%;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 3px 0 #292524;
+            box-shadow: 0 4px 0 #292524;
             transition: transform 0.05s linear;
         }
         
@@ -435,8 +439,9 @@
         
         <!-- MOBILE CONTROLS -->
         <div class="mobile-controls" style="display: none;">
-            <div id="joystickContainer" class="joystick-container">
-                <div id="joystick" class="joystick"></div>
+            <!-- Dynamic floating joystick (appears where you touch) -->
+            <div id="dynamicJoystick">
+                <div class="stick" id="dynamicStick"></div>
             </div>
             
             <div class="action-buttons">
@@ -555,7 +560,7 @@
             HUNGER_DRAIN: 0.65,
             THIRST_DRAIN: 0.95,
             ATTACK_COOLDOWN: 650,
-            ATTACK_RANGE: 55,
+            ATTACK_RANGE: 155,
             ATTACK_DAMAGE: 25,
             MAX_ZOMBIES: 18,
             WORLD_WIDTH: 800,
@@ -828,92 +833,186 @@
             
             canvas.addEventListener('contextmenu', e => e.preventDefault());
             
-            // Touch on canvas
+            // Touch on canvas (for attack when tapping near player)
             canvas.addEventListener('touchstart', handleCanvasTouch, {passive: false});
             
             function handleCanvasTouch(e) {
                 if (!gameRunning || paused) return;
                 e.preventDefault();
+                
+                // If the dynamic joystick is active, we don't want to trigger attack on the same touch
+                if (window.dynamicJoystickActive) return;
+                
                 const rect = canvas.getBoundingClientRect();
                 const t = e.touches[0];
                 const tx = (t.clientX - rect.left) * (canvas.width / rect.width);
                 const ty = (t.clientY - rect.top) * (canvas.height / rect.height);
                 
-                if (getDistance(tx, ty, player.x, player.y) < 90) {
+                // Only attack if tap is relatively close to player
+                if (getDistance(tx, ty, player.x, player.y) < 110) {
                     attack(tx, ty);
                 }
             }
             
-            // Mobile controls
+            // Mobile controls - Dynamic joystick from anywhere
             setupMobileControls();
         }
         
         function setupMobileControls() {
-            const container = document.getElementById('joystickContainer');
-            const stick = document.getElementById('joystick');
+            const dynamicJoystick = document.getElementById('dynamicJoystick');
+            const dynamicStick = document.getElementById('dynamicStick');
             const attackBtn = document.getElementById('attackBtn');
             const pickupBtn = document.getElementById('pickupBtn');
             
-            if (!container || !stick) return;
+            if (!dynamicJoystick || !dynamicStick) return;
             
-            let active = false;
+            let joystickActive = false;
+            let joystickStartX = 0;
+            let joystickStartY = 0;
+            let currentTouchId = null;
             
-            const updateStick = (touch) => {
-                const rect = container.getBoundingClientRect();
-                const cx = rect.left + rect.width / 2;
-                const cy = rect.top + rect.height / 2;
+            const JOYSTICK_SIZE = 92;
+            const MAX_DISTANCE = 38;
+            
+            function showJoystick(x, y) {
+                dynamicJoystick.style.left = (x - JOYSTICK_SIZE / 2) + 'px';
+                dynamicJoystick.style.top = (y - JOYSTICK_SIZE / 2) + 'px';
+                dynamicJoystick.style.display = 'block';
+                dynamicJoystick.style.pointerEvents = 'none';
                 
-                let dx = touch.clientX - cx;
-                let dy = touch.clientY - cy;
+                // Reset stick position
+                dynamicStick.style.transform = 'translate(-50%, -50%)';
+            }
+            
+            function updateJoystick(touch) {
+                const rect = dynamicJoystick.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
                 
-                const max = rect.width / 2 - 6;
-                const dist = Math.sqrt(dx*dx + dy*dy);
+                let dx = touch.clientX - centerX;
+                let dy = touch.clientY - centerY;
                 
-                if (dist > max) {
-                    dx = dx / dist * max;
-                    dy = dy / dist * max;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > MAX_DISTANCE) {
+                    dx = (dx / distance) * MAX_DISTANCE;
+                    dy = (dy / distance) * MAX_DISTANCE;
                 }
                 
-                stick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+                dynamicStick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
                 
+                // Normalized values (-1 to 1)
                 window.mobileJoystick = {
-                    x: dx / max,
-                    y: dy / max
+                    x: dx / MAX_DISTANCE,
+                    y: dy / MAX_DISTANCE
                 };
+            }
+            
+            function hideJoystick() {
+                dynamicJoystick.style.display = 'none';
+                dynamicStick.style.transform = 'translate(-50%, -50%)';
+                window.mobileJoystick = { x: 0, y: 0 };
+                joystickActive = false;
+                currentTouchId = null;
+            }
+            
+            // Main touch handler for the whole screen (floating joystick)
+            const handleTouchStart = (e) => {
+                if (!gameRunning || paused) return;
+                
+                // Don't start joystick if touching the action buttons
+                const target = e.target;
+                if (target.id === 'attackBtn' || target.id === 'pickupBtn' || 
+                    target.closest('#attackBtn') || target.closest('#pickupBtn')) {
+                    return;
+                }
+                
+                e.preventDefault();
+                
+                const touch = e.touches[0];
+                currentTouchId = touch.identifier;
+                
+                // Show joystick where the user touched
+                showJoystick(touch.clientX, touch.clientY);
+                joystickActive = true;
+                
+                // Store that we are using dynamic joystick
+                window.dynamicJoystickActive = true;
+                
+                updateJoystick(touch);
             };
             
-            container.addEventListener('touchstart', e => {
-                e.preventDefault();
-                active = true;
-                updateStick(e.touches[0]);
-            }, {passive: false});
+            const handleTouchMove = (e) => {
+                if (!joystickActive || !gameRunning || paused) return;
+                
+                for (let i = 0; i < e.touches.length; i++) {
+                    if (e.touches[i].identifier === currentTouchId) {
+                        e.preventDefault();
+                        updateJoystick(e.touches[i]);
+                        break;
+                    }
+                }
+            };
             
-            container.addEventListener('touchmove', e => {
-                e.preventDefault();
-                if (active) updateStick(e.touches[0]);
-            }, {passive: false});
+            const handleTouchEnd = (e) => {
+                if (!joystickActive) return;
+                
+                let stillActive = false;
+                
+                for (let i = 0; i < e.touches.length; i++) {
+                    if (e.touches[i].identifier === currentTouchId) {
+                        stillActive = true;
+                        break;
+                    }
+                }
+                
+                if (!stillActive) {
+                    hideJoystick();
+                    window.dynamicJoystickActive = false;
+                }
+            };
             
-            container.addEventListener('touchend', () => {
-                active = false;
-                stick.style.transform = 'translate(-50%, -50%)';
-                window.mobileJoystick = {x:0, y:0};
-            });
+            // Attach to document body so it works from anywhere
+            document.addEventListener('touchstart', handleTouchStart, { passive: false });
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd, { passive: false });
+            document.addEventListener('touchcancel', handleTouchEnd, { passive: false });
             
+            // Action buttons (still work)
             if (attackBtn) {
-                attackBtn.addEventListener('touchstart', e => {
+                attackBtn.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    if (gameRunning && !paused) {
+                        attack();
+                    }
+                }, { passive: false });
+                
+                // Also allow click for desktop testing
+                attackBtn.addEventListener('click', (e) => {
                     if (gameRunning && !paused) attack();
                 });
             }
             
             if (pickupBtn) {
-                pickupBtn.addEventListener('touchstart', e => {
+                pickupBtn.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    if (gameRunning && !paused) {
+                        tryPickupItem();
+                    }
+                }, { passive: false });
+                
+                pickupBtn.addEventListener('click', (e) => {
                     if (gameRunning && !paused) tryPickupItem();
                 });
             }
             
-            window.mobileJoystick = {x: 0, y: 0};
+            // Initialize
+            window.mobileJoystick = { x: 0, y: 0 };
+            window.dynamicJoystickActive = false;
+            
+            // Make sure the old fixed joystick is hidden (we use dynamic now)
+            const oldJoystick = document.getElementById('joystickContainer');
+            if (oldJoystick) oldJoystick.style.display = 'none';
         }
         
         function spawnZombie() {
@@ -1135,8 +1234,9 @@
             
             if (tx !== null && ty !== null) {
                 angle = Math.atan2(ty - player.y, tx - player.x);
-                ax = player.x + Math.cos(angle) * 18;
-                ay = player.y + Math.sin(angle) * 18;
+                // Attack point is now much farther for long reach
+                ax = player.x + Math.cos(angle) * 48;
+                ay = player.y + Math.sin(angle) * 48;
             } else {
                 ax = player.x + Math.cos(angle) * 20;
                 ay = player.y + Math.sin(angle) * 20;
@@ -1166,7 +1266,7 @@
                 }
             }
             
-            createAttackEffect(ax, ay, angle);
+            createAttackEffect(ax, ay, angle, true); // long reach visual
             
             if (hits > 0) {
                 showMessage(hits > 1 ? "¡COMBO!" : "¡GOLPE!", 500, ax, ay - 20);
@@ -1186,8 +1286,12 @@
             });
         }
         
-        function createAttackEffect(x, y, angle) {
-            attackEffects.push({x, y, angle, life: 11});
+        function createAttackEffect(x, y, angle, longReach = false) {
+            attackEffects.push({
+                x, y, angle, 
+                life: longReach ? 14 : 11,
+                long: longReach
+            });
         }
         
         function createBloodEffect(x, y) {
@@ -1384,18 +1488,31 @@
             });
             ctx.globalAlpha = 1;
             
-            // Attack effects
+            // Attack effects (longer slash when attacking far)
             attackEffects.forEach(e => {
-                const a = e.life / 11;
+                const lifeMax = e.long ? 14 : 11;
+                const a = e.life / lifeMax;
                 ctx.strokeStyle = `rgba(234,179,8,${a})`;
-                ctx.lineWidth = 3;
+                ctx.lineWidth = e.long ? 4 : 3;
                 ctx.save();
                 ctx.translate(e.x, e.y);
                 ctx.rotate(e.angle);
+                
+                const length = e.long ? 42 : 26;
                 ctx.beginPath();
-                ctx.moveTo(-12, 0);
-                ctx.lineTo(26, 0);
+                ctx.moveTo(-14, 0);
+                ctx.lineTo(length, 0);
                 ctx.stroke();
+                
+                // extra glow for long reach
+                if (e.long) {
+                    ctx.strokeStyle = `rgba(234,179,8,${a * 0.4})`;
+                    ctx.lineWidth = 7;
+                    ctx.beginPath();
+                    ctx.moveTo(-14, 0);
+                    ctx.lineTo(length * 0.95, 0);
+                    ctx.stroke();
+                }
                 ctx.restore();
             });
             
